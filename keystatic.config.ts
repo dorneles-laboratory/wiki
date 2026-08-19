@@ -11,15 +11,20 @@ export default config({
   // No desenvolvimento local, salva direto no seu SSD.
   // Quando subirmos para Vercel/Cloudflare, mudaremos para 'github'.
   storage: {
-    storage: {
     kind: 'github',
-    repo: 'SEU_USUARIO/wiki',
-  },
+    repo: 'dorneles-laboratory/wiki',
   },
   ui: {
-    brand: { name: 'Admin - Wiki Ecossistema' },
+    brand: { name: 'Dorneles - Wiki' },
   },
   collections: {
+    welcome: collection({
+      label: 'Bem-vindo',
+      slugField: 'title',
+      path: 'src/content/docs/welcome/*',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
     visaoGeral: collection({
       label: 'Visão Geral',
       slugField: 'title',
@@ -41,6 +46,13 @@ export default config({
       format: { contentField: 'content' },
       schema: docSchema,
     }),
+    ares: collection({
+      label: 'Projeto: Ares',
+      slugField: 'title',
+      path: 'src/content/docs/projetos/ares/*',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
     pgiProa: collection({
       label: 'Projeto: PGI-PROA',
       slugField: 'title',
@@ -56,9 +68,9 @@ export default config({
       schema: docSchema,
     }),
     srmTau: collection({
-      label: 'Projeto: SRM-TAU',
+      label: 'Projeto: SRM',
       slugField: 'title',
-      path: 'src/content/docs/projetos/srm-tau/*',
+      path: 'src/content/docs/projetos/srm/*',
       format: { contentField: 'content' },
       schema: docSchema,
     }),

@@ -1,40 +1,53 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: Ecossistema Dorneles
+description: Documentação centralizada de arquitetura, microsserviços e plataformas do ecossistema.
+template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: A fonte única de verdade para a arquitetura, APIs e padrões de desenvolvimento de todos os sistemas.
   image:
-    file: ../../assets/houston.webp
+    file: ../../assets/totoro.webp
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Guia de Arquitetura Base
+      link: /02-padroes-e-arquitetura/backend-nodejs/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+      variant: primary
+    - text: Editar no Keystatic
+      link: /keystatic
       icon: external
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## Frentes do Ecossistema
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+  <Card title="Gestão e EdTech" icon="setting">
+    Arquitetura, rotas de API e regras de negócio de plataformas como **PGI-PROA** e **Academic Companion**.
+  </Card>
+  
+  <Card title="Cidades Inteligentes e Clima" icon="earth">
+    Modelagem de dados, digital twins e especificações de monitoramento do **Sulflux** e **Nexus SM**.
+  </Card>
+  
+  <Card title="Engenharia Aeroespacial" icon="rocket">
+    Documentação de simulação balística, infraestrutura offline (**SRM Simulator**) e telemetria.
+  </Card>
+  
+  <Card title="Infraestrutura Core" icon="laptop">
+    Padrões globais de desenvolvimento em **TypeScript, Node.js, Spring Boot**, bancos relacionais e **Docker**.
+  </Card>
+</CardGrid>
+
+---
+
+## Primeiros Passos
+
+<CardGrid>
+  <Card title="Onboarding" icon="open-book">
+    Entendendo a estrutura dos repositórios e como configurar o ambiente de desenvolvimento local.
+  </Card>
+  <Card title="Pipelines e Deploy" icon="rocket">
+    Como funcionam as entregas contínuas (CI/CD) e o roteamento via Cloudflare Tunnels e Vercel.
+  </Card>
 </CardGrid>
