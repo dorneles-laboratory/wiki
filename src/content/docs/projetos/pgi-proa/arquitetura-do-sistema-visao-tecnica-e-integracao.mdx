@@ -1,11 +1,8 @@
 ---
-title: '# Arquitetura do Sistema: Visão Técnica e Integração'
-description: >-
-  Este documento detalha a arquitetura de alto nível do ecossistema. Ele explica
-  conceitualmente como as camadas de **Backend**, **Frontend** e **Shared**
-  operam individualmente e como se unem para formar um sistema coeso, fortemente
-  tipado e escalável.
+title: 'Arquitetura do Sistema: Visão Técnica e Integração'
 ---
+Este documento detalha a arquitetura de alto nível do ecossistema. Ele explica conceitualmente como as camadas de **Backend**, **Frontend** e **Shared** operam individualmente e como se unem para formar um sistema coeso, fortemente tipado e escalável.
+
 ## 🏗️ Padrão do Projeto: Monorepo por Acoplamento (Git Submodules)
 
 A infraestrutura utiliza o padrão de **Monorepo**, mas ao invés de um único repositório massivo, adota a estratégia de **Git Submodules**. Isso significa que o repositório principal atua como um "orquestrador", vinculando repositórios independentes em uma única árvore de diretórios lógica.
