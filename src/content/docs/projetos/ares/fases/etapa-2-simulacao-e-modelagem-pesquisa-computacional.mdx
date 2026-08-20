@@ -1,0 +1,101 @@
+---
+title: Etapa 2 - Simulação e Modelagem (Pesquisa Computacional)
+---
+#### Bloco 1 - Preparação do Ambiente e Infraestrutura de Simulação
+
+**Foco:** Preparar o ambiente computacional, instalar os motores de simulação e reproduzir o ambiente físico real dentro do simulador.
+
+* \[ ] 1. **Instalar dependências e compilar o NS-3:** Preparar o ambiente de desenvolvimento (Linux/WSL), instalar as bibliotecas necessárias e validar a compilação do núcleo do simulador.
+* \[ ] 2. **Instalar e configurar o SUMO (Simulation of Urban MObility):** Preparar o simulador de mobilidade urbana e validar sua execução independente.
+* \[ ] 3. **Extrair a malha viária e topográfica:** Exportar o mapa de uma área de risco real (ex.: região ribeirinha de Santa Maria/RS via OpenStreetMap) e converter os dados para utilização no SUMO.
+* \[ ] 4. **Configurar o *wrapper* de integração tráfego-rede:** Integrar SUMO e NS-3 por meio do TraCI ou mecanismo equivalente, sincronizando a movimentação dos veículos com as posições dos nós móveis da rede.
+* \[ ] 5. **Definir o sistema de *logs* e *traces*:** Configurar a geração de registros PCAP, ASCII e demais *traces* necessários para depuração, análise de pacotes e reconstrução dos eventos da simulação.
+
+---
+
+#### Bloco 2 - Modelagem da Camada Física, Enlace e Mobilidade
+
+**Foco:** Representar no ambiente virtual o comportamento do rádio, as condições adversas de propagação e a movimentação dos diferentes tipos de nós.
+
+* \[ ] 1. **Implementar o modelo de propagação RF:** Configurar modelos de *Path Loss* e atenuação capazes de representar condições severas, incluindo chuva intensa, obstáculos urbanos, vegetação e superfícies úmidas.
+* \[ ] 2. **Parametrizar o rádio principal (LoRa):** Configurar frequência de operação (ex.: 915 MHz no Brasil), *Spreading Factor* (SF), largura de banda, potência de transmissão e demais parâmetros relevantes.
+* \[ ] 3. **Parametrizar o rádio de *backhaul* (Wi-Fi HaLow/4G):** Configurar os enlaces de maior capacidade utilizados pelos Gateways para comunicação com infraestrutura externa.
+* \[ ] 4. **Aplicar modelo de mobilidade estática:** Fixar as posições virtuais em coordenadas x, y e z dos nós Sensor, Relay, Router, Storage e Gateway conforme a topologia definida.
+* \[ ] 5. **Aplicar modelo de mobilidade terrestre (2D):** Configurar as rotas de ambulâncias, veículos civis e demais agentes móveis responsáveis pelo transporte dos nós *Mobile*, utilizando a malha viária fornecida pelo SUMO.
+* \[ ] 6. **Aplicar modelo de mobilidade aérea (3D):** Implementar trajetórias como *Random Waypoint*, varredura em grade ou rotas previamente definidas para representar Drones atuando como *Data Mules*.
+
+---
+
+#### Bloco 3 - Modelagem de Energia (*Energy Framework*)
+
+**Foco:** Representar matematicamente o consumo energético dos nós e avaliar a capacidade da rede de permanecer operacional durante longos períodos.
+
+* \[ ] 1. **Integrar o *NS-3 Energy Framework*:** Associar um modelo energético individual a cada nó da simulação e vincular o consumo às atividades de comunicação e processamento.
+* \[ ] 2. **Configurar as fontes de energia:** Definir a capacidade inicial das baterias, utilizando modelos compatíveis com os perfis teóricos de LiFePO4 para nós de maior capacidade e Li-Ion para sensores compactos.
+* \[ ] 3. **Parametrizar o consumo em miliamperes (mA):** Incorporar os modelos definidos na Etapa 1 para os estados de Transmissão, Recepção, *Idle* e *Deep Sleep*.
+* \[ ] 4. **Implementar o *Energy Harvester*:** Simular a recarga proveniente de painéis solares e controladores MPPT considerando ciclos de iluminação, períodos diurnos e noturnos.
+* \[ ] 5. **Programar *callbacks* de bateria baixa:** Criar mecanismos de notificação para a camada lógica quando a energia do nó atingir limites críticos, como 50%, 20% e 5%.
+
+---
+
+#### Bloco 4 - Implementação da Inteligência ARES (Protocolos)
+
+**Foco:** Implementar no simulador o núcleo distribuído da arquitetura ARES, incluindo priorização, armazenamento, roteamento, descoberta e adaptação autônoma dos nós.
+
+* \[ ] 1. **Estruturar o pacote e o *payload* customizado:** Definir e implementar a estrutura binária do cabeçalho, priorizando baixo *overhead*, identificação da mensagem, origem, destino, prioridade, TTL e informações necessárias ao roteamento.
+* \[ ] 2. **Codificar o algoritmo de fila de prioridades:** Implementar uma fila preemptiva capaz de priorizar mensagens P0 de emergência sobre tráfego de menor prioridade, como mensagens P4 de telemetria.
+* \[ ] 3. **Codificar o DTN (*Store-and-Forward*):** Implementar *buffers* virtuais persistentes para armazenar temporariamente pacotes quando não houver uma rota disponível até o destino.
+* \[ ] 4. **Codificar o protocolo de roteamento (*Energy-Aware Self-Healing*):** Implementar a seleção dinâmica de rotas considerando energia disponível, qualidade do enlace, disponibilidade dos vizinhos e detecção de nós inoperantes.
+* \[ ] 5. **Codificar a máquina de estados dinâmica:** Implementar as regras de transição autônoma entre papéis. Ex.: se a bateria estiver abaixo de determinado limiar e o nó atuar como Router, alterar sua função para Relay passivo.
+* \[ ] 6. **Codificar a lógica de descoberta (*Discovery/Beacons*):** Implementar o envio periódico de *beacons* contendo informações essenciais sobre presença, energia, papel atual e disponibilidade dos nós.
+* \[ ] 7. **Codificar o algoritmo de déficit de conectividade:** Implementar a lógica que permite ao nó Storage reter mensagens e detectar oportunidades de encaminhamento quando um nó Mobile entrar em sua área de comunicação.
+
+---
+
+#### Bloco 5 - Validação Incremental e Cenários de Desastre
+
+**Foco:** Validar a arquitetura progressivamente, começando por experimentos controlados e evoluindo para cenários de desastre com falhas e congestionamento.
+
+* \[ ] 1. **Validação *Point-to-Point* (2 nós):** Transmitir mensagens P0 e P4 entre dois nós para validar o cabeçalho, o mecanismo de prioridade e as métricas energéticas básicas.
+* \[ ] 2. **Validação de retransmissão simples:** Adicionar um nó intermediário e verificar o encaminhamento correto de mensagens, o armazenamento temporário e a recuperação da comunicação após uma interrupção.
+* \[ ] 3. **Simulação de micro-malha (10 nós):** Avaliar a formação dinâmica de rotas, a descoberta de vizinhos e o funcionamento dos *beacons*.
+* \[ ] 4. **Validação de falha localizada:** Desativar nós intermediários individualmente e verificar o comportamento do mecanismo de *self-healing* e a seleção de novas rotas.
+* \[ ] 5. **Simulação em escala urbana (100 a 500 nós):** Avaliar estabilidade, consumo de memória, tempo computacional, quantidade de mensagens de controle e colisões de pacotes.
+* \[ ] 6. **Validação de escalabilidade:** Repetir os experimentos com diferentes densidades de nós e tamanhos de área para identificar limites computacionais e de comunicação.
+* \[ ] 7. **Executar Cenário 0 (*Baseline*):** Executar a rede sem falhas em condições normais para estabelecer as métricas de referência.
+* \[ ] 8. **Executar Cenário 1 (Enchente Gradual):** Desativar progressivamente Sensors e Relays localizados nas áreas mais baixas do mapa, representando a perda gradual de infraestrutura.
+* \[ ] 9. **Executar Cenário 2 (Queda Elétrica Grave):** Desativar entre 30% e 50% dos nós estáticos em um intervalo curto para representar uma falha generalizada de energia.
+* \[ ] 10. **Executar Cenário 3 (Isolamento Total):** Derrubar os Gateways principais e verificar se os nós Storage continuam armazenando e encaminhando mensagens de maneira assíncrona.
+* \[ ] 11. **Executar Cenário 4 (Resgate / *Data Mule*):** Fazer um Drone ou veículo Mobile atravessar uma região isolada, coletar mensagens retidas nos Storages e transportá-las fisicamente até um Gateway operacional.
+* \[ ] 12. **Executar Cenário 5 (Congestionamento / *Flood*):** Gerar uma carga elevada de mensagens P4 e inserir mensagens P0 de emergência para verificar a capacidade de priorização e entrega do tráfego crítico.
+
+---
+
+#### Bloco 6 - Coleta de Dados, Análise e Otimização
+
+**Foco:** Transformar os resultados das simulações em métricas quantitativas, identificar gargalos e otimizar os protocolos ARES.
+
+* \[ ] 1. **Ativar e configurar o *FlowMonitor*:** Configurar o módulo de monitoramento do NS-3 para registrar fluxos, perdas, atrasos, transmissões e demais eventos relevantes.
+* \[ ] 2. **Extrair o *Packet Delivery Ratio* (PDR):** Calcular a proporção de pacotes P0 e P4 gerados que chegaram corretamente aos respectivos destinos.
+* \[ ] 3. **Analisar a latência ponta a ponta (*End-to-End Delay*):** Medir os atrasos de comunicação direta e diferenciar esses resultados daqueles provenientes de mecanismos *Store-and-Forward*.
+* \[ ] 4. **Medir o *Routing Overhead*:** Quantificar o volume de dados utilizado exclusivamente para descoberta, manutenção e atualização de rotas em comparação com o volume de dados úteis transmitidos.
+* \[ ] 5. **Analisar anomalias de bateria:** Identificar *hotspots* energéticos e nós que assumem carga excessiva de encaminhamento, provocando consumo desproporcional.
+* \[ ] 6. **Refatorar os algoritmos com base nas falhas:** Retornar ao Bloco 4 para ajustar parâmetros de *sleep*, frequência de *beacons*, pesos de roteamento, políticas de fila e demais mecanismos identificados como gargalos.
+* \[ ] 7. **Executar repetições estatísticas:** Reexecutar os cenários utilizando múltiplas *Random Seeds* e calcular medidas estatísticas e intervalos de confiança adequados para a análise científica e futura publicação.
+
+---
+
+#### Bloco 7 - Documentação e Transição para Hardware
+
+**Foco:** Consolidar os resultados computacionais e transformar as conclusões da simulação em especificações para a implementação física do ARES.
+
+* \[ ] 1. **Gerar gráficos acadêmicos:** Exportar os resultados estatísticos e utilizar Python, Matplotlib e Pandas para produzir gráficos de consumo energético, latência, PDR, *overhead* e escalabilidade.
+* \[ ] 2. **Redigir o Capítulo de Metodologia:** Documentar no LaTeX/MDX todas as configurações, modelos, parâmetros, topologias, premissas e condições utilizadas nas simulações.
+* \[ ] 3. **Redigir o Capítulo de Resultados e Análise:** Apresentar os resultados obtidos, discutir o comportamento da rede e verificar experimentalmente as hipóteses estabelecidas na Etapa 1.
+* \[ ] 4. **Refatorar a arquitetura lógica:** Registrar as alterações realizadas na arquitetura a partir dos resultados da simulação, incluindo justificativas quantitativas para cada mudança.
+* \[ ] 5. **Compilar o Relatório de Viabilidade Teórica:** Consolidar os resultados e determinar se a arquitetura lógica e os protocolos propostos apresentam viabilidade suficiente para avançar para a implementação física.
+* \[ ] 6. **Estruturar a tradução para Firmware:** Converter as lógicas desenvolvidas em C++ no NS-3 em especificações técnicas para implementação em C/C++ no microcontrolador e RTOS selecionados.
+* \[ ] 7. **Realizar a reunião de *Design Review*:** Apresentar os resultados, gráficos, falhas encontradas, otimizações realizadas e decisões finais da arquitetura para avaliação acadêmica e orientação.
+* \[ ] 8. **Executar o congelamento da fase de simulação:** Consolidar a versão final da arquitetura virtual, versionar os resultados e formalizar a aprovação para iniciar a fase de Firmware e Hardware físico.
+
+---
