@@ -14,13 +14,11 @@ const docSchema = {
 
   content: fields.mdx({
     label: 'Conteúdo do Documento',
-
     components: {
-      Highlight: mark({
+      mark: mark({
         label: 'Destaque verde',
         icon: createElement(Highlighter),
         schema: {},
-        tag: 'mark',
       }),
     },
   }),

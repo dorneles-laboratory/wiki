@@ -1,13 +1,6 @@
-mark.blue {
-  background-color: #93c4fd;
-  color: #1e3a8a;
-  border-radius: 4px;
-  padding: 0 4px;
-}
-
-mark.green {
-  background-color: #86efac;
-  color: #14532d;
-  border-radius: 4px;
+mark {
+  background-color: #a7f3d0;
+  color: #064e3b;
+  border-radius: 2px;
   padding: 0 4px;
 }
