@@ -1,0 +1,97 @@
+---
+title: Etapa 1 - Concepção, Arquitetura e Planejamento Teórico (ARES)
+---
+#### Bloco 1 - Preparação e Fundamentação do Problema
+
+**Foco:** Preparar o ambiente e provar, com dados empíricos, que o problema existe e a infraestrutura atual é insuficiente.
+
+* \[ ] 1. <mark>**Configurar o ambiente de documentação:** Inicializar o repositório (ex.: Astro Starlight/MDX para a wiki técnica) e o setup básico do LaTeX (Overleaf) para a escrita acadêmica.</mark>
+* \[ ] 2. <mark>**Montar o esqueleto do documento acadêmico:** Criar os capítulos (Introdução, Fundamentação, Estado da Arte, Metodologia, Arquitetura), deixando Resumo/Abstract para o final.</mark>
+* \[ ] 3. <mark>**Configurar gerenciador de referências:** Integrar Zotero ou Mendeley ao ambiente de escrita para padronizar citações (IEEE/ABNT).</mark>
+* \[ ] 4. <mark>**Levantamento de dados históricos reais:** Coletar relatórios da Defesa Civil, notícias e dados hidrológicos/topográficos sobre enchentes no RS.</mark>
+* \[ ] 5. <mark>**Mapear a cascata de falhas ("Suítes"):** Documentar cronologicamente o colapso (chuvas extremas ➔ queda de energia ➔ baterias de ERBs esgotam ➔ rompimento de fibra ➔ apagão de comunicações).</mark>
+* \[ ] 6. <mark>**Revisar a arquitetura das redes convencionais (Internet e Móvel):** Explicar como funciona o 4G/5G, a topologia em estrela/árvore e a vulnerabilidade da dependência física de *backhaul* (cabos e data centers).</mark>
+* \[ ] 7. <mark>**Fundamentar o conceito de "Rede de Resiliência":** Escrever o subcapítulo justificando como a comunicação assíncrona impacta diretamente a logística de resgate e a sobrevivência (justificativa de vida).</mark>
+* \[ ] 8. <mark>**Definição da Questão de Pesquisa:** Formular o problema exato e a lacuna científica que o ARES se propõe a resolver.</mark>
+
+---
+
+#### Bloco 2: Estado da Arte e Trabalhos Correlatos
+
+**Foco:** Analisar a literatura e a indústria para não reinventar a roda e entender por que projetos anteriores falharam em desastres.
+
+* \[ ] 1. **Desconstruir projetos similares e documentar falhas:** Analisar *Disaster Radio*, *Meshtastic* e *Serval Project*, detalhando por que falham em escalabilidade, priorização crítica ou gestão de energia em cenários reais.
+* \[ ] 2. **Pesquisar literatura sobre DTN (Delay-Tolerant Networks):** Estudar como redes espaciais e militares lidam com comunicação retida (*store-and-forward*).
+* \[ ] 3. **Revisão conceitual de LPWAN:** Explicar teoricamente o funcionamento de redes sub-1 GHz (LoRa, Wi-Fi HaLow) e por que são o padrão na IoT de longo alcance.
+* \[ ] 4. **Levantar algoritmos de roteamento Mesh para desastres:** Comparar B.A.T.M.A.N., AODV e OLSR, apontando deficiências em ambientes com perda constante de nós.
+* \[ ] 5. **Estudar Energy-Aware Routing:** Pesquisar redes que tomam decisões de roteamento baseadas no nível de bateria dos nós intermediários.
+* \[ ] 6. **Investigar o uso de Data Mules:** Revisar artigos sobre o uso de agentes móveis (UAVs/drones e veículos) e estáticos temporários para transportar pacotes entre ilhas de conectividade.
+
+---
+
+#### Bloco 3: Definição de Cenários, Requisitos e Proposta
+
+**Foco:** Definir as fronteiras do projeto e como a solução vai atuar.
+
+* \[ ] 1. **Modelagem do cenário geográfico:** Usar os mapas de manchas de inundação e relevo coletados para embasar a distribuição teórica dos nós.
+* \[ ] 2. **Modelar o Cenário 1 (Enchente Urbana):** Definir a topologia teórica em uma cidade alagada, dependendo de Sensores e Gateways fixos.
+* \[ ] 3. **Modelar o Cenário 2 (Isolamento Comunitário):** Definir o papel vital dos nós móveis (drones/barcos) conectando regiões geograficamente isoladas.
+* \[ ] 4. **Levantamento de Requisitos Funcionais:** Definir capacidades obrigatórias (auto-descobrimento, mudança autônoma de papéis, armazenamento local tolerante a falhas).
+* \[ ] 5. **Levantamento de Requisitos Não Funcionais:** Estabelecer restrições teóricas rígidas (ex.: autonomia mínima de 15 dias, latência máxima aceitável para alertas P0).
+* \[ ] 6. **Redação da "Proposta do Sistema":** Escrever de forma conceitual a abordagem distribuída e autônoma do ARES para preencher as lacunas mapeadas no Bloco 2.
+
+---
+
+#### Bloco 4: Concepção da Arquitetura Lógica e Protocolos
+
+**Foco:** Definir as regras, os papéis e o comportamento do "organismo" da rede.
+
+* \[ ] 1. **Definição das propriedades dos Nós de Borda (Sensor e Relay):** Documentar o que leem, como acordam (*Duty Cycle*), retransmitem e voltam a dormir (comportamento de baixo consumo).
+* \[ ] 2. **Definição das propriedades dos Nós de Infraestrutura (Router e Storage):** Definir a manutenção da tabela de rotas e o gerenciamento da memória (ex.: política de descarte FIFO vs. descarte por baixa prioridade).
+* \[ ] 3. **Definição das propriedades de Saída (Gateway e Mobile):** Definir o gerenciamento da fila para a nuvem e o protocolo de anúncio de nós móveis à malha.
+* \[ ] 4. **Projeto da Máquina de Estados Dinâmica:** Criar o fluxograma lógico ditando sob quais condições matemáticas/energéticas um nó altera seu papel autonomamente.
+* \[ ] 5. **Modelo de Self-Healing:** Desenhar o algoritmo distribuído que detecta a queda de vizinhos inoperantes e recalcula a rota sem um controlador central.
+* \[ ] 6. **Estruturação de Prioridades (P0 a P4):** Criar a lógica preemptiva onde pacotes de vida (P0) forçam a rede a ignorar tráfego menor (P4).
+* \[ ] 7. **Definição do Protocolo de Empacotamento e Payload:** Escolher entre *Bundle Protocol* ou customizado, e desenhar a anatomia do pacote (cabeçalho) focando em compressão extrema.
+* \[ ] 8. **Modelo de Controle de Congestionamento e Segurança:** Definir reações a *flood* de dados, limite de tráfego e validação de autenticidade (ex.: chaves pré-compartilhadas ou criptografia leve) sem depender da Internet.
+
+---
+
+#### Bloco 5: Fundamentação Tecnológica de Hardware e RF
+
+**Foco:** Justificar cientificamente as escolhas dos componentes físicos e de software base.
+
+* \[ ] 1. **Seleção teórica da arquitetura de microcontroladores:** Avaliar famílias de chips (ESP32-S3, STM32WL) baseando-se no consumo documentado em *datasheets* para *Deep Sleep*.
+* \[ ] 2. **Avaliar e justificar o RTOS (Sistema Operacional):** Comparar *Zephyr* vs. *FreeRTOS* com foco em *threads* e eficiência energética.
+* \[ ] 3. **Avaliar e justificar a banda de RF primária:** Comparar LoRa (modulação CSS) com Wi-Fi HaLow (OFDM sub-1 GHz) para a camada física da rede.
+* \[ ] 4. **Estudo de propagação RF em desastres:** Pesquisar as equações de atenuação do sinal de rádio causadas por chuva extrema e obstáculos úmidos.
+* \[ ] 5. **Definir barramentos de hardware de sensores:** Analisar protocolos de leitura física (I2C vs. SPI) e seus impactos em velocidade/energia.
+* \[ ] 6. **Avaliar tecnologias de Backhaul:** Definir a stack para a integração do Gateway com satélites de baixo consumo (Swarm/Starlink) e 4G/NB-IoT.
+
+---
+
+#### Bloco 6: Modelagem Matemática Energética (*Energy-Awareness*)
+
+**Foco:** Provar através de equações que a rede não vai "morrer" sem energia.
+
+* \[ ] 1. **Pesquisar perfis térmicos de baterias:** Documentar as curvas de descarga (Li-ion vs. LiFePO4) em cenários de clima adverso.
+* \[ ] 2. **Criar a equação do Energy Budget:** Modelar matematicamente o consumo de um nó (fórmulas de TX, RX, *sleep* e frequência de envios).
+* \[ ] 3. **Estruturar a métrica relacional de energia:** Definir o algoritmo que transforma a porcentagem de bateria restante em um "peso" de rota para as tabelas de roteamento.
+* \[ ] 4. **Dimensionamento de captação renovável:** Calcular matematicamente a relação área/eficiência (MPPT) de painéis solares necessária para autossuficiência.
+
+---
+
+#### Bloco 7: Preparação, Validação e Gestão do Projeto
+
+**Foco:** Amarrar o planejamento técnico, preparar a simulação e organizar o trabalho futuro.
+
+* \[ ] 1. **Definir a stack do sistema de backend e dashboard:** Especificar como o painel em nuvem receberá e processará os dados do Gateway.
+* \[ ] 2. **Definir as métricas de validação (KPIs):** Oficializar metas para PDR (*Packet Delivery Ratio*), Latência de P0 e *Overhead* de rotas.
+* \[ ] 3. **Aprovar e parametrizar o simulador:** Confirmar a viabilidade do NS-3 + SUMO e listar as variáveis ambientais que serão injetadas nos scripts (atenuação, falhas).
+* \[ ] 4. **Modelar topologias de teste:** Desenhar as áreas exatas e a quantidade de nós virtuais que serão provisionados na Etapa 2.
+* \[ ] 5. **Análise de Riscos e Restrições Teóricas:** Documentar premissas que podem falhar (ex.: dessincronização de relógios na malha, indisponibilidade de componentes).
+* \[ ] 6. **Análise de Viabilidade Financeira (BOM preliminar):** Elaborar uma estimativa de custos para comprovar que escalar a rede é economicamente possível.
+* \[ ] 7. **Estruturação do repositório GitHub:** Criar a organização, padronização de commits e *branches* para versionar os futuros códigos do simulador e firmware.
+* \[ ] 8. **Tradução para Backlog e Cronograma:** Converter toda a arquitetura em Épicos/Tarefas no Kanban (GitHub Projects/Notion) e montar o Gantt/Roadmap de execução.
+* \[ ] 9. **Compilação e Reunião de Design Review:** Consolidar diagramas, equações e decisões lógicas, apresentando a base arquitetural para validação formal com algum profissional/professor.
+* \[ ] 10. **Revisão Final e Congelamento (Milestone):** Finalizar a formatação no LaTeX, aprovar a documentação e declarar a Etapa 1 concluída, liberando o início da codificação do simulador.
