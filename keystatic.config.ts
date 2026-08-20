@@ -33,6 +33,46 @@ export default config({
   ui: {
     brand: {
       name: 'Dorneles - Wiki',
+      mark: () => {
+        return createElement(
+          'a',
+          {
+            href: 'https://wiki.dorneles.dev/welcome/guia-de-contribuicao',
+            title: 'Voltar para a Documentação',
+            style: {
+              backgroundColor: '#059669',
+              color: '#ffffff',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontSize: '12px',
+              fontFamily: 'sans-serif',
+              fontWeight: 'bold',
+              marginLeft: '12px',
+              display: 'inline-block'
+            },
+          },
+          'Acessar Doc ↗'
+        );
+      },
+    },
+    navigation: {
+      'Geral': [
+        'welcome',
+        'visaoGeral',
+        'guides',
+        'processes',
+      ],
+      'Recursos': [
+        'reference',
+        'templates',
+        'utils',
+      ],
+      'Projeto ARES': [
+        'ares',
+        'aresTasks',
+        'aresFiles',
+      ],
     },
   },
 
