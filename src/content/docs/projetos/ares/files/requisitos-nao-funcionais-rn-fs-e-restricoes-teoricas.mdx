@@ -4,3 +4,29 @@ description: >-
   Os Requisitos Não Funcionais estabelecem as restrições de desempenho,
   segurança e resiliência impostas ao sistema.
 ---
+1. Autonomia Operacional da Frota (15 Dias)
+
+   Dada a limitação física de voo ininterrupto de um drone multirotor comercial (25 a 45 minutos), a restrição de autonomia de 15 dias aplica-se à **continuidade do serviço da frota**, e não ao tempo de voo de um nó individual.
+
+   * Modo Sentinela (Pouso Estratégico): Drones podem pousar em topo de edificações ou pontos elevados, desativando os motores de propulsão e mantendo ativos apenas os módulos de baixo consumo de rádio e processamento.
+   * Rotatividade de Frota: Operação baseada em ciclos de rotação e substituição periódica para recarga em estações de solo (alimentadas por geradores ou energia fotovoltaica).
+2. Latência Máxima e QoS para Alertas Críticos (P0)
+
+   Mensagens de emergência classificadas como **Nível P0** (ex: pedidos de resgate imediato ou alertas de colapso estrutural) devem possuir determinismo na entrega dentro da malha local.
+
+   * **Métrica Rígida:** Latência total de transporte $T\_\{\text\{lat}} \le 500\text\{ ms}$ no trajeto entre a origem e o destino na malha aérea.
+   * **Políticas de Qualidade de Serviço (QoS):**
+     1. *Pré-empção Total:* Pacotes P0 interrompem o processamento de tráfegos secundários no *buffer*.
+     2. *Inundação Controlada (Controlled Flooding):* Disparo simultâneo da mensagem por múltiplos caminhos disjuntos para maximizar a probabilidade de entrega na menor janela de tempo.
+3. Criptografia e Integridade Leve
+
+   Para prevenir a injeção de alertas falsos e a interceptação em canal aberto, todas as mensagens de controle e alertas P0 devem empregar criptografia leve (*Lightweight Cryptography*). O overhead computacional de cifragem/assinatura digital (usando algoritmos como AES-128-GCM ou Curve25519) não deve exceder **10 ms** de tempo de processamento nas unidades de bordo.
+4. Limitações Conhecidas e Estratégias de Mitigação
+
+   Para garantir o realismo da engenharia do projeto, o ARES assume as seguintes limitações operacionais:
+
+   Condições Meteorológicas Adversas: Ventos acima de **40 km/h** ou precipitações intensas impedem o voo seguro de unidades convencionais. *Mitigação:* O sistema comanda o pouso preventivo em pontos elevados, transformando temporariamente a FANET em uma rede de nós terrestres fixos.
+
+   Capacidade de Carga (*Throughput*): Devido ao perfil de rádio de baixo consumo e à volatilidade dos enlaces, a rede é otimizada estritamente para **mensagens de texto e telemétrica leve**, sendo vedado o tráfego de mídias pesadas ou navegação web convencional.
+
+   Dependência de Sistemas Globais de Navegação (GNSS): Em cenários de sombreamento de sinal GPS por relevo ou tempestades geomanéticas, a precisão geográfica pode sofrer degradação. *Mitigação:* Emprego de métricas de força de sinal (*RSSI/UWB*) e estimativa visual para manter o posicionamento relativo entre as unidades.
