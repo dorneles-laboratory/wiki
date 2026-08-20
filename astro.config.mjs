@@ -44,7 +44,8 @@ export default defineConfig({
         {
           label: 'Projetos',
           items: [
-            { label: 'Ares', items: [{ autogenerate: { directory: 'projetos/ares' } }] },
+            { label: 'Ares', items:   [{ autogenerate: { directory: 'projetos/ares' } } ] },
+            { label: 'Ares - Arquivos', items: [{ autogenerate: { directory: 'projetos/ares/files' } }] },
             { label: 'PGI-PROA', items: [{ autogenerate: { directory: 'projetos/pgi-proa' } }] },
           ],
         },

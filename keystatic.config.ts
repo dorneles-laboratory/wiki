@@ -68,16 +68,23 @@ export default config({
     ares: collection({
       label: 'Projeto: Ares',
       slugField: 'title',
-      path: 'src/content/docs/projetos/ares/**/*.mdx',
+      path: 'src/content/docs/projetos/ares/*',
       format: { contentField: 'content' },
       schema: docSchema,
-    }),    
-    pgiProa: collection({
-      label: 'Projeto: PGI-PROA',
+    }),  
+    aresTasks: collection({
+      label: 'Projeto: Ares - Fases',
       slugField: 'title',
-      path: 'src/content/docs/projetos/pgi-proa/**/*.mdx',
+      path: 'src/content/docs/projetos/ares/fases/*',
       format: { contentField: 'content' },
       schema: docSchema,
-    }),
+    }),   
+    aresFiles: collection({
+      label: 'Projeto: Ares - Arquivos',
+      slugField: 'title',
+      path: 'src/content/docs/projetos/ares/files/*',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }), 
   },
 });
