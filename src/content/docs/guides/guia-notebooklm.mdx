@@ -1,8 +1,9 @@
 ---
-title: Como usar o NotebookLM (Nosso Segundo Cérebro)
-description: Guia passo a passo para exportar os arquivos da Wiki e treinar o agente de IA do Google para interagir com o nosso ecossistema.
+title: Como usar o NotebookLM
+description: >-
+  Guia passo a passo para exportar os arquivos da Wiki e treinar o agente de IA
+  do Google para interagir com o nosso ecossistema.
 ---
-
 O **NotebookLM** é a nossa ferramenta oficial de pesquisa e validação arquitetural. Diferente do ChatGPT comum, ele não "alucina" inventando informações. Ele atua como um sistema de RAG (*Retrieval-Augmented Generation*), baseando suas respostas **exclusivamente** nos documentos técnicos que nós fornecemos.
 
 Para que ele conheça a fundo o PGI-PROA, o ARES, o Nexus SM e o restante do ecossistema, precisamos ensiná-lo lendo a nossa Wiki. Siga o fluxo abaixo.
@@ -10,17 +11,19 @@ Para que ele conheça a fundo o PGI-PROA, o ARES, o Nexus SM e o restante do eco
 ---
 
 ### Passo 1: Baixar os Arquivos da Wiki
-O NotebookLM precisa ler os nossos arquivos brutos de documentação (o código-fonte da Wiki). 
+
+O NotebookLM precisa ler os nossos arquivos brutos de documentação (o código-fonte da Wiki).
 
 1. Acesse o nosso repositório no GitHub (ou abra o projeto no seu VS Code local).
 2. Navegue até a pasta raiz dos documentos: `src/content/docs/`.
-3. Faça o download dos arquivos que você deseja que a IA analise. 
+3. Faça o download dos arquivos que você deseja que a IA analise.
    * **Dica:** Você pode baixar a pasta inteira ou apenas coleções específicas (ex: baixar apenas a pasta `/projetos/ares` se o seu foco for trabalhar exclusivamente na arquitetura de resiliência e RF).
 4. *Nota técnica:* Se o seu sistema operacional ou o NotebookLM não reconhecer a extensão `.mdx` na hora do upload, basta renomear os arquivos para `.md` ou `.txt`. O conteúdo interno (texto puro) é lido perfeitamente de qualquer forma.
 
 ---
 
 ### Passo 2: Criar e Alimentar o Agente
+
 Com os arquivos no seu computador, vamos transferir esse conhecimento para a IA.
 
 1. Acesse o [NotebookLM](https://notebooklm.google.com/).
@@ -34,7 +37,8 @@ O NotebookLM vai processar esses arquivos em poucos segundos. A partir desse mom
 ---
 
 ### Passo 3: Como Interagir com a IA
-Com as fontes carregadas, você pode começar a usar o chat integrado. O grande diferencial é que, para cada resposta, **o NotebookLM gera numerações de citação clicáveis**. 
+
+Com as fontes carregadas, você pode começar a usar o chat integrado. O grande diferencial é que, para cada resposta, **o NotebookLM gera numerações de citação clicáveis**.
 
 * **Para testar:** Pergunte algo como *"Quais são os requisitos não funcionais mapeados para o Cenário 2 do projeto ARES?"*
 * **Acompanhe a Fonte:** Clique nos números que aparecem no final das frases da IA. Ele vai abrir o documento exato e grifar a linha de onde tirou aquela informação, provando que não inventou o dado.
