@@ -1,0 +1,518 @@
+---
+title: Requisitos Rede de Resiliência
+---
+# Especificação de Requisitos — Sistema Rede de Resiliência
+
+**Versão:** 0.1 (rascunho para revisão) **Data:** 20/08/2026 **Escopo:** rede de comunicação assíncrona tolerante a desconexão para operações de resgate em áreas atingidas por inundação, composta por nós terrestres, nós aéreos (drones) e nós gateway.
+
+\
+
+
+**Fase de atuação:** exclusivamente a **fase de resposta**. O sistema não prevê o evento, não emite alerta antecipado e não atua na mitigação. Seu marco temporal inicial é o instante em que a inundação já ocorreu e a infraestrutura de telecomunicações já está indisponível. Requisitos de previsão, alerta prévio ou monitoramento hidrológico estão **fora de escopo** e não devem ser incorporados sem revisão desta delimitação.
+
+\
+
+
+
+
+---
+
+
+
+## 0. Como ler este documento
+
+### 0.1 Convenções normativas
+
+| **Termo**   | **Significado**                                               |
+| ----------- | ------------------------------------------------------------- |
+| **DEVE**    | Requisito obrigatório. A não conformidade invalida o sistema. |
+| **DEVERIA** | Requisito recomendado. Desvio exige justificativa registrada. |
+| **PODE**    | Requisito opcional / desejável.                               |
+
+### 0.2 Método de verificação
+
+| **Código** | **Método**                                              |
+| ---------- | ------------------------------------------------------- |
+| **I**      | Inspeção (documental ou visual)                         |
+| **A**      | Análise (cálculo, simulação, modelagem)                 |
+| **D**      | Demonstração (execução observada)                       |
+| **T**      | Teste (medição instrumentada com critério de aceitação) |
+
+### 0.3 Identificação
+
+* RS-nn — Requisito de Sistema (nível 0)
+* RF-XX-nn — Requisito Funcional de subsistema
+* RNF-nn — Requisito Não Funcional transversal
+* RR-nn — Requisito Regulatório
+* Subsistemas: NU (nó de usuário), NR (nó repetidor fixo), ND (nó drone), NG (nó gateway), BK (backend), APP (aplicação)
+
+### 0.4 Aviso sobre os valores numéricos
+
+Os números deste documento têm três origens distintas, sempre indicadas:
+
+\
+
+
+* **\[D]** *Derivado* — calculado ou inferido a partir dos dados do levantamento histórico ou de restrição física/regulatória. Defensável em banca.
+* **\[R]** *Referência de mercado* — baseado no que equipamentos comerciais atuais entregam. Precisa ser confirmado contra o datasheet do hardware efetivamente escolhido.
+* **\[P]** *Provisório* — arbitrado para permitir o projeto avançar. **Precisa ser substituído por valor derivado antes da versão 1.0.**
+
+\
+
+
+Não apresente um valor **\[P]** como se fosse **\[D]**. É o tipo de coisa que uma banca pergunta.
+
+\
+
+
+
+
+---
+
+
+
+## 1. Premissas e contexto operacional
+
+O sistema é especificado para operar sob as seguintes condições, todas documentadas no levantamento histórico:
+
+\
+
+
+| **Premissa**                                                                        | **Evidência**                                                                                            |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **P1.** Ausência total de telefonia móvel e internet na área de operação            | 12 municípios sem qualquer sinal em 03/05/2024; 239 com afetação parcial                                 |
+| **P2.** Ausência de energia elétrica comercial por período prolongado               | 440 mil unidades consumidoras sem energia; falta de combustível para geradores relatada pelas operadoras |
+| **P3.** Acesso terrestre interrompido                                               | Estradas e pontes danificadas impediram acesso de veículos das próprias operadoras                       |
+| **P4.** Duração da indisponibilidade da ordem de dias a semanas                     | Municípios sem sinal de 02/05 a 13/05/2024 — 11 dias                                                     |
+| **P5.** Espaço aéreo compartilhado com aeronaves tripuladas de resgate              | \~20 helicópteros particulares em operação de salvamento, além de aeronaves militares                    |
+| **P6.** Operadores em campo são majoritariamente voluntários sem treinamento formal | \~20 mil pessoas salvas na primeira semana por moradores com barcos e jet skis                           |
+| **P7.** Condições meteorológicas adversas persistentes durante a operação           | Chuva contínua, vento forte, registro de dois tornados em 11/05/2024                                     |
+| **P8.** Circulação simultânea de desinformação                                      | Alegações falsas sobre bloqueio de ajuda e desvio de recursos durante a crise                            |
+
+\
+
+
+**Consequência de projeto:** P2 + P4 significam que qualquer requisito de autonomia energética inferior a 72 h é insuficiente por construção. P3 é o que justifica o componente aéreo. P5 é a restrição de segurança dominante. P6 impõe que a interface seja utilizável sem treinamento.
+
+\
+
+
+
+
+---
+
+
+
+## 2. Requisitos de Sistema (nível 0)
+
+Estes são os requisitos "totais" — o que o sistema faz, independentemente de como.
+
+\
+
+
+| **ID**    | **Requisito**                                                                                                                                                                                                                                                  | **Verif.** |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| **RS-01** | O sistema **DEVE** restabelecer a capacidade de troca de mensagens de texto georreferenciadas entre pontos de uma área afetada, e entre essa área e a rede pública de dados, sem depender de qualquer infraestrutura de telecomunicações preexistente na área. | D          |
+| **RS-02** | O sistema **DEVE** operar sem qualquer fonte de energia elétrica da rede pública por, no mínimo, **72 h** contínuas, e **DEVERIA** sustentar operação indefinida por captação solar. \[D]                                                                      | T          |
+| **RS-03** | O sistema **DEVE** entregar mensagens de forma assíncrona, dispensando a existência de caminho fim-a-fim contínuo entre origem e destino no instante da emissão.                                                                                               | T          |
+| **RS-04** | O sistema **DEVE** garantir que uma mensagem admitida na rede não seja descartada silenciosamente: todo descarte **DEVE** ocorrer por expiração explícita de TTL ou por confirmação de entrega, e **DEVE** ser registrado.                                     | T          |
+| **RS-05** | O sistema **DEVE** apresentar degradação graciosa: a perda de até **50%** dos nós de uma célula não **DEVE** reduzir a taxa de entrega de mensagens de prioridade máxima abaixo de **70%**. \[P — arbitrado; substituir por valor derivado de simulação]       | A/T        |
+| **RS-06** | O sistema **DEVE** permitir implantação inicial em uma área isolada sem acesso terrestre, exclusivamente por meio aéreo ou fluvial.                                                                                                                            | D          |
+| **RS-07** | O sistema **DEVE** entregar uma mensagem de pedido de socorro do nó de borda até o gateway com latência **mediana ≤ 15 min** e **percentil 95 ≤ 2 h**, sob a topologia nominal de projeto. \[P]                                                                | T          |
+| **RS-08** | O sistema **DEVE** priorizar mensagens por criticidade, de modo que uma mensagem de prioridade máxima emitida depois de uma de prioridade baixa seja entregue antes dela sob congestionamento.                                                                 | T          |
+| **RS-09** | O sistema **DEVE** deduplicar pedidos: múltiplas emissões referentes à mesma ocorrência **DEVEM** ser consolidadas em um único registro no destino, preservando o histórico de atualizações.                                                                   | T          |
+| **RS-10** | O sistema **DEVE** exportar o estado consolidado das ocorrências em formato aberto e legível por máquina, consumível pelos sistemas da Defesa Civil e por equipes de coordenação.                                                                              | I/D        |
+| **RS-11** | O sistema **DEVE** operar com interface utilizável por pessoa sem treinamento prévio, com emissão de pedido de socorro em no máximo **3 interações** a partir da tela inicial. \[D — decorre de P6]                                                            | T          |
+| **RS-12** | O sistema **NÃO DEVE**, em nenhuma circunstância, comunicar ao usuário garantia ou promessa de resgate. Toda confirmação **DEVE** ser explicitamente de *recebimento da mensagem*, nunca de *atendimento*.                                                     | I          |
+| **RS-13** | O sistema **DEVE** ser suplementar e não substitutivo aos canais oficiais de emergência, orientando o usuário a acioná-los sempre que disponíveis.                                                                                                             | I          |
+| **RS-14** | O sistema **DEVE** manter operação segura no espaço aéreo compartilhado com aeronaves tripuladas de resgate, com prioridade absoluta para estas.                                                                                                               | D/A        |
+| **RS-15** | O sistema **DEVE** tratar dados de localização e de condição de saúde de pessoas identificáveis como dados pessoais sensíveis, conforme LGPD (Lei 13.709/2018).                                                                                                | I          |
+
+\
+
+
+
+
+---
+
+
+
+## 3. Nó de Usuário (NU)
+
+Dispositivo de borda operado pela pessoa em situação de risco ou pelo voluntário em campo. Pode ser um dispositivo dedicado ou um smartphone acoplado a um módulo de rádio.
+
+### 3.1 Funcionais
+
+| **ID**       | **Requisito**                                                                                                                                                                                                                                                                    | **Verif.** |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| **RF-NU-01** | O NU **DEVE** compor mensagem contendo, no mínimo: identificador único, coordenadas geográficas, carimbo temporal, número de pessoas, indicação de vulnerabilidade (criança, idoso, gestante, pessoa com deficiência, dependência de medicação contínua) e campo de texto livre. | D          |
+| **RF-NU-02** | O NU **DEVE** armazenar a mensagem localmente e retransmiti-la periodicamente até obter confirmação de custódia, sem exigir ação adicional do usuário.                                                                                                                           | T          |
+| **RF-NU-03** | O NU **DEVE** obter posição por GNSS com erro circular provável **≤ 10 m** \[R] e **DEVE** permitir entrada manual de posição ou ponto de referência textual quando não houver fixação de sinal.                                                                                 | T          |
+| **RF-NU-04** | O NU **DEVE** atuar como repetidor para mensagens de terceiros, encaminhando-as segundo a política de roteamento da rede.                                                                                                                                                        | T          |
+| **RF-NU-05** | O NU **DEVE** indicar ao usuário, de forma inequívoca, o estado da sua mensagem: *pendente na fila local*, *custódia aceita pela rede*, *entregue ao gateway*, *expirada*.                                                                                                       | D          |
+| **RF-NU-06** | O NU **DEVE** permitir atualização de estado de uma ocorrência já registrada (ex.: alteração do número de pessoas, agravamento clínico, resgate já efetuado), vinculada ao identificador original.                                                                               | T          |
+| **RF-NU-07** | O NU **DEVE** permitir o registro de *resgate concluído*, para remoção da ocorrência da fila ativa. **Este requisito é o que evita deslocamento redundante de embarcações.**                                                                                                     | D          |
+| **RF-NU-08** | O NU **DEVERIA** operar em modo somente-recepção de avisos (alertas de Defesa Civil, orientação de rota, informação de abrigo) mesmo sem capacidade de transmissão.                                                                                                              | T          |
+
+### 3.2 Não funcionais e físicos
+
+| **ID**       | **Requisito**                                                     | **Valor**         | **Origem**                                               | **Verif.** |
+| ------------ | ----------------------------------------------------------------- | ----------------- | -------------------------------------------------------- | ---------- |
+| **RF-NU-09** | Autonomia em modo de operação nominal, sem recarga                | **≥ 72 h**        | \[D] — P2/P4                                             | T          |
+| **RF-NU-10** | Autonomia em modo de baixo consumo (apenas escuta periódica)      | ≥ 7 dias          | \[P]                                                     | T          |
+| **RF-NU-11** | Recarga por painel solar integrado ou porta USB-C                 | obrigatório       | \[D]                                                     | I          |
+| **RF-NU-12** | Grau de proteção contra água e poeira                             | **≥ IP67**        | \[D] — o dispositivo será usado dentro d'água, sob chuva | T          |
+| **RF-NU-13** | Flutuabilidade                                                    | **DEVE** flutuar  | \[D] — ambiente de inundação                             | T          |
+| **RF-NU-14** | Alcance de enlace direto, área urbana com obstrução               | ≥ 1,5 km          | \[R]                                                     | T          |
+| **RF-NU-15** | Alcance de enlace direto, linha de visada sobre água              | ≥ 8 km            | \[R]                                                     | T          |
+| **RF-NU-16** | Massa                                                             | ≤ 300 g           | \[P]                                                     | I          |
+| **RF-NU-17** | Capacidade de armazenamento de mensagens de terceiros em custódia | ≥ 2.000 mensagens | \[A] — ver §8.2                                          | T          |
+| **RF-NU-18** | Custo unitário alvo de produção                                   | ≤ R$ 250          | \[P]                                                     | A          |
+
+\
+
+
+**Nota de projeto:** RF-NU-13 (flutuabilidade) costuma ser esquecido em projetos de rede para enchente e é trivial de atender no design de invólucro. Vale destacar no texto — é o tipo de requisito que demonstra que o projeto partiu do cenário real e não de um template genérico de IoT.
+
+\
+
+
+
+
+---
+
+
+
+## 4. Nó Repetidor Fixo (NR)
+
+Nó estacionário implantado em ponto alto (telhado, torre, poste, encosta) para estender a cobertura da célula.
+
+\
+
+
+| **ID**       | **Requisito**                                                                                                                                                                                                                                                                     | **Verif.** |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| **RF-NR-01** | O NR **DEVE** operar de forma totalmente autônoma após a implantação, sem necessidade de intervenção humana local.                                                                                                                                                                | D          |
+| **RF-NR-02** | O NR **DEVE** ser alimentado por painel solar com banco de baterias dimensionado para **≥ 5 dias** de autonomia sem incidência solar útil. \[D — inundações no RS ocorrem sob cobertura de nuvens persistente; dimensionar para irradiância de dia nublado, não para média anual] | A/T        |
+| **RF-NR-03** | O NR **DEVE** suportar submersão temporária ou **DEVE** ser implantado acima da cota de inundação de projeto (TR 100 anos) do local.                                                                                                                                              | A/T        |
+| **RF-NR-04** | O NR **DEVE** resistir a vento sustentado de **≥ 25 m/s** (90 km/h) sem perda de fixação ou de apontamento de antena. \[D — decorre de P7]                                                                                                                                        | A/T        |
+| **RF-NR-05** | O NR **DEVE** manter em custódia mensagens não entregues por **≥ 7 dias** ou até o TTL da mensagem, o que ocorrer primeiro.                                                                                                                                                       | T          |
+| **RF-NR-06** | O NR **DEVE** ser implantável por uma única pessoa em **≤ 15 min**, sem ferramenta especializada.                                                                                                                                                                                 | D          |
+| **RF-NR-07** | O NR **DEVERIA** ser implantável por drone (deposição aérea), dispensando acesso ao ponto alto.                                                                                                                                                                                   | D          |
+| **RF-NR-08** | O NR **DEVE** emitir baliza periódica de presença para permitir que os nós de usuário descubram a topologia disponível.                                                                                                                                                           | T          |
+
+\
+
+
+
+
+---
+
+
+
+## 5. Nó Drone (ND)
+
+O drone cumpre **dois papéis funcionalmente distintos**, e a especificação precisa separá-los porque os perfis de missão são incompatíveis entre si.
+
+\
+
+
+* **Papel A — Mula de dados (*data mule*):** sobrevoa uma rota predefinida sobre a área isolada, coleta mensagens em custódia dos nós que encontra pelo caminho, retorna à base e as descarrega no gateway. Otimiza *alcance*.
+* **Papel B — Relé aéreo:** paira ou orbita sobre um ponto para servir de repetidor temporário durante uma janela de operação. Otimiza *tempo em estação*.
+* **Papel C (opcional) — Implantação:** transporta e deposita nós repetidores fixos.
+
+### 5.1 Funcionais
+
+| **ID**       | **Requisito**                                                                                                                                                                                                                                                                         | **Verif.** |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| **RF-ND-01** | O ND **DEVE** transportar carga útil de comunicação capaz de operar como nó da rede em voo, aceitando custódia de mensagens.                                                                                                                                                          | T          |
+| **RF-ND-02** | O ND **DEVE** executar rota programada de forma autônoma, com pontos de coleta definidos e tempo mínimo de permanência em cada ponto.                                                                                                                                                 | D          |
+| **RF-ND-03** | No papel A, o ND **DEVE** permanecer sobre cada ponto de coleta por **≥ 90 s** \[A — ver cálculo em §8.3], tempo suficiente para drenar a fila de custódia dos nós ao alcance.                                                                                                        | T          |
+| **RF-ND-04** | O ND **DEVE** descarregar integralmente sua fila de custódia no gateway ao retornar à base, com confirmação transacional antes de liberar o espaço em buffer.                                                                                                                         | T          |
+| **RF-ND-05** | O ND **DEVE** registrar, para cada mensagem coletada, a posição e o instante da coleta, permitindo reconstruir a trajetória de propagação para fins de auditoria e depuração.                                                                                                         | T          |
+| **RF-ND-06** | O ND **DEVE** executar retorno automático à base (RTH) por perda de enlace de comando, bateria baixa ou falha de subsistema.                                                                                                                                                          | D          |
+| **RF-ND-07** | O ND **DEVE** dispor de meio de conscientização de tráfego aéreo tripulado (receptor ADS-B ou equivalente) e **DEVE** executar manobra de afastamento e/ou pouso imediato ao detectar aeronave tripulada em raio de **≤ 3 km** ou em rota de conflito. \[D — decorre de P5; ver §7.3] | T          |
+| **RF-ND-08** | O ND **NÃO DEVE** sobrevoar aglomerações de pessoas nem pousar em área ocupada, e **DEVE** dispor de rota de contingência para pouso em área desocupada.                                                                                                                              | A/D        |
+| **RF-ND-09** | O ND **DEVERIA** operar em enxame ou revezamento, de modo que a substituição de aeronave em recarga não interrompa a cobertura no papel B.                                                                                                                                            | D          |
+
+### 5.2 Desempenho — parâmetros numéricos
+
+Estes são os números que o seu colega pediu explicitamente. **Todos precisam ser confrontados com o datasheet da plataforma escolhida antes da versão 1.0.**
+
+\
+
+
+| **ID**       | **Parâmetro**                                             | **Valor mínimo**                                                | **Valor alvo**   | **Origem**                                                                               | **Verif.** |
+| ------------ | --------------------------------------------------------- | --------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------- | ---------- |
+| **RF-ND-10** | Autonomia de voo útil com carga útil, excluída reserva    | **≥ 35 min**                                                    | ≥ 90 min         | \[R] — multirrotor comercial atual entrega 40–55 min; VTOL asa fixa, 90–180 min          | T          |
+| **RF-ND-11** | Reserva de bateria obrigatória ao iniciar retorno         | **≥ 25%** da capacidade                                         | 30%              | \[D] — vento de retorno adverso e ausência de local alternativo de pouso em área alagada | T          |
+| **RF-ND-12** | Raio operacional (ida e volta com reserva)                | **≥ 8 km**                                                      | ≥ 25 km          | \[A] — derivado de RF-ND-10 e RF-ND-13                                                   | A/T        |
+| **RF-ND-13** | Velocidade de cruzeiro                                    | **≥ 12 m/s** (43 km/h)                                          | ≥ 18 m/s         | \[R]                                                                                     | T          |
+| **RF-ND-14** | Vento sustentado máximo de operação                       | **≥ 10 m/s** (36 km/h)                                          | ≥ 15 m/s         | \[D] — decorre de P7                                                                     | T          |
+| **RF-ND-15** | Rajada máxima tolerada sem perda de controle              | **≥ 15 m/s**                                                    | ≥ 20 m/s         | \[D]                                                                                     | T          |
+| **RF-ND-16** | Operação sob precipitação                                 | **DEVE** operar sob chuva moderada; grau de proteção **≥ IP55** | IP55             | \[D] — decorre de P7. **Ver alerta em §5.3**                                             | T          |
+| **RF-ND-17** | Faixa de temperatura de operação                          | −5 °C a +40 °C                                                  | —                | \[D] — inverno/outono gaúcho                                                             | T          |
+| **RF-ND-18** | Capacidade de carga útil                                  | **≥ 500 g**                                                     | ≥ 2 kg (papel C) | \[P]                                                                                     | T          |
+| **RF-ND-19** | Peso máximo de decolagem (PMD)                            | **≤ 25 kg**                                                     | ≤ 2 kg           | \[D] — limite da Categoria Aberta do RBAC 100; ver §7.2                                  | I          |
+| **RF-ND-20** | Altura máxima de operação                                 | **≤ 120 m** AGL                                                 | —                | \[D] — limite regulatório da Categoria Aberta                                            | T          |
+| **RF-ND-21** | Buffer de mensagens em custódia                           | **≥ 50.000** mensagens                                          | ≥ 200.000        | \[A] — ver §8.2                                                                          | T          |
+| **RF-ND-22** | Tempo de troca de bateria e retorno ao ar                 | **≤ 5 min**                                                     | ≤ 3 min          | \[P]                                                                                     | T          |
+| **RF-ND-23** | Conjuntos de bateria por aeronave, para operação contínua | **≥ 4**                                                         | ≥ 6              | \[A] — derivado de RF-ND-10 e RF-ND-22                                                   | I          |
+| **RF-ND-24** | Meio de recarga em campo sem rede elétrica                | obrigatório (gerador, banco solar ou veículo)                   | —                | \[D] — decorre de P2                                                                     | D          |
+| **RF-ND-25** | Precisão de navegação horizontal                          | ≤ 5 m                                                           | ≤ 1,5 m (RTK)    | \[R]                                                                                     | T          |
+| **RF-ND-26** | Ruído acústico a 50 m                                     | **DEVERIA** ≤ 65 dB(A)                                          | —                | \[P] — relevante porque equipes de busca dependem de escuta de sinais de vida            | T          |
+
+### 5.3 Alerta técnico sobre RF-ND-16
+
+**Este é o requisito mais frágil da especificação e precisa ser tratado com honestidade no texto.**
+
+\
+
+
+A esmagadora maioria dos multirrotores comerciais acessíveis **não possui grau de proteção declarado** e não é homologada para voo sob chuva. Plataformas com IP55 existem, mas estão na faixa de dezenas de milhares de reais. Há, portanto, três caminhos, e o projeto precisa escolher explicitamente um:
+
+\
+
+
+1. **Aceitar a limitação:** especificar o drone como recurso de *janela de trégua* — utilizável nos intervalos entre eventos de precipitação, não durante o pico. Isso é operacionalmente defensável, já que a fase de resgate se estende por dias, mas **enfraquece a proposta de valor** e precisa ser dito.
+2. **Especificar plataforma com IP55 e absorver o custo**, tratando o drone como ativo compartilhado entre municípios em vez de item distribuído.
+3. **Prototipar invólucro estanque sobre plataforma comum**, assumindo perda de garantia e de autonomia por peso adicional.
+
+\
+
+
+Recomendo o caminho 1 para o escopo acadêmico, com o 2 registrado como recomendação de implantação real. Um projeto que promete voo sob tempestade e não demonstra vai ser questionado exatamente nesse ponto.
+
+\
+
+
+
+
+---
+
+
+
+## 6. Nó Gateway (NG)
+
+Ponto de interface entre a rede assíncrona e a rede pública de dados. **É o componente mais sutil da arquitetura**, porque não faz apenas transporte: faz *tradução entre dois modelos de comunicação semanticamente incompatíveis*.
+
+### 6.1 O problema que o gateway resolve
+
+A rede interna opera em modelo **store-carry-forward**: sem sessão, sem caminho fim-a-fim, entrega best-effort com custódia, ordem de chegada arbitrária, latência de minutos a horas, relógios locais imprecisos. A internet opera em modelo **requisição-resposta**: sessão estabelecida, entrega assumida como imediata, ordem preservada, latência de milissegundos, relógio sincronizado.
+
+\
+
+
+Traduzir ingenuamente entre os dois produz quatro classes de erro, e cada uma gera um requisito:
+
+\
+
+
+* Interpretar ACK de transporte como confirmação de entrega ao destinatário → **RF-NG-03**
+* Assumir que ordem de chegada equivale a ordem de emissão → **RF-NG-05**
+* Tratar reentrega como ocorrência nova → **RF-NG-04**
+* Descartar mensagem cujo enlace de saída está indisponível → **RF-NG-06**
+
+### 6.2 Requisitos
+
+| **ID**       | **Requisito**                                                                                                                                                                                                                                                                   | **Verif.** |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| **RF-NG-01** | O NG **DEVE** traduzir mensagens do protocolo interno da rede para protocolo de aplicação da internet (HTTPS/MQTT ou equivalente) preservando integralmente identificador, carimbo de emissão, cadeia de custódia e prioridade.                                                 | T          |
+| **RF-NG-02** | O NG **DEVE** traduzir no sentido inverso, injetando na rede assíncrona mensagens originadas na internet (alertas, confirmações de despacho, orientações), respeitando as restrições de banda e duty cycle do enlace interno.                                                   | T          |
+| **RF-NG-03** | O NG **NÃO DEVE** emitir confirmação de entrega ao remetente com base em sucesso de transporte. Confirmação de entrega **DEVE** ser emitida apenas mediante confirmação da aplicação de destino, e propagada de volta à rede como mensagem distinta.                            | T          |
+| **RF-NG-04** | O NG **DEVE** ser idempotente: o recebimento repetido de mensagem com mesmo identificador — situação **esperada**, dada a replicação inerente ao roteamento epidêmico — **DEVE** produzir exatamente um registro no destino.                                                    | T          |
+| **RF-NG-05** | O NG **NÃO DEVE** ordenar eventos pelo relógio de parede do nó de origem. A ordenação **DEVE** usar número de sequência monotônico por nó, com o carimbo do gateway como referência secundária. \[D — nós sem fixação GNSS têm relógio com deriva significativa]                | T          |
+| **RF-NG-06** | O NG **DEVE** bufferizar em armazenamento não volátil todas as mensagens pendentes quando o enlace de subida estiver indisponível, por **≥ 72 h** ou **≥ 500.000** mensagens, o que for atingido primeiro, e **DEVE** drenar a fila automaticamente ao restabelecimento. \[D/P] | T          |
+| **RF-NG-07** | O NG **DEVE** suportar pelo menos dois meios de enlace de subida, sendo **ao menos um não terrestre** (satélite). **DEVE** selecionar automaticamente o enlace disponível e registrar a comutação. \[D — decorre de P1 e da experiência dos terminais Telebras em 2024]         | T          |
+| **RF-NG-08** | O NG **DEVE** validar a autenticidade e a integridade de cada mensagem antes da injeção na rede pública, rejeitando e registrando mensagens não autenticadas. \[D — decorre de P8]                                                                                              | T          |
+| **RF-NG-09** | O NG **DEVE** manter registro auditável e imutável de toda mensagem processada, com instante de recepção, instante de encaminhamento e desfecho.                                                                                                                                | T          |
+| **RF-NG-10** | O NG **DEVE** exportar o estado consolidado em **GeoJSON** e **DEVERIA** suportar **CAP (Common Alerting Protocol, OASIS)** para interoperabilidade com sistemas de alerta oficiais.                                                                                            | I/D        |
+| **RF-NG-11** | O NG **DEVE** traduzir a política de prioridade da rede interna em ordenação equivalente na saída, de modo que a criticidade não se perca na travessia.                                                                                                                         | T          |
+| **RF-NG-12** | O NG **DEVE** traduzir e propagar o TTL: mensagem expirada **NÃO DEVE** ser injetada como ocorrência ativa, mas **DEVE** ser registrada como expirada.                                                                                                                          | T          |
+| **RF-NG-13** | O NG **DEVE** operar por **≥ 72 h** sem energia da rede pública, com recarga solar. \[D]                                                                                                                                                                                        | T          |
+| **RF-NG-14** | O NG **DEVE** ser transportável e implantável por uma pessoa, incluindo antena e fonte, e **DEVERIA** ser transportável por embarcação pequena ou drone de carga.                                                                                                               | D          |
+| **RF-NG-15** | O NG **DEVE** degradar para modo somente-armazenamento — continuando a aceitar custódia da rede interna — quando não houver nenhum enlace de subida disponível, sem rejeitar mensagens.                                                                                         | T          |
+| **RF-NG-16** | O NG **DEVERIA** expor interface local (Wi-Fi de curto alcance) permitindo que equipes no local consultem o estado consolidado mesmo sem enlace de subida.                                                                                                                      | D          |
+
+\
+
+
+**Nota:** RF-NG-15 é o requisito que impede o modo de falha mais provável do sistema. Um gateway que rejeita mensagens quando perde o satélite transforma a rede inteira em rede síncrona, anulando toda a premissa do projeto. Vale um parágrafo dedicado no capítulo de arquitetura.
+
+\
+
+
+
+
+---
+
+
+
+## 7. Requisitos Regulatórios
+
+### 7.1 Radiofrequência
+
+| **ID**    | **Requisito**                                                                                                                                                                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RR-01** | Os enlaces de rádio **DEVEM** operar em faixas de radiação restrita conforme Resolução Anatel nº 680/2017 e Ato nº 14.448/2017, dispensando licenciamento. Para LoRa no Brasil aplica-se o plano AU915, nas faixas **902–907,5 MHz** e **915–928 MHz**. |
+| **RR-02** | Os equipamentos de rádio **DEVEM** ser homologados pela Anatel, ou empregar módulo OEM pré-homologado sem alteração de características de RF.                                                                                                           |
+| **RR-03** | A ocupação de canal **DEVE** respeitar os limites de potência e de tempo de ocupação aplicáveis à categoria.                                                                                                                                            |
+
+\
+
+
+⚠️ **Verificar antes de fixar valores.** Fontes secundárias divergem materialmente sobre o limite de potência aplicável nessas faixas: há referências a 1 W (30 dBm) de pico para sistemas com salto em frequência de no mínimo 35 canais e 0,25 W (24 dBm) para os demais, e há referências a 25 mW com duty cycle de 1%. **Consulte o texto vigente do Ato nº 14.448/2017 diretamente**, na seção aplicável, antes de dimensionar o enlace — o alcance do sistema depende inteiramente desse número, e errá-lo invalida os cálculos de cobertura.
+
+### 7.2 Aeronáutica — atenção, houve mudança normativa recente
+
+| **ID**    | **Requisito**                                                                                                                                                                                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **RR-04** | A operação **DEVE** observar o **RBAC 100 (Resolução ANAC nº 805)**, em vigor desde **16/06/2026**, que substituiu o RBAC-E 94 e trocou a classificação por peso pelas categorias por risco: **Aberta**, **Específica** e **Certificada**. |
+| **RR-05** | A aeronave **DEVE** ser cadastrada no **SISANT** (ANAC) e cada voo **DEVE** ter autorização de espaço aéreo via **SARPAS NG** (DECEA). Os dois cadastros são complementares e nenhum dispensa o outro.                                     |
+| **RR-06** | Operação na **Categoria Aberta** limita-se a VLOS (linha de visada), até 120 m de altura e afastamento de pessoas não envolvidas.                                                                                                          |
+| **RR-07** | Operação **BVLOS** enquadra-se na **Categoria Específica** e exige autorização da ANAC mediante **análise de risco SORA** aprovada.                                                                                                        |
+| **RR-08** | Operações não recreativas **DEVEM** contar com seguro de responsabilidade civil por danos a terceiros.                                                                                                                                     |
+| **RR-09** | Pilotos de aeronaves acima de 250 g **DEVEM** possuir aprovação em exame teórico da ANAC, com prazo de transição até o fim de 2026.                                                                                                        |
+
+\
+
+
+⚠️ **Consequência de projeto de primeira ordem.** O papel A (mula de dados sobrevoando área isolada) é, por definição, uma operação **BVLOS sobre área potencialmente povoada** — Categoria Específica, SORA aprovada, autorização prévia. Isso não se obtém no dia do desastre. **O projeto precisa decidir agora entre:**
+
+\
+
+
+* **(a)** restringir a demonstração a VLOS, com raio efetivo de poucas centenas de metros, e tratar o BVLOS como trabalho futuro;
+* **(b)** desenvolver a análise SORA como parte da própria contribuição do trabalho — o que é academicamente valioso e diferencia o projeto, mas é um esforço considerável;
+* **(c)** modelar o sistema pressupondo articulação institucional prévia com Defesa Civil e DECEA, com autorização pré-aprovada acionável em emergência.
+
+\
+
+
+A opção (c) é a mais realista para operação real e a mais interessante para o texto, porque converte uma limitação técnica em um requisito de política pública — e conecta diretamente com o precedente da rede Anatel/LABRE/Defesa Civil documentado no levantamento.
+
+### 7.3 Segurança de espaço aéreo compartilhado
+
+| **ID**    | **Requisito**                                                                                                                                                      |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **RR-10** | A operação **DEVE** ser coordenada com o comando de operações aéreas de resgate da área, e **DEVE** ser suspensa imediatamente mediante solicitação deste.         |
+| **RR-11** | O sistema **DEVE** presumir presença de helicópteros de resgate operando em baixa altura e sem plano de voo publicado, e **DEVE** ceder espaço incondicionalmente. |
+
+\
+
+
+**Esta é a restrição de segurança dominante do projeto.** Em 2024 havia cerca de vinte helicópteros particulares em operação de salvamento, além de aeronaves militares, frequentemente em baixa altitude e sem coordenação centralizada. Um drone autônomo nesse espaço aéreo é um risco à vida que o sistema se propõe a proteger. Trate isso como requisito de segurança crítica, não como nota de rodapé.
+
+### 7.4 Proteção de dados
+
+| **ID**    | **Requisito**                                                                                                                                                                      |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **RR-12** | Dados de localização vinculados a pessoa identificável, e informação sobre condição de saúde, **DEVEM** ser tratados como dados pessoais sensíveis nos termos da LGPD.             |
+| **RR-13** | A base legal de tratamento **DEVE** ser explicitada — proteção da vida ou da incolumidade física do titular ou de terceiro é hipótese aplicável (art. 7º, VII e art. 11, II, "e"). |
+| **RR-14** | O sistema **DEVE** definir política de retenção com prazo máximo e procedimento de anonimização ou eliminação após o encerramento da operação.                                     |
+| **RR-15** | O acesso ao estado consolidado **DEVE** ser controlado por perfil, e a exposição pública de dados individualizados de pessoas em situação de vulnerabilidade **NÃO DEVE** ocorrer. |
+
+\
+
+
+
+
+---
+
+
+
+## 8. Memórias de cálculo
+
+### 8.1 Autonomia de 72 h (RS-02)
+
+Em 2024, municípios ficaram sem qualquer sinal de 02/05 a 13/05 — **11 dias**. Um sistema com autonomia de 24 h teria falhado no dia 2 de 11. As 72 h são, portanto, o **piso absoluto**, não a meta: cobrem apenas a janela de maior densidade de resgates. A meta real é operação indefinida por captação solar, com o banco de baterias dimensionado para 5 dias de céu encoberto (RF-NR-02) — não para média anual de irradiância, porque inundação e céu limpo não coocorrem.
+
+### 8.2 Dimensionamento de buffer (RF-NU-17, RF-ND-21, RF-NG-06)
+
+Mensagem estruturada típica: identificador (16 B) + coordenadas (8 B) + carimbo (8 B) + metadados de vulnerabilidade (4 B) + texto livre (≤ 160 B) + cabeçalho de custódia e assinatura (≈ 64 B) ≈ **260 B**.
+
+\
+
+
+* 50.000 mensagens ≈ **13 MB**
+* 500.000 mensagens ≈ **130 MB**
+
+\
+
+
+Ou seja: **armazenamento não é restrição de projeto neste sistema.** Um cartão microSD de 8 GB comporta ordens de magnitude mais do que qualquer cenário realista. O buffer deve ser dimensionado com folga generosa e a política de descarte deve ser regida por TTL e prioridade, jamais por escassez de memória. Vale afirmar isso explicitamente no texto — é um ponto onde a intuição engana.
+
+### 8.3 Janela de contato do drone (RF-ND-03)
+
+Com LoRa em SF10/BW125, o *airtime* de um quadro de \~260 B fica na ordem de **0,5 a 1,2 s**, a depender da configuração e do overhead.
+
+\
+
+
+Assumindo 0,8 s por mensagem, com aproveitamento de canal de 30% (colisões e contenção em acesso tipo ALOHA), a vazão útil é de aproximadamente **0,37 mensagens/s**. Em 90 s de permanência: **≈ 33 mensagens** drenadas por ponto de coleta.
+
+\
+
+
+**Implicação a verificar:** se um ponto de coleta agregar mais de \~30 mensagens pendentes, uma única passagem não drena a fila. Isso impõe ou permanência maior, ou múltiplas passagens, ou uso de múltiplos canais. **Refazer este cálculo com os parâmetros de rádio efetivamente escolhidos** — ele muda por ordem de magnitude conforme o spreading factor.
+
+### 8.4 Capacidade de célula (RS-07)
+
+Com a mesma vazão útil de \~0,37 msg/s por canal, uma célula suporta **≈ 1.330 mensagens/hora**. Com cada nó emitindo uma mensagem a cada 10 min, isso equivale a **≈ 220 nós ativos por canal**. Para densidades maiores, é necessário segmentar em múltiplos canais ou reduzir a taxa de emissão sob congestionamento — o que reforça a necessidade de RS-08 (priorização).
+
+\
+
+
+
+
+---
+
+
+
+## 9. Matriz de rastreabilidade — requisito ↔ evidência histórica
+
+Esta tabela é o que sustenta a defesa dos requisitos em banca. Todo requisito de sistema aponta para um fato documentado.
+
+\
+
+
+| **Requisito**             | **Evidência que o origina**                                                                                       |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| RS-01, RR-01              | 12 municípios sem qualquer sinal; 239 com afetação parcial                                                        |
+| RS-02, RF-NR-02, RF-NG-13 | 440 mil unidades sem energia; falta de combustível para geradores                                                 |
+| RS-03, RS-04              | Colapso simultâneo e regional das cinco bacias contribuintes                                                      |
+| RS-06, RF-ND-01           | Estradas e pontes danificadas impedindo acesso das próprias operadoras                                            |
+| RS-08, RS-09, RF-NU-07    | Criação emergencial do Salva RS para centralizar pedidos dispersos e evitar dispersão de recursos                 |
+| RS-11                     | \~20 mil resgates na 1ª semana executados por moradores sem treinamento                                           |
+| RS-14, RR-10, RR-11       | \~20 helicópteros particulares em operação simultânea                                                             |
+| RF-ND-14, RF-ND-16        | Chuva persistente por 15 dias; dois tornados em 11/05/2024                                                        |
+| RF-NG-08                  | Circulação documentada de desinformação durante a operação                                                        |
+| RF-NG-07                  | Deslocamento de 53 antenas satelitais Telebras como única alternativa viável                                      |
+| RR-04 a RR-09             | RBAC 100 / Resolução ANAC nº 805, vigente desde 16/06/2026                                                        |
+| Todo o conjunto           | Rede redundante Anatel + LABRE-RS + Defesa Civil (2025), que reconhece oficialmente o problema como não resolvido |
+
+\
+
+
+
+
+---
+
+
+
+## 10. Questões em aberto
+
+Precisam de decisão antes da versão 1.0:
+
+\
+
+
+1. **Escopo de voo** — VLOS, SORA própria, ou articulação institucional prévia? (§7.2) Define o raio operacional e, portanto, metade dos números do §5.2.
+2. **Limite de potência RF** — resolver a divergência das fontes consultando o Ato 14.448/2017. (§7.1) Todos os cálculos de cobertura dependem disso.
+3. **Estratégia de chuva** — qual dos três caminhos do §5.3?
+4. **Protocolo de roteamento** — epidêmico, PRoPHET, MaxProp ou baseado em quadrantes? Define RS-05 e RS-07, hoje provisórios.
+5. **Identidade e autenticação** — como autenticar um nó de usuário sem infraestrutura de chaves acessível em campo, sem criar barreira de uso que viole RS-11?
+6. **Escala do piloto** — quantos nós, que área, qual município? Sem isso, RS-05 e §8.4 não têm como sair de \[P].
+7. **Métrica de sucesso** — o levantamento registrou que **não existe métrica pública do intervalo entre pedido de socorro e resgate efetivo**. Se o projeto conseguir instrumentar essa métrica, ela é uma contribuição própria, independentemente do desempenho da rede.
+
+\
