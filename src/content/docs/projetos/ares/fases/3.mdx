@@ -1,0 +1,142 @@
+
+---
+
+title: Etapa 3 - Desenvolvimento de Firmware e Protocolos Embarcados
+
+---
+
+#### Bloco 1 - Setup do Ambiente e Arquitetura Base (Infraestrutura)
+
+**Foco:** Preparar o ambiente profissional de desenvolvimento embarcado em C/C++, estabelecer a arquitetura do firmware e garantir compilação reproduzível para os diferentes tipos de nós.
+
+* [ ] 1. **Configurar o repositório e CI/CD:** Criar o *pipeline* de compilação automatizada utilizando GitHub Actions, garantindo que cada *commit* relevante seja compilado e validado automaticamente.
+
+* [ ] 2. **Configurar o ambiente PlatformIO:** Estruturar o projeto no VS Code utilizando o *framework* de produção definido, como ESP-IDF ou Zephyr RTOS.
+
+* [ ] 3. **Definir a estrutura de diretórios:** Separar a base de código em camadas bem definidas, incluindo HAL (*Hardware Abstraction Layer*), RTOS, Drivers, Network, Storage e Application.
+
+* [ ] 4. **Configurar sistema de *Build* Multi-Target:** Permitir a geração de diferentes firmwares, como Sensor, Relay, Router, Storage, Gateway e Mobile, utilizando uma base de código compartilhada.
+
+* [ ] 5. **Inicializar o RTOS e configurar proteções básicas:** Configurar o *Task Scheduler*, *Watchdog Timer*, tratamento de falhas e mecanismos básicos de recuperação automática do sistema.
+
+---
+
+#### Bloco 2 - Drivers de Baixo Nível e Memória (HAL)
+
+**Foco:** Desenvolver a camada de abstração de hardware responsável pela comunicação entre o microcontrolador, os rádios, sensores e dispositivos de armazenamento.
+
+* [ ] 1. **Desenvolver *Driver* SPI com DMA:** Criar uma interface eficiente para comunicação com o módulo de rádio, reduzindo o uso de CPU e permitindo transmissões de alta velocidade.
+
+* [ ] 2. **Desenvolver *Drivers* I2C e ADC:** Implementar as interfaces para leitura dos sensores ambientais, incluindo nível de água, temperatura, pressão e pluviometria.
+
+* [ ] 3. **Desenvolver *Driver* UART para GPS:** Implementar a comunicação com módulos GPS utilizando mensagens NMEA e disponibilizar posição, velocidade e horário para os demais módulos do firmware.
+
+* [ ] 4. **Implementar sistema de arquivos resiliente:** Configurar LittleFS ou FATFS na memória Flash, utilizando mecanismos de integridade para reduzir o risco de corrupção após perda inesperada de energia.
+
+* [ ] 5. **Desenvolver *Driver* SD/eMMC:** Implementar uma camada segura de acesso ao armazenamento externo destinado principalmente aos nós Storage e Gateway.
+
+---
+
+#### Bloco 3 - Gerenciamento Energético Prático (*Power Management*)
+
+**Foco:** Transformar o modelo energético desenvolvido nas etapas anteriores em mecanismos reais de monitoramento, controle e economia de energia.
+
+* [ ] 1. **Codificar o monitoramento da bateria via ADC:** Implementar a leitura da tensão da bateria e aplicar calibração e filtragem por software para reduzir ruídos e erros de medição.
+
+* [ ] 2. **Implementar o algoritmo de *State of Charge* (SoC):** Estimar a porcentagem real de carga da bateria a partir da tensão, corrente e demais parâmetros disponíveis, considerando compensações ambientais quando necessário.
+
+* [ ] 3. **Programar a máquina de estados de energia:** Implementar as transições entre *Active*, *Light Sleep* e *Deep Sleep* conforme o papel do nó e as condições operacionais.
+
+* [ ] 4. **Configurar *Wake-up Interrupts*:** Permitir que o microcontrolador permaneça em baixo consumo e seja acordado por RTC, temporizadores ou eventos físicos provenientes do rádio e demais periféricos.
+
+* [ ] 5. **Criar *Task* de otimização térmica e energética:** Desenvolver uma tarefa do RTOS responsável por desligar ou reduzir o consumo de sensores, memórias e periféricos que estejam temporariamente ociosos.
+
+---
+
+#### Bloco 4 - Camada de Enlace, MAC e Controle de Rádio
+
+**Foco:** Implementar o controle de acesso ao meio físico, reduzir colisões e garantir comunicação confiável entre os nós da rede.
+
+* [ ] 1. **Implementar o empacotamento de *Structs* do *Payload*:** Traduzir o cabeçalho teórico para estruturas C/C++, utilizando empacotamento controlado e manipulação de *bits* para reduzir o *overhead* de transmissão.
+
+* [ ] 2. **Programar o controle de interrupções (IRQ) do rádio:** Implementar o tratamento de eventos como *Tx Done*, *Rx Done*, *Timeout*, erro de transmissão e demais eventos disponibilizados pelo transceptor.
+
+* [ ] 3. **Implementar *Listen Before Talk* (CCA):** Realizar avaliação do canal antes da transmissão para reduzir colisões e controlar o acesso ao meio compartilhado.
+
+* [ ] 4. **Desenvolver a camada MAC customizada:** Implementar mecanismos de confirmação, ACK (*Acknowledgement*), retransmissão, controle de tentativas e detecção de falhas de enlace.
+
+* [ ] 5. **Codificar o protocolo de auto-descobrimento:** Implementar *Beacons* periódicos contendo metadados essenciais, como ID do nó, papel atual, nível energético, qualidade do enlace e localização quando disponível.
+
+---
+
+#### Bloco 5 - O Cérebro da Rede (Roteamento e Máquina de Estados)
+
+**Foco:** Traduzir os algoritmos desenvolvidos no NS-3 para estruturas eficientes capazes de executar em microcontroladores com recursos limitados.
+
+* [ ] 1. **Implementar a tabela de roteamento dinâmica:** Criar estruturas em memória estática para registrar vizinhos, métricas de enlace, energia disponível, papel dos nós e melhores próximos saltos.
+
+* [ ] 2. **Traduzir o algoritmo *Energy-Aware*:** Implementar o recálculo dos pesos das rotas utilizando as informações de energia e qualidade de enlace recebidas dos demais nós.
+
+* [ ] 3. **Codificar o mecanismo de *Self-Healing*:** Remover automaticamente vizinhos considerados inoperantes após a perda de um número configurável de *Beacons* e iniciar a descoberta de novas rotas.
+
+* [ ] 4. **Codificar a máquina de estados de papéis:** Implementar as regras que permitem ao microcontrolador alterar autonomamente sua função dentro da rede conforme energia, conectividade, demanda e contexto.
+
+* [ ] 5. **Implementar o módulo DTN (*Store-and-Forward*):** Detectar a inexistência de uma rota válida e armazenar imediatamente o *Payload* no Flash ou SD disponível.
+
+* [ ] 6. **Implementar política de descarte (*Garbage Collector*):** Desenvolver uma política circular e orientada à prioridade para liberar espaço de armazenamento, preservando mensagens críticas e descartando tráfego de menor prioridade quando necessário.
+
+---
+
+#### Bloco 6 - Lógica de Aplicação (Filas e Prioridades)
+
+**Foco:** Orquestrar as tarefas do firmware para garantir que mensagens críticas atravessem a rede mesmo sob congestionamento e limitações severas de recursos.
+
+* [ ] 1. **Criar filas segmentadas do RTOS:** Alocar *Message Queues* e buffers de memória adequados para as cinco classes de prioridade P0 a P4.
+
+* [ ] 2. **Implementar preempção P0:** Garantir que mensagens de emergência possam interromper ou antecipar o processamento de tráfego de menor prioridade sem comprometer a integridade das tarefas críticas do RTOS.
+
+* [ ] 3. **Desenvolver a rotina do Sensor:** Implementar o ciclo Acordar → Inicializar periféricos → Ler sensores → Criar pacote → Transmitir → Registrar resultado → Retornar ao *Deep Sleep*.
+
+* [ ] 4. **Desenvolver a rotina do Relay:** Implementar um *Duty Cycle* orientado à escuta, retransmissão rápida de pacotes e retorno ao baixo consumo sempre que possível.
+
+* [ ] 5. **Integrar a lógica do nó Mobile:** Integrar GPS e rádio para permitir que o nó móvel anuncie sua presença, posição e disponibilidade e transporte mensagens entre regiões desconectadas.
+
+---
+
+#### Bloco 7 - Segurança, Gateway e Integração Externa
+
+**Foco:** Proteger a comunicação contra mensagens falsas ou adulteradas e estabelecer a ponte entre a rede ARES e infraestruturas externas.
+
+* [ ] 1. **Integrar biblioteca criptográfica:** Incorporar uma biblioteca como mbedTLS e validar seu funcionamento no microcontrolador escolhido.
+
+* [ ] 2. **Implementar criptografia e autenticação:** Utilizar mecanismos como AES-128/256 e autenticação de mensagens para garantir confidencialidade, integridade e autenticidade dos *Payloads*.
+
+* [ ] 3. **Desenvolver a ponte IP do Gateway:** Criar o mecanismo responsável por retirar mensagens da rede LoRa e encaminhá-las para a pilha TCP/IP disponível via Wi-Fi, Ethernet ou 4G.
+
+* [ ] 4. **Implementar cliente MQTT/HTTP no Gateway:** Desenvolver a publicação assíncrona dos dados recebidos para o servidor em nuvem, incluindo reconexão e tratamento de indisponibilidade.
+
+* [ ] 5. **Implementar a fila de contenção do Gateway:** Permitir que o Gateway assuma temporariamente funções de Storage quando a conexão externa estiver indisponível, armazenando as mensagens até a recuperação do *backhaul*.
+
+---
+
+#### Bloco 8 - Confiabilidade, Atualização Remota e Testes
+
+**Foco:** Validar a confiabilidade do firmware, detectar falhas antes da implantação física e estabelecer mecanismos seguros de manutenção remota.
+
+* [ ] 1. **Criar atualização OTA (*Over-The-Air*) via malha:** Desenvolver um mecanismo de distribuição de firmware utilizando a própria rede ARES e o protocolo DTN para transportar os arquivos entre regiões desconectadas.
+
+* [ ] 2. **Implementar *Rollback* seguro:** Configurar partições A/B ou mecanismo equivalente para permitir o retorno automático à versão anterior caso uma atualização seja interrompida ou apresente falha na inicialização.
+
+* [ ] 3. **Configurar *framework* de testes unitários:** Integrar ferramentas como Unity ou Ceedling para executar testes automatizados das funções críticas do firmware.
+
+* [ ] 4. **Escrever testes de *Structs* e *Buffers*:** Validar serialização, desserialização, alinhamento, limites de memória e integridade do *Payload*, garantindo que nenhum *bit* seja perdido ou interpretado incorretamente.
+
+* [ ] 5. **Escrever testes unitários da fila de prioridades:** Inserir conjuntos de mensagens P0 a P4 e verificar automaticamente se a ordem de processamento respeita as regras de prioridade estabelecidas.
+
+* [ ] 6. **Escrever testes da máquina de estados:** Validar as transições entre papéis e garantir que cada mudança ocorra exatamente nas condições e limiares definidos pela arquitetura.
+
+* [ ] 7. **Executar análise estática de código:** Integrar ferramentas como Cppcheck ao CI para identificar possíveis vazamentos de memória, ponteiros inválidos, acessos fora dos limites, condições perigosas e demais problemas de qualidade.
+
+* [ ] 8. **Realizar *Code Review* e congelamento do firmware:** Revisar a implementação completa, consolidar a versão candidata, gerar os binários necessários e preparar o firmware para a **Etapa 4 - Prototipação de Hardware**.
+
+---

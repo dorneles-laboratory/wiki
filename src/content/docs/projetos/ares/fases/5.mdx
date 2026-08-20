@@ -1,0 +1,147 @@
+---
+title: Etapa 5 - Integração, Testes de Bancada e Validação (Lab)
+---
+
+#### Bloco 1 - Preparação de Bancada e Calibração Física (RF)
+
+**Foco:** Validar se as placas fabricadas atendem aos requisitos elétricos e de radiofrequência antes da formação da rede física.
+
+* [ ] 1. **Gravar o Firmware Base (*Bootloader*):** Realizar o *flash* do sistema inicial nas placas e validar a comunicação serial por meio da interface USB, UART ou JTAG/SWD.
+
+* [ ] 2. **Auditar antenas e impedância:** Utilizar um Analisador de Redes Vetoriais (VNA) para verificar o casamento de impedância, perdas e desempenho das antenas reais em relação às especificações do projeto.
+
+* [ ] 3. **Validar a potência de saída (Tx):** Medir experimentalmente a potência de transmissão do rádio e verificar sua conformidade com os limites regulamentares aplicáveis à frequência e tecnologia utilizadas.
+
+* [ ] 4. **Testar a sensibilidade de recepção (Rx):** Utilizar atenuadores e uma conexão de RF controlada para determinar o nível mínimo de sinal no qual o receptor consegue interpretar corretamente os pacotes, registrando RSSI, SNR e PDR.
+
+* [ ] 5. **Calibrar o *Clock* do rádio:** Medir a precisão dos osciladores utilizados pelo transceptor e identificar possíveis desvios de frequência (*drift*) que possam provocar perda ou dessincronização de comunicação.
+
+* [ ] 6. **Validar a criptografia base:** Medir o tempo de processamento e o consumo energético associados à criptografia e autenticação de pacotes, verificando se o mecanismo não cria gargalos no microcontrolador.
+
+---
+
+#### Bloco 2 - Testes Ponto-a-Ponto e Validação Unitária (Sensores)
+
+**Foco:** Garantir que os componentes individuais, sensores e mecanismos básicos de comunicação funcionem corretamente antes da formação da malha.
+
+* [ ] 1. **Testar comunicação P2P:** Enviar mensagens criptografadas entre dois nós e validar transmissão, recepção, integridade, autenticação e confirmação dos pacotes.
+
+* [ ] 2. **Injetar dados controlados nos sensores físicos:** Utilizar sinais de referência, potenciômetros, fontes ou mecanismos equivalentes para simular alterações controladas nas grandezas medidas.
+
+* [ ] 3. **Calibrar a leitura dos sensores:** Comparar medições físicas com instrumentos ou referências conhecidas e ajustar os parâmetros de conversão utilizados pelo firmware.
+
+* [ ] 4. **Validar o *Lock* de GPS:** Levar um nó Mobile para ambiente externo, verificar a aquisição das coordenadas e validar a interpretação das mensagens NMEA.
+
+* [ ] 5. **Testar a memória local:** Realizar milhares de operações de escrita e leitura no cartão SD ou Flash, incluindo aproximadamente 10 mil registros, verificando integridade, desempenho e comportamento após interrupções de energia.
+
+---
+
+#### Bloco 3 - Formação da Micro-Malha (*Mesh*) e Roteamento
+
+**Foco:** Formar uma rede física com múltiplos nós e verificar se a descoberta, topologia e seleção de rotas correspondem ao comportamento previsto na simulação.
+
+* [ ] 1. **Configurar o lote de laboratório:** Gravar o firmware validado em 10 nós de diferentes papéis, incluindo Sensors, Relays, Storage e Gateway.
+
+* [ ] 2. **Definir o posicionamento de bancada:** Distribuir fisicamente os nós em diferentes ambientes, corredores e obstáculos para reproduzir condições de atenuação e multipercurso.
+
+* [ ] 3. **Validar o auto-descobrimento:** Monitorar os *logs* e *beacons* para verificar se os nós identificam automaticamente seus vizinhos e atualizam suas informações de conectividade.
+
+* [ ] 4. **Auditar as tabelas de roteamento:** Comparar as rotas estabelecidas fisicamente com os caminhos previstos pelos modelos matemáticos e resultados da simulação.
+
+* [ ] 5. **Testar *Multi-hop*:** Forçar mensagens a atravessarem múltiplos nós e medir PDR, RSSI, SNR, número de saltos, latência e consumo energético acumulado.
+
+---
+
+#### Bloco 4 - Validação de Inteligência, Falhas e *Self-Healing*
+
+**Foco:** Introduzir falhas controladas nos nós e verificar se a rede consegue reorganizar seus papéis e recuperar automaticamente a conectividade.
+
+* [ ] 1. **Simular condição crítica de bateria:** Injetar ou reproduzir artificialmente um nível de energia crítico em um nó Router e verificar a reação da arquitetura.
+
+* [ ] 2. **Validar a mudança dinâmica de papel:** Confirmar que o Router altera autonomamente sua função para um papel de menor consumo, como Relay passivo, quando os critérios energéticos forem atingidos.
+
+* [ ] 3. **Testar o *Self-Healing* físico:** Desligar abruptamente um nó central utilizado por uma rota ativa e observar a capacidade dos nós restantes de detectar a falha e reorganizar a topologia.
+
+* [ ] 4. **Medir o tempo de recuperação:** Cronometrar o intervalo entre a detecção da falha e o estabelecimento de uma nova rota funcional.
+
+* [ ] 5. **Testar o particionamento da rede:** Separar fisicamente os nós em regiões isoladas e verificar se cada subconjunto consegue continuar operando como uma sub-rede autônoma até que a conectividade seja restaurada.
+
+---
+
+#### Bloco 5 - Tolerância a Atrasos (DTN) e Preempção
+
+**Foco:** Validar experimentalmente a comunicação assíncrona do ARES, garantindo retenção de dados durante interrupções e prioridade absoluta das mensagens críticas.
+
+* [ ] 1. **Simular o isolamento do Gateway:** Desconectar intencionalmente o Gateway da rede 4G/Wi-Fi para reproduzir a indisponibilidade da infraestrutura externa.
+
+* [ ] 2. **Validar o *Store* físico:** Gerar dados de telemetria durante o isolamento e verificar se o Storage armazena corretamente as mensagens no SD ou memória local.
+
+* [ ] 3. **Validar o *Forward* físico:** Restaurar a conectividade do Gateway e verificar se as mensagens retidas são encaminhadas corretamente, respeitando prioridade, integridade e ordem definida pelo protocolo.
+
+* [ ] 4. **Simular congestionamento (*Flood*):** Gerar simultaneamente uma grande quantidade de mensagens P4 para ocupar os recursos de comunicação e armazenamento da rede.
+
+* [ ] 5. **Testar a preempção de alertas P0:** Gerar fisicamente uma mensagem de emergência P0 por meio de botão de pânico ou mecanismo equivalente durante o congestionamento.
+
+* [ ] 6. **Validar a prioridade da fila:** Utilizar um *sniffer* de rádio ou SDR, como RTL-SDR quando aplicável, para verificar experimentalmente que mensagens P0 recebem prioridade sobre mensagens P4 pendentes.
+
+---
+
+#### Bloco 6 - Mobilidade, *Data Mules* e Integração com a Nuvem
+
+**Foco:** Validar a capacidade dos nós móveis de transportar informações entre regiões desconectadas e estabelecer a comunicação entre a malha ARES e sistemas externos.
+
+* [ ] 1. **Configurar o nó Mobile:** Alimentar e configurar um nó para operar no modo Mobile, integrando GPS, rádio e armazenamento local.
+
+* [ ] 2. **Testar o transporte físico de pacotes:** Deslocar o nó Mobile entre duas regiões da rede, simulando o comportamento de um *Data Mule* e verificando a transferência de mensagens retidas.
+
+* [ ] 3. **Validar a integração Sub-1 GHz → TCP/IP:** Verificar a conversão dos dados recebidos pelo rádio para pacotes destinados à infraestrutura IP disponível no Gateway.
+
+* [ ] 4. **Integrar o SIM Card e o *Backhaul*:** Configurar a comunicação 4G/NB-IoT ou tecnologia externa selecionada e avaliar estabilidade, reconexão e qualidade do enlace.
+
+* [ ] 5. **Validar a comunicação *End-to-End*:** Confirmar que dados originados nos Sensors atravessam a malha, chegam ao Gateway, são encaminhados pelo *backhaul* e aparecem corretamente decodificados no *Dashboard*.
+
+---
+
+#### Bloco 7 - Validação Termodinâmica e Ambiental (*Stress Test*)
+
+**Foco:** Submeter o hardware a condições controladas de consumo, temperatura, umidade e exposição ambiental para verificar sua resistência antes dos testes de campo.
+
+* [ ] 1. **Medir o consumo em *Deep Sleep*:** Utilizar instrumentos de precisão para verificar se o consumo da placa permanece dentro da faixa definida no projeto energético.
+
+* [ ] 2. **Medir os picos de corrente de transmissão (Tx):** Utilizar osciloscópio ou analisador de potência para registrar os picos de corrente produzidos durante as transmissões.
+
+* [ ] 3. **Validar o carregamento solar:** Conectar o sistema MPPT ao painel solar e verificar a eficiência do carregamento da bateria enquanto o nó permanece em operação.
+
+* [ ] 4. **Realizar teste de umidade:** Submeter os *cases* a condições elevadas de umidade e verificar a ocorrência de entrada de água, condensação ou falhas elétricas.
+
+* [ ] 5. **Executar teste de estresse térmico (*Cycling*):** Submeter as unidades a ciclos controlados de temperatura e verificar alterações elétricas, mecânicas e de frequência de operação do rádio.
+
+* [ ] 6. **Executar teste de submersão (IP67):** Submergir um Sensor com o sistema de vedação instalado durante o período definido no protocolo de ensaio e verificar posteriormente a presença de água, umidade ou condensação no interior do *case*.
+
+---
+
+#### Bloco 8 - Depuração, *Patches* e Liberação (*Go/No-Go*)
+
+**Foco:** Consolidar os problemas encontrados, corrigir as falhas e determinar objetivamente se o sistema está pronto para avançar aos testes em condições reais.
+
+* [ ] 1. **Consolidar o *Bug Tracker*:** Registrar, classificar e priorizar todos os problemas elétricos, mecânicos, de firmware, RF, energia e comunicação identificados durante os testes.
+
+* [ ] 2. **Desenvolver *Patches* (*Bug Fixes*):** Corrigir os problemas encontrados no firmware, incluindo temporização, comunicação, roteamento, gerenciamento energético e tratamento de falhas.
+
+* [ ] 3. **Executar retrabalho de hardware (*Modwires*):** Corrigir problemas identificados nas PCBs do lote piloto por meio de modificações físicas documentadas e controladas, quando necessário.
+
+* [ ] 4. **Validar o sistema OTA:** Realizar uma atualização de firmware via rádio em um nó isolado e verificar a integridade da transferência, instalação e recuperação em caso de falha.
+
+* [ ] 5. **Realizar ajuste fino das antenas (SWR):** Ajustar fisicamente as antenas ou a rede de casamento de impedância para obter o melhor desempenho possível de transmissão e recepção dentro dos limites regulamentares.
+
+* [ ] 6. **Executar o lacramento definitivo:** Aplicar os materiais de proteção especificados, instalar elementos de controle de umidade quando aplicáveis e realizar o fechamento definitivo dos *cases* aprovados.
+
+* [ ] 7. **Montar o *Go-Bag* do lote piloto:** Organizar baterias carregadas, painéis solares, ferramentas, cabos, elementos de fixação e nós necessários para a operação de campo.
+
+* [ ] 8. **Realizar a reunião de *Go/No-Go*:** Avaliar os resultados dos testes, métricas, *logs*, falhas e correções para determinar formalmente se o sistema está apto a avançar para testes externos.
+
+* [ ] 9. **Auditar o custo final das placas:** Registrar o custo efetivamente pago para cada tipo de nó e comparar os valores com a BOM e as estimativas financeiras anteriores.
+
+* [ ] 10. **Congelar o *Hardware Release 1.0*:** Aprovar formalmente a versão validada do hardware, registrar a documentação correspondente e liberar o início da **Etapa 6 - Validação em Campo**.
+
+---

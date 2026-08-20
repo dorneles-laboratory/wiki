@@ -1,0 +1,71 @@
+---
+title: Como usar o Overleaf (Documentos Oficiais e Artigos)
+description: Guia de padronização, links e boas práticas para a escrita acadêmica e relatórios oficiais utilizando LaTeX no Overleaf.
+---
+
+Enquanto a nossa Wiki (Docs-as-Code) serve como a fonte da verdade para a engenharia de software, infraestrutura e documentação viva, o **Overleaf (LaTeX)** é a nossa ferramenta oficial para publicações. 
+
+Utilizamos o Overleaf exclusivamente para documentos que exigem formatação acadêmica rigorosa, geração de PDFs finais para bancas, submissões em congressos e relatórios institucionais.
+
+---
+
+### 🔗 Links e Templates Oficiais
+
+Antes de criar um documento do zero, verifique se já não existe um *template* pré-aprovado ou um projeto em andamento para a sua necessidade.
+
+#### Templates Institucionais
+*   **Template UFSM (TCC / Relatórios):** [COLE AQUI O LINK DO TEMPLATE]
+*   **Template Artigo SBC / IEEE (Congressos):** [COLE AQUI O LINK DO TEMPLATE]
+*   **Template de Apresentação (Slides em Beamer):** [COLE AQUI O LINK DO TEMPLATE]
+
+#### Projetos em Andamento
+*   **Documentação ARES (Artigo Oficial):** [COLE AQUI O LINK DE CONVITE DO OVERLEAF]
+*   **Relatórios PGI-PROA / Academic Companion:** [COLE AQUI O LINK DE CONVITE DO OVERLEAF]
+*   [ADICIONE OUTRO PROJETO AQUI, ex: Relatório de Iniciação Científica]: [COLE AQUI O LINK DO PROJETO]
+
+---
+
+### ⚙️ Fluxo de Trabalho e Colaboração
+
+Como o Overleaf permite a edição simultânea (estilo Google Docs), é vital mantermos a organização para não quebrar o código de compilação de quem está escrevendo junto com você.
+
+1.  **Divisão por Arquivos:** Nunca escreva um documento inteiro no arquivo `main.tex`. Use a estrutura de pastas. Crie arquivos separados para cada seção (ex: `introducao.tex`, `metodologia.tex`) e chame-os no arquivo principal usando o comando `\input{pasta/arquivo}`.
+2.  **Imagens e Gráficos:** Salve todos os diagramas (gerados no Figma ou exportados dos relatórios) dentro da pasta `/images`. Certifique-se de usar imagens em alta resolução (preferencialmente `.png` ou vetor `.pdf`).
+3.  **Comentários de Revisão:** Ao revisar o texto de um colega, não apague diretamente. Use o atalho `Ctrl + /` (ou `Cmd + /`) para comentar o trecho antigo e escreva sua sugestão, ou utilize a funcionalidade nativa de *Review / Track Changes* do Overleaf.
+
+---
+
+### 📚 Gestão de Referências (Bibliografia)
+
+A padronização das referências é crítica (ABNT ou IEEE, dependendo do documento). O processo é totalmente automatizado através do arquivo `.bib`.
+
+1.  **Não digite referências à mão:** Utilize um gerenciador de referências como **Zotero** ou **Mendeley**.
+2.  **Exportação do BibTeX:** Exporte as coleções do seu gerenciador no formato `.bib` e faça o upload substituindo o arquivo `referencias.bib` do projeto no Overleaf.
+3.  **Citação no Texto:** Para citar um autor durante a escrita, utilize o comando `\cite{chave_do_autor}` ou `\citeonline{chave_do_autor}` para que o LaTeX monte a bibliografia automaticamente no final do PDF.
+
+---
+
+### 💡 Dicas Rápidas de Sintaxe LaTeX
+
+Se você está migrando do Markdown para o LaTeX agora, aqui estão as conversões mais comuns que você usará no dia a dia:
+
+*   **Negrito:** `\textbf{seu texto aqui}`
+*   **Itálico:** `\textit{seu texto aqui}`
+*   **Listas:**
+    ```latex
+    \begin{itemize}
+      \item Primeiro ponto
+      \item Segundo ponto
+    \end{itemize}
+    ```
+*   **Inserir Imagem:**
+    ```latex
+    \begin{figure}[htb]
+      \centering
+      \includegraphics[width=0.8\textwidth]{images/nome_da_imagem.png}
+      \caption{Descrição detalhada da imagem.}
+      \label{fig:referencia_cruzada}
+    \end{figure}
+    ```
+
+> **Atenção:** Em caso de erros de compilação (fundo vermelho indicando falha na geração do PDF), verifique a aba *Logs and output*. Geralmente, o erro é causado por esquecer de fechar chaves `}` ou por usar caracteres especiais (como `&`, `%`, `$`, `#`, `_`) soltos no texto sem a barra invertida `\` antes deles.

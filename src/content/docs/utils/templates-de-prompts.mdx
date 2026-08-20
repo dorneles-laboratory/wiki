@@ -1,0 +1,41 @@
+---
+title: Biblioteca de Prompts (Templates)
+description: Modelos prontos de engenharia de prompts com espaços preenchíveis para utilizar com NotebookLM, Cursor ou ChatGPT.
+---
+
+Este documento contém templates padronizados para interagir com as nossas IAs de apoio. Para usar, basta copiar o prompt desejado e substituir o conteúdo entre os colchetes `[ ]` pelas informações do seu contexto atual.
+
+---
+
+### 1. Geração de Esqueletos (Boilerplate)
+**Uso:** Quando você sabe o que precisa documentar e os tópicos principais, mas não quer perder tempo criando a estrutura do arquivo do zero.
+
+> Vou documentar [TEMA DA DOCUMENTAÇÃO, ex: a infraestrutura de CI/CD]. Crie o arquivo MDX base, inclua o frontmatter exigido pelo Keystatic com o título '[TÍTULO DO DOCUMENTO, ex: Pipeline de Deploy]', e crie o esqueleto com os tópicos: 1. [TÓPICO 1], 2. [TÓPICO 2], 3. [TÓPICO 3]. Deixe espaços com `TODO` para eu preencher depois.
+
+---
+
+### 2. Criação de Nova Documentação (Escritor Fantasma)
+**Uso:** Quando você precisa escrever a primeira versão de um documento e quer que a IA já formate e escreva seguindo as regras da nossa Wiki.
+
+> Preciso escrever a documentação sobre [MÓDULO/TEMA, ex: o banco de dados e as tabelas] do projeto [NOME DO PROJETO, ex: Nexus SM]. Leia os nossos Guias de Arquitetura e Padrões da Wiki e gere o arquivo Markdown inicial para mim. Siga exatamente o mesmo tom de voz, nível de detalhamento técnico e estrutura de títulos que usamos nas outras documentações. Considere também os seguintes detalhes específicos: [LISTE 2 OU 3 DETALHES IMPORTANTES DO NOVO MÓDULO].
+
+---
+
+### 3. Revisão Técnica (Code Review de Documentação)
+**Uso:** Para validar rascunhos, encontrar falhas lógicas na arquitetura e garantir a coesão técnica.
+
+> Atue como [PAPEL, ex: revisor técnico / engenheiro de RF / arquiteto de software] sênior. Avalie este novo rascunho sobre [ASSUNTO DO RASCUNHO, ex: a modelagem matemática] do projeto [NOME DO PROJETO, ex: ARES]. Verifique se ele entra em conflito com os requisitos que já definimos na documentação do '[NOME DO DOCUMENTO DE REFERÊNCIA, ex: Bloco 4: Arquitetura Lógica]', corrija erros conceituais e sugira melhorias de clareza.
+
+---
+
+### 4. Pesquisa, Integração e Onboarding
+**Uso:** Para cruzar dados do nosso ecossistema inteiro e planejar os próximos passos de desenvolvimento.
+
+> Estou planejando a integração entre [PROJETO A] e [PROJETO B]. Com base em toda a arquitetura documentada no repositório até agora, quais são os [NÚMERO] maiores desafios de [ÁREA DE ATENÇÃO, ex: segurança / comunicação offline / sincronização] que enfrentaremos? Além disso, liste quais tecnologias ou padrões já documentados na seção de '[SEÇÃO DA WIKI, ex: Infraestrutura / Padrões]' nós podemos reaproveitar.
+
+---
+
+### 5. Geração de Código Baseado na Wiki (Exclusivo para IDE/Cursor)
+**Uso:** Para ser rodado no chat do Cursor/Copilot com a tag `@Codebase`, pedindo para a IA escrever código baseando-se nas regras que você já documentou.
+
+> Com base nos padrões de arquitetura, regras de repositório e configurações de [TECNOLOGIA BASE, ex: rotas do backend / componentes React] definidos na nossa Wiki, crie [O QUE PRECISA SER CODIFICADO, ex: o endpoint de cadastro / o componente de tabela filtrável] para o [NOME DO PROJETO]. Certifique-se de seguir os padrões de nomenclatura estipulados nos documentos de arquitetura.

@@ -8,8 +8,6 @@ const docSchema = {
 };
 
 export default config({
-  // No desenvolvimento local, salva direto no seu SSD.
-  // Quando subirmos para Vercel/Cloudflare, mudaremos para 'github'.
   storage: {
     kind: 'github',
     repo: 'dorneles-laboratory/wiki',
@@ -25,10 +23,17 @@ export default config({
       format: { contentField: 'content' },
       schema: docSchema,
     }),
-    visaoGeral: collection({
-      label: 'Visão Geral',
+    guides: collection({
+      label: 'Guias',
       slugField: 'title',
-      path: 'src/content/docs/visao-geral/*',
+      path: 'src/content/docs/guides/*',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+    processes: collection({
+      label: 'Processos',
+      slugField: 'title',
+      path: 'src/content/docs/processes/*',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
@@ -39,52 +44,38 @@ export default config({
       format: { contentField: 'content' },
       schema: docSchema,
     }),
-    padroes: collection({
-      label: 'Padrões e Arquitetura',
+    templates: collection({
+      label: 'Templates',
       slugField: 'title',
-      path: 'src/content/docs/padroes/*',
+      path: 'src/content/docs/templates/*',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+    utils: collection({
+      label: 'Utilitários e Prompts',
+      slugField: 'title',
+      path: 'src/content/docs/utils/*',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+    visaoGeral: collection({
+      label: 'Visão Geral',
+      slugField: 'title',
+      path: 'src/content/docs/visao-geral/*',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
     ares: collection({
       label: 'Projeto: Ares',
       slugField: 'title',
-      path: 'src/content/docs/projetos/ares/*',
+      path: 'src/content/docs/projetos/ares/**/*.mdx',
       format: { contentField: 'content' },
       schema: docSchema,
-    }),
+    }),    
     pgiProa: collection({
       label: 'Projeto: PGI-PROA',
       slugField: 'title',
-      path: 'src/content/docs/projetos/pgi-proa/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-    nexusSm: collection({
-      label: 'Projeto: Nexus SM',
-      slugField: 'title',
-      path: 'src/content/docs/projetos/nexus-sm/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-    srmTau: collection({
-      label: 'Projeto: SRM',
-      slugField: 'title',
-      path: 'src/content/docs/projetos/srm/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-    academicCompanion: collection({
-      label: 'Projeto: Academic Companion',
-      slugField: 'title',
-      path: 'src/content/docs/projetos/academic-companion/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-    infraestrutura: collection({
-      label: 'Infraestrutura',
-      slugField: 'title',
-      path: 'src/content/docs/infraestrutura/*',
+      path: 'src/content/docs/projetos/pgi-proa/**/*.mdx',
       format: { contentField: 'content' },
       schema: docSchema,
     }),

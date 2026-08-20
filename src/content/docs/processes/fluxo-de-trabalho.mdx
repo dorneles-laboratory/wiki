@@ -1,0 +1,121 @@
+---
+title: Fluxo de Trabalho
+---
+
+> **Última atualização:** 20-08-2026
+---
+
+## Objetivo
+
+Descrever o fluxo de trabalho adotado pela equipe de desenvolvimento da Tau Rocket Team, desde a criação de uma tarefa até a entrega final, garantindo consistência, qualidade e rastreabilidade.
+
+---
+
+## Visão Geral do Fluxo
+
+```
+Backlog → Sprint Planning → Desenvolvimento → Code Review → Testes → Merge → Deploy
+```
+
+---
+
+## Etapas Detalhadas
+
+### 1. Criação e Refinamento de Itens do Backlog
+
+- Qualquer membro pode sugerir novos itens ao backlog.
+- Itens devem ser criados como issues nos repositórios correspondentes ou listados diretamente no `/planning/backlog.md`.
+- No mínimo uma vez por sprint, o time realiza o refinamento do backlog para estimar, priorizar e detalhar os itens.
+
+### 2. Sprint Planning
+
+- Realizado no início de cada sprint.
+- O time seleciona os itens do backlog a serem desenvolvidos no sprint.
+- Cada item recebe um responsável e uma estimativa de pontos.
+- Os itens selecionados são registrados em `/planning/sprint-planning.md`.
+
+### 3. Desenvolvimento
+
+- Cada tarefa deve ser desenvolvida em uma branch separada, seguindo o padrão:
+  - `feature/descricao-da-feature`
+  - `fix/descricao-do-bug`
+  - `docs/descricao-da-documentacao`
+  - `infra/descricao-da-infra`
+- Commits devem ser atômicos e ter mensagens descritivas.
+- O membro responsável mantém o status da tarefa atualizado.
+
+### 4. Pull Request (Code Review)
+
+- Ao finalizar o desenvolvimento, o membro abre um pull request (PR) para a branch principal.
+- O PR deve ter:
+  - Título descritivo
+  - Descrição do que foi feito e por quê
+  - Referência à issue ou item do backlog correspondente
+  - Evidências (prints, logs) quando aplicável
+- O PR deve ser revisado por pelo menos um outro membro do time.
+- A Tech Lead deve aprovar o PR antes do merge.
+
+### 5. Testes
+
+- Testes devem ser escritos junto com o desenvolvimento, não após.
+- O pipeline de CI deve executar todos os testes automaticamente a cada pull request.
+- PRs com testes falhando não devem ser mergeados.
+
+### 6. Merge e Deploy
+
+- Após aprovação e testes passando, o PR é mergeado na branch principal.
+- O deploy em ambiente de staging é automático via pipeline de CI/CD.
+- O deploy em produção deve ser autorizado pela Tech Lead.
+
+---
+
+## Definition of Done
+
+Um item do backlog é considerado **concluído** quando todos os critérios abaixo são atendidos:
+
+- [ ] O código foi desenvolvido conforme o acordado.
+- [ ] Um pull request foi aberto e revisado por pelo menos um membro.
+- [ ] Os testes relevantes foram escritos e estão passando no CI.
+- [ ] A documentação foi atualizada (quando aplicável).
+- [ ] O pull request foi aprovado pelo Tech Lead.
+- [ ] O pull request foi mergeado na branch principal.
+- [ ] O item foi marcado como concluído no backlog e nas tarefas.
+
+---
+
+## Padrões de Commit
+
+Use o padrão de mensagens de commit baseado em [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Prefixo    | Uso                                                    |
+|------------|--------------------------------------------------------|
+| `feat:`    | Nova funcionalidade                                    |
+| `fix:`     | Correção de bug                                        |
+| `docs:`    | Atualização de documentação                            |
+| `test:`    | Adição ou correção de testes                           |
+| `refactor:`| Refatoração sem mudança de comportamento               |
+| `infra:`   | Mudanças de infraestrutura/configuração                |
+| `chore:`   | Tarefas de manutenção que não alteram o código         |
+
+**Exemplo:** `feat: adicionar endpoint de autenticação JWT`
+
+---
+
+## Ambientes
+
+| Ambiente   | Branch      | Deploy      | Acesso         |
+|------------|-------------|-------------|----------------|
+| Produção   | `main`      | Manual      | Restrito       |
+| Dev        | `develop`   | Automático  | Time interno   |
+
+---
+
+## Ferramentas Utilizadas
+
+| Ferramenta         | Finalidade                                   |
+|--------------------|----------------------------------------------|
+| GitHub             | Versionamento, code review, CI/CD            |
+| GitHub Actions     | Pipeline de CI/CD                            |
+| Google Meet        | Reuniões                                     |
+| wiki               | Gestão e organização do time                 |
+| Overleaf           | Documentação técnica                         |

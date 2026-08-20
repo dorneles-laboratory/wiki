@@ -1,0 +1,149 @@
+---
+title: Etapa 6 - Implantação e Operação (Deploy)
+---
+
+#### Bloco 1 - Planejamento Logístico e Mapeamento Físico (Pré-Deploy)
+
+**Foco:** Preparar a implantação da infraestrutura em uma área real, definindo os locais dos equipamentos, as condições de radiofrequência, as autorizações necessárias e toda a logística de campo.
+
+* [ ] 1. **Definir o Polígono do Piloto:** Selecionar uma área ribeirinha real de aproximadamente 2 km² com histórico comprovado de enchentes, estabelecendo os limites geográficos do experimento.
+
+* [ ] 2. **Executar o** ***Site Survey*** **de Radiofrequência:** Percorrer a região com analisadores de espectro portáteis para identificar zonas de sombra, obstáculos físicos e níveis de interferência na banda sub-1 GHz.
+
+* [ ] 3. **Solicitar Autorizações Legais:** Formalizar autorizações junto à Prefeitura, Defesa Civil e proprietários privados para instalação de equipamentos em postes, telhados e demais estruturas.
+
+* [ ] 4. **Definir as Coordenadas Geográficas:** Utilizar ferramentas SIG, como QGIS ou Google Earth, para determinar a latitude e longitude exatas dos pontos de instalação de cada nó.
+
+* [ ] 5. **Fabricar o Lote Piloto (***Ramp-up***):** Escalar a produção do hardware para montar o conjunto completo de equipamentos necessários ao piloto (ex: 20 Sensores, 10 Relays, 3 Storages e 2 Gateways).
+
+* [ ] 6. **Preparar a Logística de Segurança:** Separar EPIs, escadas, braçadeiras de aço inoxidável, parafusadeiras, furadeiras e demais ferramentas necessárias para a instalação.
+
+---
+
+#### Bloco 2 - Instalação e Comissionamento da Infraestrutura Fixa
+
+**Foco:** Implantar fisicamente os nós estáticos e colocar a malha ARES em funcionamento na área piloto.
+
+* [ ] 1. **Instalar o Gateway Principal:** Fixar o Gateway no ponto mais alto e seguro definido no planejamento e conectá-lo à infraestrutura primária disponível (Fibra Óptica ou 4G).
+
+* [ ] 2. **Instalar o Gateway Redundante:** Instalar um segundo Gateway em outra extremidade da área piloto e, quando houver infraestrutura disponível, conectá-lo a um terminal de comunicação satelital de baixo consumo.
+
+* [ ] 3. **Posicionar os Nós** ***Storage*****:** Instalar os nós responsáveis pelo armazenamento de dados em regiões elevadas e protegidas contra alagamentos, garantindo condições adequadas para retenção das informações.
+
+* [ ] 4. **Fixar os Nós** ***Relay*** **e Painéis Solares:** Instalar os repetidores em postes ou estruturas adequadas e posicionar os painéis fotovoltaicos de acordo com a orientação necessária para maximizar a captação solar e o desempenho do MPPT.
+
+* [ ] 5. **Implantar os Nós Sensores:** Instalar os sensores em margens de rios, pontes, bueiros e outros pontos críticos, posicionando os dispositivos de medição adequadamente em relação à água.
+
+* [ ] 6. **Executar o** ***First Breath*** **(Primeiro Suspiro):** Energizar os equipamentos, acessar o *Dashboard* em nuvem e confirmar que os nós implantados aparecem no mapa com comunicação e status operacional válidos.
+
+---
+
+#### Bloco 3 - Integração da Fronteira Móvel (***Data Mules***)
+
+**Foco:** Introduzir mobilidade à rede e validar a utilização de veículos e drones como agentes de transporte físico de informações entre regiões desconectadas.
+
+* [ ] 1. **Instalar Nós** ***Mobile*** **em Veículos Oficiais:** Equipar veículos da Prefeitura, Defesa Civil ou serviços de emergência com módulos móveis e antenas apropriadas.
+
+* [ ] 2. **Acoplar Nó** ***Mobile*** **a um Drone:** Desenvolver e instalar um suporte físico ultraleve para transportar o módulo utilizando a própria alimentação do UAV ou um *Powerbank* dedicado.
+
+* [ ] 3. **Validar a Telemetria de Movimento:** Monitorar no *Dashboard* as coordenadas GPS dos nós móveis e verificar se seus deslocamentos são registrados corretamente no mapa.
+
+* [ ] 4. **Testar o** ***Handshake*** **em Movimento:** Fazer um veículo equipado com um nó móvel atravessar uma região atendida por um *Relay* fixo e verificar a capacidade de negociação da conexão durante o deslocamento.
+
+---
+
+#### Bloco 4 - Operação *Baseline* e Calibração Real
+
+**Foco:** Estabelecer o comportamento normal da rede em campo e calibrar os parâmetros físicos antes da execução dos cenários de desastre.
+
+* [ ] 1. **Executar o Período de Aquecimento (72h):** Operar a rede sem intervenções durante 72 horas para registrar o comportamento basal de consumo energético, temperatura e conectividade.
+
+* [ ] 2. **Calibrar o "Nível Zero" da Água:** Ajustar os parâmetros de *offset* no sistema de processamento para que as leituras dos sensores correspondam às medições físicas reais do nível do rio.
+
+* [ ] 3. **Comparar a Propagação Real com a Simulada:** Comparar os resultados de propagação do sinal LoRa em campo com as previsões obtidas pelo NS-3 e registrar eventuais divergências.
+
+* [ ] 4. **Auditar o** ***Duty Cycle*** **Fotovoltaico:** Monitorar os níveis de tensão e carga durante os períodos de amanhecer e anoitecer para verificar se a geração solar é suficiente para compensar o consumo do nó.
+
+* [ ] 5. **Realizar Ajuste Fino (***Tuning***) do Roteamento:** Alterar remotamente, por meio de OTA, parâmetros como os intervalos de *Beacon* caso a frequência de comunicação esteja provocando consumo energético desnecessário.
+
+---
+
+#### Bloco 5 - Simulação do Desastre (***Stress Test*** em Campo)
+
+**Foco:** Reproduzir em ambiente real a cascata de falhas definida na Etapa 1 e verificar se os mecanismos de resiliência do ARES respondem conforme projetado.
+
+* [ ] 1. **Simular o Cenário 1 (Apagão de Internet):** Desconectar fisicamente os Gateways da infraestrutura de Internet ou 4G e verificar se a rede continua operando localmente.
+
+* [ ] 2. **Validar o DTN Físico:** Verificar nos *logs* dos nós *Storage* se os dados de telemetria continuam sendo armazenados localmente durante a indisponibilidade da conexão externa.
+
+* [ ] 3. **Executar o Cenário 2 (Acionamento do** ***Data Mule*****):** Utilizar um drone ou veículo móvel para transportar dados entre uma região conectada e a zona isolada do piloto.
+
+* [ ] 4. **Validar o Resgate de Dados:** Confirmar no *Dashboard* que os dados acumulados durante o período de isolamento são transferidos para a nuvem quando o nó móvel retorna a uma região conectada.
+
+* [ ] 5. **Executar o Cenário 3 (Ameaça à Vida / Preempção):** Provocar uma alteração abrupta em um sensor de monitoramento, simulando uma situação crítica que exija o disparo de um alerta de emergência.
+
+* [ ] 6. **Validar o Alerta P0:** Confirmar que o alerta de prioridade máxima ultrapassa a fila de telemetria convencional e chega ao Gateway dentro do intervalo de tempo estabelecido.
+
+* [ ] 7. **Executar o Cenário 4 (Morte de Infraestrutura):** Interromper deliberadamente a comunicação de um dos *Relays* principais, simulando a queda ou indisponibilidade de um ponto da infraestrutura.
+
+* [ ] 8. **Validar o** ***Self-Healing*** **ao Vivo:** Verificar no *Dashboard* se os nós vizinhos detectam a perda do *Relay* e recalculam automaticamente as rotas utilizando os dispositivos sobreviventes.
+
+---
+
+#### Bloco 6 - Teste de Resistência (***Endurance***) e *Data Science*
+
+**Foco:** Avaliar a capacidade da infraestrutura de permanecer operacional durante longos períodos sem intervenção e transformar os dados coletados em evidências quantitativas.
+
+* [ ] 1. **Iniciar o** ***Lockdown*** **de Hardware:** Proibir intervenções físicas nos equipamentos durante o período de teste, permitindo avaliar a degradação natural do sistema.
+
+* [ ] 2. **Monitorar a Sobrevivência em Dias Nublados:** Avaliar o comportamento energético da rede durante períodos de baixa incidência solar e verificar se a autonomia prevista permanece válida.
+
+* [ ] 3. **Executar Inspeção Física Pós-*****Endurance*****:** Remover os equipamentos após o período de teste e verificar a presença de condensação, oxidação, sujeira ou obstruções nos painéis solares.
+
+* [ ] 4. **Exportar a Base de Dados da Nuvem:** Extrair os *logs* acumulados durante o experimento em formatos estruturados, como CSV ou JSON.
+
+* [ ] 5. **Realizar Análise Estatística dos Dados:** Utilizar ferramentas como Python e Pandas para calcular e visualizar métricas como PDR, latência e evolução da vida útil das baterias.
+
+* [ ] 6. **Executar o Comparativo Final:** Comparar os resultados obtidos em campo com os resultados previstos pelo NS-3 e avaliar quantitativamente as diferenças entre o modelo simulado e o comportamento real.
+
+---
+
+#### Bloco 7 - Validação Institucional, Negócios e Academia
+
+**Foco:** Transformar os resultados técnicos do piloto em evidências úteis para validação institucional, científica e de viabilidade do projeto.
+
+* [ ] 1. **Realizar Reunião de Demonstração (***Stakeholders*****):** Apresentar o *Dashboard*, os resultados do piloto e o comportamento do ARES durante os cenários de desastre para representantes da Defesa Civil e demais interessados.
+
+* [ ] 2. **Realizar Entrevistas de UX e** ***Feedback*****:** Coletar avaliações dos usuários e agentes públicos sobre a utilidade, clareza e aplicabilidade da interface e das informações fornecidas pelo sistema.
+
+* [ ] 3. **Redigir o Relatório Técnico Executivo:** Documentar os resultados do piloto, incluindo falhas inesperadas, limitações físicas, problemas de instalação e soluções aplicadas.
+
+* [ ] 4. **Estruturar o** ***Pitch*** **de Negócios:** Utilizar os dados obtidos no piloto para demonstrar a viabilidade e o potencial de aplicação do ARES como solução *GovTech* ou *DeepTech*.
+
+* [ ] 5. **Escrever os Capítulos Finais da Pesquisa:** Redigir no LaTeX as seções de Análise de Resultados e Conclusão, relacionando os resultados obtidos com a questão de pesquisa definida na Etapa 1.
+
+* [ ] 6. **Realizar a Defesa Acadêmica:** Apresentar os resultados da pesquisa aos orientadores e preparar a submissão do trabalho para eventos e conferências relacionados a redes de computadores.
+
+---
+
+#### Bloco 8 - Encerramento, *Open Source* e Visão de Futuro
+
+**Foco:** Encerrar formalmente o ciclo original de P&D, disponibilizar os resultados e estabelecer as bases técnicas para a próxima versão do ARES.
+
+* [ ] 1. **Realizar Auditoria do Código-Fonte:** Revisar o código do firmware, simulador e demais componentes, removendo credenciais, endereços IP fixos e outras informações sensíveis ou inadequadas para publicação.
+
+* [ ] 2. **Definir a Licença do Projeto:** Selecionar uma licença de código aberto adequada (ex: MIT ou GPLv3) para os componentes que serão disponibilizados publicamente.
+
+* [ ] 3. **Realizar o Lançamento** ***Open Source*****:** Publicar de forma estruturada no GitHub os códigos do firmware e simulador, esquemáticos das PCBs e modelos tridimensionais desenvolvidos.
+
+* [ ] 4. **Executar a Desmobilização Parcial:** Remover equipamentos temporários ou instalados em posições inadequadas, mantendo apenas os nós estratégicos necessários para a continuidade do monitoramento.
+
+* [ ] 5. **Realizar a Transição para Operação Assistida:** Alterar o status do sistema de experimento para monitoramento ativo contínuo na infraestrutura que permanecer instalada.
+
+* [ ] 6. **Elaborar o** ***Post-Mortem*****:** Produzir um documento interno consolidando os principais aprendizados, erros, dificuldades, decisões e resultados obtidos durante o ciclo de desenvolvimento.
+
+* [ ] 7. **Elaborar o Projeto Executivo de Expansão (ARES 2.0):** Projetar a arquitetura, distribuição dos nós e estimativa financeira necessários para ampliar a cobertura da rede para toda a área urbana planejada.
+
+* [ ] 8. **Realizar a Declaração de Encerramento do P&D:** Formalizar a conclusão do ciclo original de Pesquisa e Desenvolvimento do ARES após a validação dos resultados técnicos, científicos e operacionais.
+
+---
