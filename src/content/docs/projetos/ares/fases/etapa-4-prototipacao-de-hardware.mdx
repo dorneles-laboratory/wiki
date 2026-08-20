@@ -1,0 +1,99 @@
+---
+title: Etapa 4 - Prototipação de Hardware
+---
+#### Bloco 1 - Especificação Estrita de Componentes (*Sourcing*)
+
+**Foco:** Definir e consolidar os componentes físicos utilizados na construção dos diferentes tipos de nós, garantindo disponibilidade, compatibilidade elétrica, desempenho e operação contínua.
+
+* \[ ] 1. **Definir o SoC (*System on Chip*) principal:** Congelar a escolha dos microcontroladores destinados a cada classe de nó, considerando alternativas como ESP32-S3 para Gateways/Storage e STM32WL com LoRa integrado para Sensors/Relays.
+* \[ ] 2. **Definir o *Front-end* de rádio (LoRa e HaLow):** Selecionar os transceptores e módulos sub-1 GHz adequados à arquitetura, considerando sensibilidade, potência de transmissão, consumo e disponibilidade comercial.
+* \[ ] 3. **Especificar o PMIC e MPPT:** Selecionar os circuitos integrados responsáveis pelo gerenciamento de energia, carregamento das baterias, entrada solar, proteção e geração das tensões reguladas necessárias.
+* \[ ] 4. **Especificar os sensores industriais:** Selecionar sensores robustos para o ambiente de operação, incluindo sensores de temperatura, pressão, nível de água, pluviometria e demais variáveis relevantes.
+* \[ ] 5. **Especificar antenas e conectores RF:** Dimensionar antenas sub-1 GHz, cabos *pigtail* e conectores U.FL/SMA compatíveis, considerando impedância, ganho, robustez mecânica e proteção ambiental.
+* \[ ] 6. **Consolidar a BOM (*Bill of Materials*):** Criar a lista definitiva de materiais contendo fabricantes, *part numbers*, fornecedores, quantidades, especificações, tolerâncias, alternativas e custos estimados.
+
+---
+
+#### Bloco 2 - Design Elétrico e Esquemáticos (EDA)
+
+**Foco:** Desenvolver os esquemáticos elétricos completos dos diferentes módulos ARES e estabelecer as conexões entre alimentação, processamento, sensores, armazenamento e comunicação.
+
+* \[ ] 1. **Criar o diagrama de blocos elétrico:** Mapear os principais barramentos de energia e comunicação, incluindo I2C, SPI, UART, alimentação e interfaces de programação.
+* \[ ] 2. **Desenhar o esquemático base (*Core*):** Projetar o circuito comum às diferentes versões da placa, incluindo MCU, reguladores, osciladores, circuitos de reset, proteção e interfaces USB/Serial.
+* \[ ] 3. **Desenhar o módulo Sensor:** Adicionar as interfaces, conectores e circuitos necessários para integração dos sensores ambientais e demais periféricos.
+* \[ ] 4. **Desenhar o módulo Relay/MPPT:** Implementar as entradas para painel solar, bateria, proteção contra polaridade reversa, sobrecorrente e demais mecanismos necessários ao gerenciamento energético.
+* \[ ] 5. **Desenhar o módulo Storage:** Adicionar o socket MicroSD e implementar o barramento SPI ou SDIO, incluindo resistores de *pull-up*, proteção e alimentação adequada.
+* \[ ] 6. **Desenhar o módulo Gateway:** Integrar as interfaces necessárias para modems 4G/LTE, Wi-Fi, Ethernet ou comunicação satelital, incluindo o respectivo slot SIM quando aplicável.
+* \[ ] 7. **Projetar a rede de casamento de impedância (*Pi-Network*):** Inserir e dimensionar os componentes necessários entre o transceptor e a antena para possibilitar ajuste da impedância e redução das perdas de RF.
+* \[ ] 8. **Inserir *Test Points* (TP):** Distribuir pontos de teste para alimentação, sinais digitais, barramentos e RF, facilitando medições e diagnóstico durante a validação da placa.
+
+---
+
+#### Bloco 3 - Layout de PCB e Integridade de Sinal
+
+**Foco:** Transformar os esquemáticos em placas de circuito impresso funcionais, garantindo integridade de sinal, distribuição adequada de energia, controle térmico e redução de interferências eletromagnéticas.
+
+* \[ ] 1. **Definir o *Stackup* da placa:** Selecionar uma arquitetura de duas ou quatro camadas, priorizando quatro camadas quando necessário para manter planos contínuos de GND e melhorar a integridade dos sinais.
+* \[ ] 2. **Realizar o roteamento de RF:** Projetar as trilhas entre transceptor, rede de casamento e conector de antena com impedância controlada de 50 Ω e geometria compatível com o *stackup* escolhido.
+* \[ ] 3. **Realizar o roteamento de potência:** Dimensionar as trilhas de alimentação do painel solar, bateria e reguladores de acordo com a corrente máxima esperada e os limites térmicos da PCB.
+* \[ ] 4. **Posicionar vias térmicas:** Implementar *thermal vias* sob componentes de elevada dissipação, como reguladores e dispositivos de potência, para melhorar a transferência de calor.
+* \[ ] 5. **Separar os domínios elétricos:** Organizar fisicamente os circuitos analógicos, digitais, potência e RF para minimizar acoplamentos indesejados, ruído e EMI.
+* \[ ] 6. **Executar DRC e ERC:** Utilizar os verificadores automáticos do software EDA para identificar violações elétricas, regras de espaçamento, conexões inválidas e demais problemas antes da fabricação.
+* \[ ] 7. **Gerar os arquivos de fabricação:** Exportar Gerber, Drill, Pick-and-Place/CPL, *BOM* e demais arquivos necessários para fabricação e montagem da PCBA.
+
+---
+
+#### Bloco 4 - Engenharia Mecânica e Proteção (Caixas/*Cases*)
+
+**Foco:** Desenvolver os elementos mecânicos responsáveis por proteger a eletrônica contra água, umidade, radiação solar, impactos e variações térmicas.
+
+* \[ ] 1. **Desenhar o *Case* base no CAD:** Projetar as caixas no Fusion 360 ou ferramenta equivalente considerando dimensões da PCB, componentes internos, fixações e acessibilidade para manutenção.
+* \[ ] 2. **Projetar o alojamento híbrido:** Criar divisões internas que mantenham baterias e eletrônica adequadamente separadas, considerando segurança, dissipação térmica e manutenção.
+* \[ ] 3. **Dimensionar os prensa-cabos (*Cable Glands*):** Projetar as entradas para cabos de antena, bateria, sensores e painéis solares mantendo o nível de proteção ambiental especificado.
+* \[ ] 4. **Projetar os sulcos para *O-rings*:** Desenvolver os canais de vedação entre tampa e corpo da caixa, dimensionando compressão, tolerâncias e área de contato da junta.
+* \[ ] 5. **Realizar simulação térmica do encapsulamento:** Avaliar a temperatura interna do *case* sob diferentes condições ambientais, incluindo radiação solar, dissipação dos componentes e temperatura externa.
+* \[ ] 6. **Executar o fatiamento e impressão 3D:** Produzir protótipos das carcaças, suportes e elementos de fixação utilizando materiais adequados à exposição externa, como ASA, PETG ou Nylon.
+
+---
+
+#### Bloco 5 - Fabricação, Compra e Montagem (PCBA)
+
+**Foco:** Transformar os projetos digitais em placas eletrônicas físicas, adquirir os componentes e produzir o primeiro lote funcional.
+
+* \[ ] 1. **Encomendar PCBs e estêncil:** Enviar os arquivos de fabricação à empresa selecionada e solicitar placas e estênceis compatíveis com o processo de montagem.
+* \[ ] 2. **Adquirir componentes e materiais:** Comprar componentes eletrônicos, baterias, cabos, conectores, parafusos, painéis solares, antenas e demais materiais necessários ao lote piloto.
+* \[ ] 3. **Aplicar a pasta de solda:** Utilizar o estêncil para depositar a quantidade adequada de pasta de solda nos *pads* da PCB.
+* \[ ] 4. **Realizar o posicionamento SMD (*Pick and Place*):** Posicionar microcontroladores, resistores, capacitores, transceptores e demais componentes SMD de acordo com a documentação de montagem.
+* \[ ] 5. **Executar o refluxo térmico:** Submeter a placa ao perfil térmico adequado utilizando forno de refluxo ou equipamento equivalente, garantindo a formação correta das juntas de solda.
+* \[ ] 6. **Realizar inspeção óptica (AOI/Manual):** Inspecionar as placas em busca de pontes de solda, desalinhamentos, componentes ausentes, terminais defeituosos e outros problemas de montagem.
+* \[ ] 7. **Executar a soldagem THT (*Through-hole*):** Montar manualmente conectores, barras de pinos, botões, terminais e demais componentes através de furos.
+
+---
+
+#### Bloco 6 - *Bring-up* e Validação Elétrica (O "Nascimento" da Placa)
+
+**Foco:** Energizar as placas de maneira controlada e validar progressivamente alimentação, processamento, rádio e consumo antes da integração completa do firmware.
+
+* \[ ] 1. **Realizar teste frio de curto-circuito:** Medir a resistência e verificar possíveis curtos entre as principais linhas de alimentação e GND antes de aplicar energia.
+* \[ ] 2. **Executar *Smoke Test* controlado:** Energizar a placa utilizando fonte de bancada com limitação de corrente e monitoramento contínuo para evitar danos em caso de falha.
+* \[ ] 3. **Validar as tensões dos reguladores:** Medir as saídas dos LDOs/Buck-Boost e verificar estabilidade, *ripple*, transientes e comportamento sob diferentes cargas.
+* \[ ] 4. **Gravar o *Bootloader*:** Conectar a interface de programação por JTAG, SWD ou UART e executar um firmware mínimo de validação, como inicialização do MCU e acionamento de GPIO/LED.
+* \[ ] 5. **Realizar a calibração de radiofrequência:** Utilizar VNA ou equipamento equivalente para verificar impedância, retorno, perdas e casamento entre o transceptor e a antena.
+* \[ ] 6. **Medir o consumo em *Deep Sleep*:** Utilizar PPK2, analisador de potência ou instrumento equivalente para medir o consumo real e comparar os resultados com os valores teóricos definidos nas etapas anteriores.
+
+---
+
+#### Bloco 7 - Integração, Resina e *Weather-Proofing*
+
+**Foco:** Integrar os componentes físicos, proteger a eletrônica contra condições ambientais e preparar os primeiros nós para operação externa prolongada.
+
+* \[ ] 1. **Realizar a conectorização interna:** Crimpar e conectar os cabos de bateria, painel solar, antena e sensores utilizando os conectores e *pigtails* especificados.
+* \[ ] 2. **Aplicar *Conformal Coating*:** Aplicar revestimento apropriado sobre a PCB para aumentar a resistência contra umidade, condensação, contaminantes e crescimento de fungos, mantendo livres os componentes que necessitem de contato ou dissipação específica.
+* \[ ] 3. **Executar o encapsulamento em resina (*Potting*) - Opcional:** Aplicar resina epóxi ou poliuretano somente nos módulos em que o encapsulamento seja compatível com manutenção, dissipação térmica e requisitos de operação.
+* \[ ] 4. **Realizar a montagem final no *Case*:** Fixar a eletrônica, instalar prensa-cabos, conectores, antenas, baterias e demais componentes, realizando o fechamento conforme as especificações mecânicas.
+* \[ ] 5. **Executar teste físico de submersão:** Inserir indicador de umidade no interior do *case*, realizar o fechamento e executar um ensaio controlado de exposição à água para verificar a eficiência da vedação.
+* \[ ] 6. **Executar teste térmico físico:** Expor a unidade montada a condições controladas de temperatura e radiação solar, monitorando deformações, dilatações, temperaturas internas e possíveis falhas estruturais.
+* \[ ] 7. **Instalar o Firmware ARES:** Gravar nas placas aprovadas a versão de firmware correspondente ao primeiro *release* físico e validar a inicialização de todos os módulos.
+* \[ ] 8. **Separar o lote piloto:** Organizar o primeiro conjunto completo de equipamentos, composto por 1 Gateway, 2 Storages, 3 Relays e 5 Sensors, identificados, testados e documentados individualmente.
+
+---
