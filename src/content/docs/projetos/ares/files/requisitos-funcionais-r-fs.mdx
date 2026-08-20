@@ -1,0 +1,36 @@
+---
+title: Requisitos Funcionais (RFs)
+description: >-
+  Os Requisitos Funcionais descrevem os comportamentos e capacidades
+  obrigatórias que a frota de drones e o software embarcado devem executar.
+---
+1. Auto-descobrimento (*Neighbor Discovery*)
+
+   Mecanism&#x6F;**:** A detecção ocorre por meio da emissão de mensagens periódicas de controle (*beacons/heartbeats*) transmitidas em frequência de rádio aberta (protocolo Wi-Fi Mesh 802.11s ou LoRa).
+
+   Payload do Sinal: O pacote inclui identificador único (ID), coordenadas geográficas (GPS/GNSS), altitude, nível de carga da bateria e capacidade de armazenamento disponível.
+
+   Topologia Dinâmica: A tabela de vizinhança e as rotas de transmissão são atualizadas em tempo real conforme a movimentação ou o deslocamento relativo dos drones.
+
+
+2. Mudança Autônoma de Papéis (*Role Switching*)
+
+   Os nós aéreos devem possuir a capacidade de reconfigurar seus papéis funcionais na malha de forma totalmente autônoma para preservar a conectividade da área coberta.
+
+   * Mapeamento **de Papéis:**
+     1. *Access Point (AP) Local:* Drone em baixa altitude que provê interface direta Wi-Fi/LoRa para os dispositivos de solo.
+     2. *Repetidor / Relé:* Drone responsável exclusivamente por retransmitir pacotes na malha aérea, estendendo o alcance geográfico.
+     3. *Gateway:* Drone estrategicamente posicionado para concentrar o tráfego e realizar o *offloading* de dados para um centro de comando ou ponto com acesso à rede externa.
+   * Algoritmo de Eleiçã&#x6F;**:** Baseado em uma variação do *Bully Algorithm*, a transição ocorre por gatilhos de estado (ex: bateria abaixo de 20%, falha mecânica ou degradação acentuada do enlace). O nó mais apto em termos de energia e centralidade espacial assume o papel vago automaticamente.
+
+
+3. Armazenamento Local Tolerante a Falhas (*Store-and-Forward*)
+
+   Mecanismo de Persistência: Os dados são gravados em memória não volátil embarcada utilizando banco de dados de footprint leve (ex: SQLite operando em modo WAL — *Write-Ahead Logging*), prevenindo a corrupção de arquivos em caso de desligamento abrupto.
+
+   Filas de Prioridad&#x65;**:** O gerenciamento do *buffer* descarta pacotes normais antes que ocorra *overflow* de memória, mantendo mensagens de prioridade máxima imunes à deleção automática.
+
+
+4. Geofencing e Redistribuição Geográfica (*Handover*)
+
+   A frota deve monitorar a área de cobertura para evitar a criação de zonas cegas de sinal (*blackouts*). Quando um drone necessitar deixar a malha para recarga, o sistema deve disparar uma notificação de *handover*, sinalizando aos nós adjacentes para reajustarem suas posições no espaço até a chegada de um nó substituto.
