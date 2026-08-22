@@ -1,0 +1,32 @@
+---
+title: Definição da Questão da Pesquisa
+---
+# Definição da Questão de Pesquisa
+
+**Objetivo:** formular o problema exato e a lacuna científica que o ARES se propõe a resolver.
+
+---
+
+## O problema
+
+As seções anteriores mostraram que, em desastres como o do RS em 2024, a queda de comunicação não é um evento único, mas uma cascata: energia cai, baterias das ERBs esgotam, acesso terrestre para reparo é cortado, fibra rompe fisicamente — e o apagão resultante dura semanas a meses, muito além do tempo de resposta emergencial.
+
+Redes ad hoc de drones para desastre (FANETs) já são um campo de pesquisa maduro: roteamento adaptativo, clustering e uso em busca e resgate estão bem documentados na literatura \[1]\[2]. O que essa literatura em geral não trata é o cenário específico da Seção 5 — falha simultânea e prolongada de **múltiplas camadas de infraestrutura** (energia, transporte, telecom) que se retroalimentam, num contexto de restrição regulatória real (espaço aéreo compartilhado, RBAC 100).
+
+## A lacuna
+
+Falta uma arquitetura de comunicação que continue funcionando de forma autônoma e auditável **durante todo esse intervalo estendido**, não apenas nas primeiras horas — e que resolva a tradução entre o modelo assíncrono da rede interna (store-carry-forward) e o modelo síncrono da internet, sem perder priorização, ordenação ou rastreabilidade das mensagens.
+
+## Questão de pesquisa
+
+> Como projetar uma rede de comunicação assíncrona, tolerante a desconexão e energeticamente autônoma, capaz de sustentar entrega priorizada e auditável de mensagens de emergência durante uma falha em cascata de infraestrutura com duração de semanas, operando sob restrições regulatórias reais de espaço aéreo?
+
+---
+
+## Referências
+
+\[1] Flying Ad-Hoc Networks (FANETs): Review of Communications, Challenges, Applications, Future Direction and Open Research Topics. ITM Web of Conferences 64, 01002 (2024). [https://www.itm-conferences.org/articles/itmconf/pdf/2024/07/itmconf\_icacs2024\_01002.pdf](https://www.itm-conferences.org/articles/itmconf/pdf/2024/07/itmconf_icacs2024_01002.pdf)
+
+\[2] Bhatia, T. K. et al. Flying Ad-Hoc Networks (FANETs): A Review. EAI, 2024. [https://www.researchgate.net/publication/379133814\_Flying\_Ad-Hoc\_Networks\_FANETs\_A\_Review](https://www.researchgate.net/publication/379133814_Flying_Ad-Hoc_Networks_FANETs_A_Review)
+
+**Lacuna metodológica a resolver antes da versão final:** confirmar, com revisão dedicada de literatura de DTN e redes mesh comunitárias (Serval, Meshtastic, LoRaWAN), que a continuidade sob falha em cascata multi-camada realmente não está coberta — é o ponto mais provável de ser questionado em banca.
