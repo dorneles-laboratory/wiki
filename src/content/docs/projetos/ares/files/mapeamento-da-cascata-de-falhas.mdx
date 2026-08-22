@@ -1,3 +1,130 @@
 ---
-title: Mapeamento da cascata de falhas ("Suítes")
+title: Mapeamento da cascata de falhas
 ---
+# Mapeamento da Cascata de Falhas
+
+**Estudo de caso:** enchentes do Rio Grande do Sul, abril–maio de 2024. **Objetivo:** mostrar que o apagão de comunicações em desastres não é um evento único, mas o resultado de uma cadeia causal com elos identificáveis. É essa generalidade que sustenta os requisitos de autonomia e independência de infraestrutura do ARES.
+
+---
+
+## 1.1 A cascata, em termos gerais
+
+Antes de descer ao caso específico, vale nomear o padrão — porque é ele, e não o evento isolado, que justifica o projeto:
+
+```
+Evento climático extremo
+        │
+        ▼
+Falha da infraestrutura elétrica (subestações, linhas, geradores)
+        │
+        ▼
+Esgotamento da reserva de energia dos nós de telecom (baterias/geradores das ERBs)
+        │
+        ▼
+Colapso do acesso terrestre (estradas, pontes) → impede reabastecimento e reparo
+        │
+        ▼
+Dano físico à camada de transporte (fibra óptica, postes)
+        │
+        ▼
+Apagão de comunicações regional
+
+```
+
+O ponto central é que esse não é um encadeamento linear simples: há **retroalimentação**. O colapso do acesso terrestre (elo 4) não é apenas consequência da enchente — ele também impede a recuperação dos elos anteriores (reabastecer gerador de ERB, consertar fibra). É essa retroalimentação que transforma uma falha de horas em uma falha de semanas a meses, e é o motivo pelo qual sistemas pensados como "ponte temporária até a rede voltar" tendem a falhar: a rede convencional não volta na escala de tempo da resposta ao desastre.
+
+É consistente com o que a literatura de infraestrutura crítica chama de **falha em cascata (cascading failure)**: sistemas interdependentes (energia, transporte, telecom) onde a falha de um reduz a capacidade de recuperação dos outros, produzindo um colapso desproporcional ao evento inicial. Redes de telecom são estruturalmente vulneráveis a isso porque dependem de energia comercial contínua e de acesso físico para manutenção — duas coisas que desastres naturais atacam primeiro.
+
+---
+
+## 1.2 O caso do RS 2024 — reconstrução cronológica
+
+### Estágio 1 — Deflagração
+
+Chuvas extremas atingiram o estado a partir de 27 de abril de 2024, com alerta vermelho do INMET em 29/04 e as primeiras mortes confirmadas em 30/04 \[1]. Não foi um pico isolado: os rios Taquari, Caí, Sinos, Gravataí e Jacuí — todas as bacias que alimentam o Guaíba — entraram em cheia simultaneamente \[2]. Essa simultaneidade é o que explica por que o colapso subsequente foi regional, e não localizado em um município.
+
+### Estágio 2 — Colapso elétrico
+
+O alagamento atingiu 452 das 497 cidades do estado (mais de 90%), afetando diretamente cerca de 2 milhões de pessoas \[3]. O mecanismo foi direto: alagamento de subestações, desligamento de linhas de transmissão e rompimento de uma barragem hidrelétrica, com outras sob risco \[3]. Em 4 de maio já havia mais de 400 mil pontos sem energia e ao menos 186 municípios sem sinal de telefone ou internet \[1]. O acesso das próprias equipes técnicas para reparo foi bloqueado pelas mesmas águas e estradas destruídas \[3].
+
+### Estágio 3 — Esgotamento da reserva das ERBs
+
+Torres de telefonia (ERBs) não caem no instante em que falta energia comercial — elas têm reserva própria, tipicamente um sistema de no-break para autonomia imediata e, em alguns casos, gerador a diesel ou banco de baterias para sustentar a operação por horas a poucos dias, dependendo do suprimento de combustível \[4]. É esse intervalo que explica por que a queda de sinal foi progressiva, não instantânea. No RS, as operadoras relataram falta de combustível para reabastecer geradores — precisamente porque as estradas de acesso estavam interrompidas \[5], o que fecha o ciclo de retroalimentação descrito em 5.1.
+
+Esse elo não é peculiaridade do RS: em 2013, um apagão de energia no Nordeste já havia motivado inquérito civil do Ministério Público Federal contra a Anatel, resultando em decisão judicial obrigando as operadoras a comprovar condições técnicas mínimas de continuidade de serviço em queda de energia \[6]. O problema é estrutural e recorrente no setor — não uma peculiaridade do evento gaúcho.
+
+### Estágio 4 — Ruptura física da camada de transporte
+
+Em paralelo, a camada de transporte (fibra óptica) sofreu dano físico direto, geralmente como dano colateral a infraestrutura civil. Em Santa Maria, das quatro saídas de fibra do município, apenas uma permaneceu operacional; uma fibra aérea para Porto Alegre rompeu porque a ponte que a sustentava sobre o Arroio Grande caiu, e a mesma queda de ponte rompeu também a fibra de outra operadora na mesma rota — tirando do ar inclusive os números de emergência 190/191/193 que dependiam dela via roaming \[7]. Especialistas do setor estimaram a reconstrução das redes de fibra do estado em seis meses a um ano \[8], e apontaram que equipamentos sem certificação de vedação (IP67/IP68) foram inundados e precisaram de substituição integral \[9].
+
+Esse é o elo que torna a falha **irreversível na escala de tempo de uma operação de resgate**: diferente da energia elétrica, que volta assim que a água baixa e a subestação é acessada, a fibra rompida exige obra civil de meses.
+
+### Estágio 5 — Apagão consolidado e recuperação
+
+A tabela abaixo consolida os boletins da força-tarefa Ministério das Comunicações/Anatel/operadoras \[10]:
+
+| Data          | Municípios sem qualquer sinal | Situação geral                                                |
+| ------------- | ----------------------------- | ------------------------------------------------------------- |
+| 04/05/2024    | ≥ 186                         | Pico do colapso, 400 mil+ pontos sem energia                  |
+| 05/05/2024    | 12                            | 222 municípios com afetação parcial após abertura de roaming  |
+| 07/05/2024    | 5                             | 264 cidades em funcionamento pleno                            |
+| 09/05/2024    | 4                             | 271 cidades plenas                                            |
+| 10–12/05/2024 | 3                             | 344 cidades plenas                                            |
+| 13/05/2024    | 2                             | 345 municípios com as três operadoras ativas                  |
+| 14/05/2024    | 0                             | Nenhum município 100% desconectado; 372 sem qualquer problema |
+
+Para sustentar comunicação nas áreas mais críticas durante essa janela, o governo federal recorreu a estações satelitais móveis da Telebras — de 34 antenas de emergência em 7 de maio para 53 em 13 de maio, com plano de instalar 390 pontos fixos adicionais via satélite \[11]. Na prática, a resposta institucional convergiu, sob pressão, para exatamente a arquitetura que o ARES propõe formalizar: nós móveis, autônomos, com enlace de subida não dependente da infraestrutura terrestre.
+
+**Nota sobre recorrência:** o padrão observado no RS não é um evento isolado. A cota de transbordamento do Guaíba (3,00 m) foi superada apenas três vezes entre 1941 e 2023 — mas três vezes novamente entre setembro de 2023 e maio de 2024, em nove meses. A premissa de que "esse tipo de evento é raro" deixou de se sustentar estatisticamente para essa bacia, o que reforça que o problema de comunicação em desastre não é uma contingência remota a ser tolerada, mas um cenário recorrente a ser projetado.
+
+---
+
+## 1.3 Síntese comparativa dos estágios
+
+| Estágio | Evento                          | Mecanismo de falha                                                   | Início                                   | Recuperação típica                                                        |
+| ------- | ------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------- |
+| 1       | Evento climático extremo        | Meteorológico-hidrológico                                            | T+0                                      | Dias                                                                      |
+| 2       | Colapso elétrico                | Alagamento de subestações, rompimento de linhas/barragem             | Horas após pico de cheia                 | Dias a semanas, uma vez acessível                                         |
+| 3       | Esgotamento de energia das ERBs | Reserva finita sem reabastecimento (acesso terrestre cortado)        | Horas a \~1–2 dias após queda de energia | Depende do restabelecimento elétrico ou logístico                         |
+| 4       | Ruptura física de fibra         | Dano colateral (pontes, postes), submersão de equipamento não vedado | Simultâneo ao pico de cheia              | **6 meses a 1 ano**                                                       |
+| 5       | Apagão consolidado              | Soma dos estágios 2–4                                                | Pico em 04–05/05                         | Zero municípios 100% desconectados em 14/05; recuperação plena mais lenta |
+
+O ponto que essa tabela evidencia: o "relógio" que importa para o projeto não é o mais rápido (recuperação celular emergencial, \~2 semanas), mas o mais lento (fibra, meses). Um sistema pensado para cobrir apenas o intervalo mais curto fica exposto exatamente na janela em que a comunicação segue mais necessária.
+
+---
+
+## 1.4 Implicações de projeto para o ARES
+
+1. **A cascata tem dois relógios distintos, e o projeto precisa ser dimensionado pelo mais lento.** A conectividade celular voltou em cerca de duas semanas por força-tarefa emergencial; a fibra levou de seis meses a um ano. O ARES não é uma ponte de dias — é a infraestrutura viável durante toda a fase de resposta.
+2. **O esgotamento de energia das ERBs é agravado por uma segunda falha, de acesso terrestre.** Isso é uma cascata dentro da cascata: a autonomia solar do sistema precisa cobrir o cenário em que ninguém consegue chegar fisicamente ao nó para reabastecer ou reparar.
+3. **O padrão "dano colateral à infraestrutura civil rompe a fibra" é replicável para qualquer enlace terrestre fixo.** Isso reforça o enlace aéreo (drone) e o satelital como as rotas mais resistentes a esse modo de falha específico.
+4. **O precedente Telebras confirma, com dado oficial do próprio evento, que a resposta institucional real convergiu para a arquitetura que o ARES propõe** — nós móveis, autônomos, com enlace de subida não terrestre. O projeto não formaliza uma solução hipotética: formaliza e antecipa algo que o Estado precisou emular manualmente, sob pressão, durante a crise.
+5. **O padrão não é exclusivo do RS 2024.** O precedente de 2013 no Nordeste (energia → ERB) e a recorrência de cheias do Guaíba em nove meses indicam que a cascata descrita é um modo de falha estrutural de redes de telecom dependentes de energia comercial e acesso terrestre — não uma anomalia de um evento específico.
+
+---
+
+## Referências
+
+\[1] Cronologia das enchentes no Rio Grande do Sul em 2024. Wikipédia. https\://pt.wikipedia.org/wiki/Cronologia\_das\_enchentes\_no\_Rio\_Grande\_do\_Sul\_em\_2024
+
+\[2] Levantamento de dados históricos — Enchentes no Rio Grande do Sul (documento de referência do projeto, 20/08/2026).
+
+\[3] "Série Energia": Enchentes no RS expõem precariedade energética. Jornal da USP, 12 jun. 2024. https\://jornal.usp.br/campus-ribeirao-preto/serie-energia-enchentes-no-rs-expoem-precariedade-energetica/
+
+\[4] As torres de celular funcionam quando há falta de energia? DB Tower, 18 nov. 2024. https\://pt.db-tower.net/info/do-cell-towers-work-when-power-is-out-17131182157554688.html
+
+\[5] Levantamento de dados históricos — Enchentes no Rio Grande do Sul (Seção 3, relato das operadoras).
+
+\[6] MPF consegue decisão para garantir continuidade do serviço de telefonia móvel em caso de falta de energia. Jusbrasil. https\://www\.jusbrasil.com.br/noticias/mpf-consegue-decisao-para-garantir-continuidade-do-servico-de-telefonia-movel-em-caso-de-falta-de-energia/575728517
+
+\[7] ENCHENTE: Rompimentos de fibra afetam internet e outros serviços em Santa Maria. Paralelo 29, 3 maio 2024. https\://paralelo29.com.br/2024/05/03/enchente-rompimentos-de-fibra-afetam-internet-e-outros-servicos-em-santa-maria/
+
+\[8] Reconstrução de redes de fibra óptica no RS pode levar de seis meses a um ano. TI Inside Online, 16 maio 2024. https\://tiinside.com.br/16/05/2024/reconstrucao-de-redes-de-fibra-optica-no-rs-pode-levar-de-seis-meses-a-um-ano-preveem-especialistas/
+
+\[9] Desastre no RS: redes de fibra óptica podem levar um ano para serem reconstruídas. TudoCelular.com, 21 maio 2024. https\://www\.tudocelular.com/mercado/noticias/n221470/rs-redes-de-fibra-optica-ano-reconstruidas-estado.html
+
+\[10] Boletins da força-tarefa Ministério das Comunicações/Anatel/operadoras, maio de 2024. https\://www\.gov.br/mcom
+
+\[11] Idem \[10]; ver também Levantamento de dados históricos, Seção 3, sobre expansão de antenas Telebras.
+
+**Lacuna identificada:** não há relatório técnico público que discrimine o tempo médio de autonomia de bateria observado ERB a ERB no evento de 2024. Recomenda-se solicitar via LAI à Anatel ou buscar em relatórios de resiliência de rede das operadoras.
