@@ -1,16 +1,13 @@
 ---
 title: Operação First Breath (ARES POC-01)
 ---
-A **Operação First Breath** é a Prova de Conceito zero (POC-01) do projeto **ARES (Rede de Resiliência Distribuída e Autônoma)**. O objetivo primordial desta fase é realizar o "primeiro suspiro" da rede: estabelecer a comunicação via rádio local entre dois microcontroladores ESP32 transmitindo mensagens de texto livres, e garantir que o estado seja tunelado pelo notebook do operador e disponibilizado na nuvem para plotagem em tempo real.\
-
+A **Operação First Breath** é a Prova de Conceito zero (POC-01) do projeto **ARES (Rede de Resiliência Distribuída e Autônoma)**. O objetivo primordial desta fase é realizar o "primeiro suspiro" da rede: estabelecer a comunicação via rádio local entre dois microcontroladores ESP32 transmitindo mensagens de texto livres, e garantir que o estado seja tunelado pelo notebook do operador e disponibilizado na nuvem para plotagem em tempo real.\\
 
 ### Nome do Teste & Objetivos
 
 * **Identificador Interno:** ARES-POC-01
 * **Codinome do Teste:** Operação First Breath (O Primeiro Suspiro)
 * **Escopo:** Comunicação ESP1 (Emissor de Texto) -> ESP2 (Gateway Ingress) -> Notebook (Hotspot / Ingress Handler) -> Túnel WAN -> Nuvem / Dashboard.
-
-
 
 **Objetivos do Teste**
 
@@ -22,35 +19,25 @@ A **Operação First Breath** é a Prova de Conceito zero (POC-01) do projeto **
 
 \[ ] 4. **Exibição no Dashboard:** Visualização imediata da frase ou texto enviado diretamente no painel em tempo real na nuvem.
 
-
-
 ### Arquitetura da Solução
 
 **1. ESP32-S3 (Nó 1 - Emissor de Mensagem)**
 
 * Envia uma string de texto livre arbitrária via subsistema de rádio (ESP-NOW).
 
-
-
 **2. ESP32-S3 (Nó 2 - Gateway Ingress)**
 
 * Recebe a string via ESP-NOW e conecta-se via Wi-Fi ao Hotspot do notebook. Atua como ponte IP, traduzindo as mensagens do protocolo interno para HTTPS/MQTT.
-
-
 
 **3. Notebook do Operador**
 
 * Roteamento Local (ex: faixa de IP `192.168.137.x`).
 * Script em Python atuando como Ingress Handler para capturar a requisição e encaminhá-la via túnel SSL (ex: *ngrok*) para a Internet WAN.
 
-
-
 **4. Sistema na Nuvem / Dashboard**
 
 * Ingestão do JSON contendo a mensagem de texto livre.
 * Plotagem e exibição do conteúdo textual recebido em tempo real.
-
-
 
 ### Especificação do Payload JSON (ARES Spec v1.0)
 
@@ -83,8 +70,6 @@ JSON
 }
 ```
 
-
-
 **Detalhamento dos Campos (Baseado nos Requisitos do ARES)**
 
 * **header.msg\_id:** Identificador único de mensagem para deduplicação (**RS-09**).
@@ -95,8 +80,6 @@ JSON
 * **telemetry.battery\_level:** Percentual da bateria, essencial para monitorar o requisito de autonomia de **72h (RS-02)**.
 * **location:** Georreferenciamento (Lat/Lon/Alt) exigido pelo requisito **RS-01**.
 * **payload.text\_message:** Conteúdo textual livre transmitido pelo dispositivo.
-
-
 
 ### Passo a Passo para Execução
 
