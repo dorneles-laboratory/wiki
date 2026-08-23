@@ -1,0 +1,143 @@
+---
+title: Operação First Breath (ARES POC-01)
+---
+A **Operação First Breath** é a Prova de Conceito zero (POC-01) do projeto **ARES (Rede de Resiliência Distribuída e Autônoma)**. O objetivo primordial desta fase é realizar o "primeiro suspiro" da rede: estabelecer a comunicação via rádio local entre dois microcontroladores ESP32 transmitindo mensagens de texto livres, e garantir que o estado seja tunelado pelo notebook do operador e disponibilizado na nuvem para plotagem em tempo real.\
+
+
+### Nome do Teste & Objetivos
+
+* **Identificador Interno:** ARES-POC-01
+* **Codinome do Teste:** Operação First Breath (O Primeiro Suspiro)
+* **Escopo:** Comunicação ESP1 (Emissor de Texto) -> ESP2 (Gateway Ingress) -> Notebook (Hotspot / Ingress Handler) -> Túnel WAN -> Nuvem / Dashboard.
+
+
+
+**Objetivos do Teste**
+
+\[ ] 1. **Validação do Rádio Local:** Estabelecer canal sem fio de baixa latência usando protocolo ESP-NOW entre os dois ESP32.
+
+\[ ] 2. **Ponte IP (Gateway Ingress):** Validar a recepção da mensagem de texto via rádio no ESP2 e a tradução para o formato JSON estruturado, cumprindo os requisitos de tradução de protocolo da arquitetura de gateway.
+
+\[ ] 3. **Tunelamento WAN:** Roteamento dos dados através do Hotspot Wi-Fi gerado pelo notebook com repasse via HTTP/MQTT para um endpoint público.
+
+\[ ] 4. **Exibição no Dashboard:** Visualização imediata da frase ou texto enviado diretamente no painel em tempo real na nuvem.
+
+
+
+### Arquitetura da Solução
+
+**1. ESP32-S3 (Nó 1 - Emissor de Mensagem)**
+
+* Envia uma string de texto livre arbitrária via subsistema de rádio (ESP-NOW).
+
+
+
+**2. ESP32-S3 (Nó 2 - Gateway Ingress)**
+
+* Recebe a string via ESP-NOW e conecta-se via Wi-Fi ao Hotspot do notebook. Atua como ponte IP, traduzindo as mensagens do protocolo interno para HTTPS/MQTT.
+
+
+
+**3. Notebook do Operador**
+
+* Roteamento Local (ex: faixa de IP `192.168.137.x`).
+* Script em Python atuando como Ingress Handler para capturar a requisição e encaminhá-la via túnel SSL (ex: *ngrok*) para a Internet WAN.
+
+
+
+**4. Sistema na Nuvem / Dashboard**
+
+* Ingestão do JSON contendo a mensagem de texto livre.
+* Plotagem e exibição do conteúdo textual recebido em tempo real.
+
+
+
+### Especificação do Payload JSON (ARES Spec v1.0)
+
+O formato dos dados segue a especificação de protocolos e enquadramento do ARES, contendo o cabeçalho de roteamento assíncrono e a telemetria do nó.
+
+JSON
+
+```
+{
+  "header": {
+    "msg_id": "123e4567-e89b-12d3-a456-426614174000",
+    "source_id": "ARES-NODE-ESP01",
+    "destination_id": "BROADCAST",
+    "priority": "P4",
+    "ttl": 64,
+    "timestamp": 1724451305
+  },
+  "telemetry": {
+    "battery_level": 98.2,
+    "storage_avail_kb": 2048
+  },
+  "location": {
+    "lat": -29.6842,
+    "lon": -53.8069,
+    "altitude": 150.5
+  },
+  "payload": {
+    "text_message": "Ola mundo, este e o primeiro suspiro da rede ARES!"
+  }
+}
+```
+
+
+
+**Detalhamento dos Campos (Baseado nos Requisitos do ARES)**
+
+* **header.msg\_id:** Identificador único de mensagem para deduplicação (**RS-09**).
+* **header.source\_id:** MAC Address ou identificador único do nó de origem.
+* **header.priority:** Fila Preemptiva (P0 para Emergência até P4 para Telemetria normal).
+* **header.ttl:** Time To Live — decrementado a cada salto para evitar loops na rede (**RF-NG-12**).
+* **header.timestamp:** Carimbo de tempo Unix gerado na emissão do pacote (**RF-NG-01**).
+* **telemetry.battery\_level:** Percentual da bateria, essencial para monitorar o requisito de autonomia de **72h (RS-02)**.
+* **location:** Georreferenciamento (Lat/Lon/Alt) exigido pelo requisito **RS-01**.
+* **payload.text\_message:** Conteúdo textual livre transmitido pelo dispositivo.
+
+
+
+### Passo a Passo para Execução
+
+**Fase 1: Preparação do Ambiente**
+
+\[ ] Configurar o Hotspot Wi-Fi no Notebook (SSID: `ARES_NET_GATEWAY`, Senha: `AresResilience2026`).
+
+\[ ] Verificar a faixa de IP atribuída pelo Hotspot (ex: `192.168.137.x`).
+
+
+
+**Fase 2: Desenvolvimento do Firmware ESP1 (Emissor de Texto)**
+
+\[ ] Iniciar o projeto na IDE (Arduino / PlatformIO).
+
+\[ ] Configurar o ESP32 como estação ESP-NOW.
+
+\[ ] Criar a estrutura em C++ contendo o cabeçalho e a string de texto livre.
+
+\[ ] Implementar a rotina de envio periódico da mensagem de texto via ESP-NOW a cada 3000 ms.
+
+
+
+**Fase 3: Desenvolvimento do Firmware ESP2 (Gateway Ingress)**
+
+\[ ] Iniciar o projeto na IDE para o segundo microcontrolador.
+
+\[ ] Inicializar o receptor ESP-NOW e registrar o MAC Address do ESP1.
+
+\[ ] Implementar a rotina de conexão Wi-Fi na rede `ARES_NET_GATEWAY` criada pelo notebook.
+
+\[ ] Programar a conversão dos dados de rádio recebidos para o formato JSON estruturado com a frase/texto.
+
+\[ ] Implementar o cliente HTTP/MQTT para realizar o envio (*POST*) do JSON para o endpoint local do notebook.
+
+
+
+**Fase 4: Ingress e Nuvem**
+
+\[ ] Desenvolver e iniciar o script receptor em Python no Notebook para atuar como o servidor local de escuta.
+
+\[ ] Configurar o repasse dos dados para o painel na nuvem (ex: Adafruit IO, ThingsBoard ou webhook próprio) via túnel HTTP.
+
+\[ ] Validar se a mensagem de texto enviada pelo ESP1 aparece corretamente no dashboard do notebook/nuvem.
