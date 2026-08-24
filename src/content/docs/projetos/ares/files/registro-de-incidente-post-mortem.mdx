@@ -1,0 +1,59 @@
+---
+title: Registro de Incidente (Post-Mortem)
+---
+## 1. Resumo do Incidente e Ambiente
+
+* **Data/Hora do Incidente:** 24 de agosto de 2026.
+
+
+* **Sintoma Principal:** O ESP2 (Gateway) falhava ao retransmitir pacotes via HTTP POST para o servidor Ingress, retornando o código de erro numérico `-1` e a mensagem `connection refused`.
+
+
+* **Ambiente de Operação:** Servidor Python hospedado no Windows (IP `10.174.176.89`, porta `8080`), conectado via Hotspot Wi-Fi (SSID `ARES_NET_GATEWAY`, Canal 2, Banda 2.4 GHz).
+
+
+
+> **\[Aviso de Imagem]:** *Inserir aqui um print do Monitor Serial mostrando o erro "Falha no POST. Código numérico: -1 | Erro descritivo: connection refused".*
+>
+>
+
+## 2. Investigação e Causa Raiz
+
+O erro apresentou múltiplas camadas de bloqueio que precisaram ser isoladas:
+
+* **Bloqueio de Firewall e Perfil de Rede:** O Windows Defender Firewall estava rejeitando conexões de entrada na porta 8080. Além disso, o perfil do Hotspot estava configurado de forma restritiva, impedindo o tráfego de rede local (AP Isolation).
+
+
+* **Binding do Servidor Python:** O script `ingress_handler.py` rejeitava conexões externas ou métodos de validação (`GET`) quando atrelado incorretamente às interfaces de rede virtuais (vEthernet/WSL) do host.
+
+
+* **Conflito de Interrupção de Hardware (Critical):** A requisição HTTP cliente (`http.POST()`) estava sendo acionada dentro da função de callback do ESP-NOW (`handleAresIncomingPacket`). Como callbacks de rádio operam no nível de Interrupção de Serviço de Rotina (ISR), a pilha TCP/IP do ESP32 entrava em colapso ao tentar abrir um socket síncrono, resultando na rejeição imediata da própria placa.
+
+
+
+> **\[Aviso de Imagem]:** *Desenhar/Inserir um diagrama de blocos simples mostrando a colisão entre a Camada de Interrupção do Rádio (ESP-NOW RX) e a Camada de Rede (TCP/IP socket).*
+>
+>
+
+## 3. Resolução e Plano de Ação
+
+* **Liberação de Tráfego:** Execução do comando `New-NetFirewallRule` via PowerShell (nível Administrador) para permitir tráfego TCP Inbound na porta 8080.
+  * `New-NetFirewallRule -DisplayName "ARES Ingress Server" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow`
+
+
+* **Ajuste do Ingress Server:** Alteração da variável `HOST` para `0.0.0.0` no Python e implementação do método `do_GET` na classe `BaseHTTPRequestHandler` para aceitar validações de conectividade de navegadores e escutar em todas as interfaces.
+
+
+* **Refatoração da Arquitetura do ESP32:** Implementação do padrão produtor-consumidor. O callback do ESP-NOW passou apenas a copiar o payload para um buffer de memória (`pendingPacket`). O disparo HTTP foi movido para a thread principal (`loop()`), executando de forma segura fora do contexto de interrupção.
+
+
+
+## 4. Referências Bibliográficas
+
+* **Espressif Systems - ESP-NOW API Reference (ESP-IDF):** [https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp\_now.html](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_now.html)
+
+
+* **Barry, R. (2016). Mastering the FreeRTOS Real Time Kernel:** [https://www.freertos.org/Documentation/RTOS\_book.html](https://www.freertos.org/Documentation/RTOS_book.html) *(O guia oficial em PDF pode ser baixado e consultado gratuitamente através deste portal da FreeRTOS).*
+
+
+* **Microsoft Build - New-NetFirewallRule (NetSecurity):** [https://learn.microsoft.com/powershell/module/netsecurity/new-netfirewallrule?view=windowsserver2025-ps\&wt.mc\_id=studentamb\_620809](https://learn.microsoft.com/powershell/module/netsecurity/new-netfirewallrule?view=windowsserver2025-ps\&wt.mc_id=studentamb_620809)
