@@ -1,0 +1,89 @@
+---
+title: Guia de Configuração e Credenciais
+---
+## 1. Visão Geral de Segurança
+
+Para evitar o vazamento de senhas de Wi-Fi e IPs de infraestrutura no controle de versão (como o GitHub), o projeto ARES adota um modelo de injeção de dependência em tempo de compilação.
+
+
+
+As variáveis críticas de ambiente não ficam no código-fonte principal (`main.cpp`), mas sim distribuídas entre um arquivo base de configuração e um arquivo de credenciais local que é ignorado pelo repositório (`.gitignore`).\
+
+
+> **\[Aviso de Imagem]:** *Inserir captura de tela da árvore de arquivos do projeto no VS Code, destacando o arquivo* `ares_credentials.h` *listado em cinza, indicando que está sendo ignorado pelo* `.gitignore`*.*
+>
+>
+
+## 2. Arquitetura de Configuração (`ares_config.h`)
+
+Este é o arquivo público que define a estrutura e carrega os segredos caso eles existam na máquina local do desenvolvedor. Utilizamos a diretiva do pré-processador C++ `__has_include` para garantir que o código compile com valores padrão caso o desenvolvedor não tenha o arquivo de credenciais.
+
+C++
+
+```
+#ifndef ARES_CONFIG_H
+#define ARES_CONFIG_H
+
+// Tenta carregar o arquivo de segredos local
+#if __has_include("ares_credentials.h")
+    #include "ares_credentials.h"
+    #pragma message("[ARES CONFIG] Arquivo 'ares_credentials.h' carregado com sucesso.")
+#else
+    #pragma message("[AVISO ARES CONFIG] 'ares_credentials.h' NAO encontrado. Usando valores PADRAO.")
+#endif
+
+// Valores padrão de fallback
+#ifndef WIFI_SSID
+    #define WIFI_SSID "DEFAULT_SSID"
+#endif
+
+// ... (Demais configurações de porta e debug)
+#endif
+
+```
+
+## 3. Arquivo Local de Credenciais (`ares_credentials.h`)
+
+Este arquivo existe **apenas** na máquina onde o código é compilado e contém as definições literais da infraestrutura de teste.\
+
+
+**Dados utilizados no Teste ARES (24/Ago/2026):**
+
+* **WIFI\_SSID:** `"ARES_NET_GATEWAY"`
+* **WIFI\_PASSWORD:** `"AresResilience2026"`
+* **INGRESS\_SERVER\_IP:** `"10.174.176.89"`
+
+C++
+
+```
+#ifndef ARES_CREDENTIALS_H
+#define ARES_CREDENTIALS_H
+
+#define WIFI_SSID "ARES_NET_GATEWAY"
+#define WIFI_PASSWORD "AresResilience2026"
+#define INGRESS_SERVER_IP "10.174.176.89"
+
+#endif
+
+```
+
+## 4. Parâmetros de Rede e Hotspot
+
+O teste foi validado utilizando um ambiente de rede local provido por um Hotspot no Windows (MediaTek Wi-Fi 6E MT7922), devido à necessidade de isolamento e controle de espectro de rádio.
+
+* **Banda de Rede:** 2.4 GHz (Apenas banda compatível com a antena interna do ESP32).
+* **Canal Operacional:** Canal 2 (Dinâmico). O ESP-NOW do nó emissor deve estar rigorosamente pareado neste mesmo canal.
+* **Porta do Servidor Ingress:** TCP `8080`.
+
+
+
+> **\[Aviso de Imagem]:** *Inserir print das Propriedades da rede Wi-Fi do Windows, mostrando o SSID "ARES\_NET\_GATEWAY", a Banda de 2,4 GHz e o endereço IPv4* `10.174.176.89`*.*
+>
+>
+
+## 5. Referências Bibliográficas
+
+* **GCC (GNU Compiler Collection).** (n.d.). *\_\_has\_include*. C Preprocessor Documentation. Recuperado de [https://gcc.gnu.org/onlinedocs/cpp/\_005f\_005fhas\_005finclude.html](https://gcc.gnu.org/onlinedocs/cpp/_005f_005fhas_005finclude.html) *(Consulte para entender a lógica de compilação condicional baseada na presença de arquivos locais).*
+
+
+* **Git.** (n.d.). *gitignore - Specifies intentionally untracked files to ignore*. Git Documentation. Recuperado de [https://git-scm.com/docs/gitignore](https://git-scm.com/docs/gitignore)
