@@ -1,0 +1,54 @@
+---
+title: Procedimento de Contingência (Hotspot)
+---
+## 1. Contexto e Motivação Operacional
+
+Em ambientes de campo ou redes acadêmicas e corporativas, o uso de redes locais padrão apresenta severas limitações para protótipos IoT baseados em microcontroladores ESP32:
+
+* **Autenticação WPA2-Enterprise (802.1X):** Exige certificados digitais e credenciais individuais por usuário que complicam e oneram a pilha de reconexão do rádio do ESP32.
+* **Isolamento de Clientes (AP Isolation):** Impede a comunicação direta ponto a ponto (*peer-to-peer*) entre o ESP2 e a máquina host dentro da mesma sub-rede.
+* **Banda de 5 GHz e Band Steering:** Redes corporativas modernas costumam forçar o direcionamento de banda para 5 GHz, frequência física não suportada pela antena interna do ESP32 (limitada a 2.4 GHz).
+
+A adoção do **Hotspot Mobile / Windows** como rede de contingência isolada garante controle total sobre o canal de rádio, eliminação de intermediários de infraestrutura de terceiros e um ambiente de testes estável e previsível.\
+
+
+> **\[Aviso de Imagem]:** *Inserir um diagrama comparativo ilustrando: (A) Rede Institucional bloqueando o tráfego local entre ESP2 e Notebook via AP Isolation; (B) Hotspot Dedicado ARES permitindo canal direto de comunicação local.*
+>
+>
+
+## 2. Procedimento Passo a Passo de Configuração
+
+1. **Criação do Hotspot no Windows Host:**
+   * Acesse **Configurações > Rede e Internet > Hotspot móvel**.
+   * Defina o SSID como `ARES_NET_GATEWAY` e atribua a senha cadastrada em `ares_credentials.h`.
+   * Em **Banda de rede**, selecione obrigatoriamente **2,4 GHz** (desative qualquer opção de seleção automática ou 5 GHz).
+
+
+2. **Ajuste do Perfil de Rede (Crítico):**\
+
+   * Após ativar o Hotspot, acesse as propriedades da rede Wi-Fi conectada.
+   * Altere o Perfil de Rede de **Público** para **Particular (Privada)**. Essa ação desativa o isolamento de portas estrito do Windows Defender.
+
+
+3. **Sincronização de Frequência e Canal ESP-NOW:**\
+
+   * Como o Windows define o canal de rádio dinamicamente na inicialização do Hotspot (ex: Canal 2), o ESP2 executa a varredura `WiFi.scanNetworks()` no `setup()` para identificar o canal operacional.
+   * O ESP1 (Emissor) deve alinhar seu canal de transmissão ao mesmo canal do Hotspot para evitar a perda de frames no ESP-NOW.
+
+> **\[Aviso de Imagem]:** *Inserir captura de tela do painel de configurações do Hotspot Móvel do Windows, destacando a seleção manual da banda de 2,4 GHz e as propriedades do adaptador.*
+>
+>
+
+## 3. Matriz de Resolução de Problemas (Troubleshooting)
+
+| **Problema Encontrado**                  | **Causa Raiz**                                                                  | **Ação de Contingência**                                                                             |
+| ---------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Erro `-1` (`connection refused`) no ESP2 | Perfil do Wi-Fi definido como **Público** ou porta 8080 bloqueada pelo Firewall | Mudar perfil da rede para **Particular** e reexecutar a regra de Inbound no PowerShell.              |
+| Alteração de IP do Servidor Ingress      | DHCP do Hotspot atribuiu um novo IP ao notebook após reconexão                  | Executar `ipconfig` no terminal e atualizar a constante `INGRESS_SERVER_IP` em `ares_credentials.h`. |
+| Perda de sincronismo no ESP-NOW          | Troca automática do canal de rádio após reinicialização do Hotspot              | Verificar a linha `[WiFi] Canal atual: X` no log de boot do ESP2 e atualizar a frequência do ESP1.   |
+
+## 4. Referências Bibliográficas
+
+* **Wi-Fi Alliance.** (2023). *Wi-Fi Certified WPA3™ and WPA2™ Security Specifications*. Recuperado de [https://www.wi-fi.org/discover-wi-fi/security](https://www.wi-fi.org/discover-wi-fi/security)
+* **Espressif Systems.** (2024). *Wi-Fi Driver Architecture - Station & AP Modes*. Documentação Oficial do ESP-IDF. Recuperado de [https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp\_wifi.html](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_wifi.html)
+* **Microsoft Build.** (n.d.). *Configure Mobile Hotspot settings via Windows settings*. Microsoft Technical Documentation. Recuperado de [https://learn.microsoft.com/en-us/windows/blogs/](https://www.google.com/search?q=https://learn.microsoft.com/en-us/windows/blogs/)
