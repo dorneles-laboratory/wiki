@@ -1,0 +1,41 @@
+---
+title: Relatório de Conectividade e Rede
+---
+## 1. Topologia do Sistema ARES
+
+A arquitetura de comunicação do projeto ARES foi desenhada como um pipeline de três camadas (3-Tier), focada em garantir que os nós operacionais no campo não precisem lidar com a complexidade e o consumo de energia de uma conexão TCP/IP completa.
+
+> **\[Aviso de Imagem]:** *Desenhar e inserir aqui um diagrama de topologia de rede. Ele deve mostrar o ESP1 à esquerda, uma seta com o símbolo de Wi-Fi (representando o ESP-NOW) apontando para o ESP2 no centro. Do ESP2, uma seta dupla (representando TCP/HTTP) deve apontar para o ícone de um Notebook (Servidor Python), passando através do ícone de um Roteador/Hotspot.*
+
+### Camada 1: Nó Emissor (ESP1 - Borda)
+
+* **Função:** Coleta dados de telemetria, localização e payloads de texto, empacotando-os no formato estruturado `AresMessagePacket`.
+* **Protocolo de Saída:** ESP-NOW. Envia pacotes via broadcast ou unicast diretamente para o endereço MAC do Gateway, sem necessidade de pareamento em rede Wi-Fi padrão.
+* **Vantagem Arquitetural:** Baixíssima latência e menor tempo de rádio ativo, conservando a bateria do nó isolado.
+
+### Camada 2: Nó Gateway (ESP2 - Ponte de Borda)
+
+* **Função:** Atua como um tradutor de protocolos. Ele escuta pacotes ESP-NOW e os converte em requisições de rede padrão.
+* **Design Concorrente (Thread-Safe):** Para evitar o colapso da placa, o Gateway separa o recebimento da transmissão. A interrupção de rádio (ISR) apenas copia o pacote para um buffer de memória (`pendingPacket`). O núcleo principal (loop) consome esse buffer e realiza o envio HTTP de forma assíncrona.
+* **Conexão de Saída:** Wi-Fi (Modo STA), conectado ao Hotspot `ARES_NET_GATEWAY`.
+
+### Camada 3: Servidor Ingress (Notebook - Centro de Comando)
+
+* **Função:** Ponto de entrada (Ingress) dos dados na rede de comando.
+* **Tecnologia:** Script Python utilizando `http.server.BaseHTTPRequestHandler`.
+* **Processamento:** Escuta na porta 8080 (em todas as interfaces via `0.0.0.0`), recebe o payload em formato JSON, decodifica a requisição POST e exibe os dados operacionais estruturados para tomada de decisão.
+
+## 2. Fluxo de Vida do Dado (Pipeline)
+
+1. **Geração:** ESP1 gera o pacote com ID único, coordenadas e leitura de bateria.
+2. **Transmissão Rádio:** O pacote viaja em 2.4 GHz (Canal 2) via ESP-NOW.
+3. **Conversão JSON:** O ESP2 recebe os bytes brutos do ESP-NOW, extrai as variáveis e as serializa em um documento JSON.
+4. **Entrega HTTP:** O ESP2 abre um socket TCP com o IP `10.174.176.89`, despacha um HTTP POST e aguarda o código de retorno (Status 200).
+5. **Exibição:** O Python Ingress acusa o recebimento e imprime o JSON no terminal do Centro de Comando.
+
+> **\[Aviso de Imagem]:** *Inserir aqui uma captura de tela (ou um bloco de código formatado) mostrando a estrutura exata do JSON recebido no terminal do Python, para ilustrar como o dado chega no final do pipeline.*
+
+## 3. Referências Bibliográficas
+
+* **Espressif Systems.** (2024). *ESP-NOW Overview*. Documentação Oficial do ESP-IDF. Recuperado de [https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp\_now.html](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_now.html) *(Consulte para detalhamentos sobre a topologia MAC-to-MAC do protocolo).*
+* **Fielding, R., et al.** (2014). *Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content (RFC 7231)*. Internet Engineering Task Force (IETF). Recuperado de [https://datatracker.ietf.org/doc/html/rfc7231](https://datatracker.ietf.org/doc/html/rfc7231) *(Referência oficial sobre os métodos POST e GET utilizados na integração Node-Servidor).*
