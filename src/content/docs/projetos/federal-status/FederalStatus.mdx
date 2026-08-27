@@ -1,0 +1,147 @@
+---
+title: Federal Status
+---
+
+# Documento de Requisitos do Produto (PRD) & Visão Geral
+
+**Projeto:** FederalStatus — Plataforma de Observabilidade e Transparência das Universidades Federais Brasileiras
+
+**Versão:** 1.0
+
+**Status:** Em Desenvolvimento / Prototipagem Avançada
+
+**Classificação:** Documento Fundacional de Produto
+
+---
+
+## 1. Sumário Executivo e Visão Geral
+
+O **FederalStatus** é uma plataforma de observabilidade digital e transparência pública voltada para o ecossistema das Universidades Federais do Brasil. O projeto nasceu da necessidade de centralizar, monitorar e dar visibilidade em tempo real ao status operacional dos serviços web essenciais prestados por essas instituições (como sistemas acadêmicos, ambientes virtuais de aprendizagem, portais de biblioteca e infraestruturas de rede).
+
+A plataforma opera sob uma arquitetura de duas frentes complementares:
+
+1. **Portal Público de Transparência:** Interface aberta focada na comunidade acadêmica (estudantes, professores, pesquisadores) e sociedade civil, fornecendo informações claras sobre uptime, latência e histórico de incidentes de cada universidade monitorada.
+2. **Área Institucional (SaaS Admin):** Painel denso de produtividade e observabilidade técnica exclusivo para as equipes de Tecnologia da Informação (TI) e Governança Digital das universidades credenciadas.
+
+---
+
+## 2. Declaração do Problema
+
+### 2.1 Contexto e Cenário Atual
+
+As universidades federais brasileiras atendem a milhões de usuários diariamente. Sistemas como SIGAA, Moodle, Portais do Aluno, Webmails e Serviços de Autenticação Centralizada (SSO) são indispensáveis para a rotina acadêmica e administrativa. Contudo, o ecossistema atual enfrenta gargalos críticos:
+
+* **Opacidade na Comunicação de Falhas:** Quando um sistema crítico sai do ar (por exemplo, o SIGAA durante a semana de matrícula), os alunos não têm como confirmar se o problema é local (sua própria conexão) ou geral (queda de servidor da universidade). Isso gera enxurradas de chamados desnecessários no suporte técnico e desinformação em redes sociais.
+* **Monitoramento Fragmentado e Reativo:** Muitas equipes de TI universitárias operam de forma reativa, descobrindo indisponibilidades através de reclamações de usuários em vez de alertas proativos.
+* **Falta de Gestão Preventiva de Infraestrutura:** Problemas previsíveis, como o vencimento de certificados SSL/TLS ou falhas de resolução DNS, frequentemente passam despercebidos até causarem interrupção total do serviço.
+* **Ausência de Métricas Históricas Públicas:** Não existe um indicador centralizado e neutro que mensure a maturidade digital e o SLA (Service Level Agreement) real das instituições federais de ensino.
+
+---
+
+## 3. Objetivos do Produto
+
+### 3.1 Objetivos do Portal Público
+
+* **Empoderamento do Usuário:** Permitir que estudantes e servidores verifiquem instantaneamente a saúde de qualquer serviço universitário antes de tentar utilizá-lo.
+* **Transparência Passiva:** Estabelecer um histórico público e auditável de disponibilidade (uptime) e tempo de resposta (latência) das 69+ universidades federais.
+* **Redução de Ruído de Suporte:** Diminuir a carga de chamados repetitivos nas secretarias e divisões de TI durante instabilidades.
+
+### 3.2 Objetivos da Área Institucional (SaaS de Observabilidade)
+
+* **Centralização de Métricas:** Consolidar em um único *App Shell* de alta densidade os dados de disponibilidade de servidores, expiração de certificados digitais e integridade DNS.
+* **Detecção e Resolução Proativa (MTTR):** Reduzir o Tempo Médio de Recuperação (*Mean Time to Recovery*) fornecendo alertas instantâneos e relatórios detalhados de causa-raiz de incidentes.
+* **Gestão de Governança Digital:** Oferecer relatórios executivos para reitorias e diretorias de TI sobre a estabilidade de seus ecossistemas tecnológicos.
+
+---
+
+## 4. Personas do Sistema
+
+### Persona 1: O Estudante Universitário ("Dorneles")
+
+* **Perfil:** Aluno de graduação dependente diariamente do portal acadêmico para rematrícula, envio de trabalhos e consulta de notas.
+* **Dor:** Tenta acessar o portal do aluno em horário de pico de matrícula, a página não carrega e ele não sabe se o problema é o Wi-Fi do campus, a sua internet de casa ou a queda do servidor da universidade.
+* **Necessidade:** Uma resposta binária, rápida e confiável: *"O SIGAA da UFSM está online ou offline agora?"*.
+
+### Persona 2: O Administrador de TI / Infraestrutura ("John Doe")
+
+* **Perfil:** Servidora pública responsável pela infraestrutura de rede e servidores da universidade.
+* **Dor:** Gerencia dezenas de domínios, subdomínios e certificados SSL espalhados em diferentes campi. Frequentemente é pega de surpresa com certificados expirados ou indisponibilidades registradas fora do horário de expediente.
+* **Necessidade:** Um dashboard denso de observabilidade em tempo real com alertas preventivos, gestão de incidentes e visualização compacta de métricas operacionais.
+
+---
+
+## 5. Casos de Uso Detalhados
+
+### Caso de Uso 01: Consulta Rápida de Disponibilidade em Período de Matrícula
+
+* **Ator Principal:** Estudante (Dorneles).
+* **Pré-condição:** O estudante tenta acessar o sistema de matrícula (ex: SIGAA) e a página apresenta timeout.
+* **Fluxo Principal:**
+1. O aluno acessa a página inicial do **FederalStatus** ou a página específica de sua universidade (ex: `/universidade/ufsm`).
+2. Ele visualiza imediatamente o badge de status com pulso animado ao vivo (🟢 **Online**, 🟡 **Degradado** ou 🔴 **Interrupção Total**).
+3. O aluno identifica que o serviço "SIGAA" está marcado com 🔴 **Interrupção Total** com uma nota oficial: *"Identificada alta carga no banco de dados. Equipe técnica ciente."*
+4. O aluno compreende que o sistema está em manutenção/instabilidade geral e evita realizar múltiplos envios de formulário ou abrir chamados duplicados.
+
+
+* **Resultado Esperado:** Transparência imediata, redução de ansiedade do usuário e diminuição de requisições inúteis no servidor afetado.
+
+---
+
+### Caso de Uso 02: Monitoramento Preventivo de Certificados SSL/TLS pela TI
+
+* **Ator Principal:** Administrador de TI (John Doe).
+* **Pré-condição:** O administrador faz login na **Área Institucional** (`/admin`).
+* **Fluxo Principal:**
+1. No dashboard em formato *App Shell*, a administradora observa a seção lateral (Side Panel) de **Alerta de Certificados SSL**.
+2. O sistema exibe um card de atenção amarela: `moodle.universidade.br` — *Expira em 5 dias (Emissor: GlobalSign)*.
+3. A administradora clica no serviço, copia as especificações do certificado prestes a vencer e agenda a renovação antes que os navegadores dos alunos bloqueiem o acesso por falha de segurança (`HTTPS`).
+4. Após a renovação no servidor web, o *worker* de checagem do FederalStatus detecta automaticamente o novo certificado e atualiza o status para 🟢 **Válido (Expira em 365 dias)**.
+
+
+* **Resultado Esperado:** Prevenção total de incidentes causados por expiração de certificados digitais.
+
+---
+
+### Caso de Uso 03: Registro e Comunicação Transparente de Incidente Grave
+
+* **Ator Principal:** Equipe de TI da Universidade e Comunidade Acadêmica.
+* **Pré-condição:** O servidor de banco de dados principal da universidade sofre uma falha de hardware.
+* **Fluxo Principal:**
+1. O motor de observabilidade do FederalStatus detecta sucessivas falhas de ping/HTTP e altera automaticamente o status da instituição para 🔴 **Interrupção Parcial/Total**.
+2. A equipe de TI acessa o painel admin e atualiza o incidente com um boletim oficial: *"Falha no storage principal. Restauração de backup em andamento."*
+3. No Portal Público, o card do incidente exibe uma linha do tempo clara (*Investigando* $\rightarrow$ *Identificado* $\rightarrow$ *Em restauração*).
+4. Assim que o serviço é restabelecido, o sistema registra o tempo total de indisponibilidade e recalcula automaticamente o MTTR e a porcentagem de uptime do mês.
+
+
+* **Resultado Esperado:** Comunicação oficial centralizada sem ruídos e histórico auditável do incidente.
+
+---
+
+## 6. Requisitos Funcionais de Alto Nível
+
+| ID | Módulo | Descrição do Requisito |
+| --- | --- | --- |
+| **RF-01** | Portal Público | Exibir lista e mapa interativo das universidades monitoradas com status em tempo real. |
+| **RF-02** | Portal Público | Permitir a busca e filtragem rápida por nome da instituição, sigla, estado ou região (Sul, Sudeste, etc.). |
+| **RF-03** | Detalhes da Inst. | Apresentar grid de serviços da universidade (SIGAA, Moodle, Webmail) com botões para acesso direto e link para detalhes técnicos. |
+| **RF-04** | Área Institucional | Disponibilizar layout em *App Shell* (Sidebar fixa, Topbar com busca e área de trabalho densa em Bento Grid). |
+| **RF-05** | Observabilidade | Monitorar latência em milissegundos (ms), uptime percentual (ex: $99.98\%$), validade de SSL/TLS e resolução de DNS. |
+| **RF-06** | Incidentes | Manter histórico público de incidentes com linha do tempo de atualização (Investigando, Identificado, Resolvido). |
+| **RF-07** | Páginas Institucionais | Disponibilizar rotas institucionais estáticas/informativas: *Sobre o Projeto*, *Transparência* e *Como Participar*. |
+
+---
+
+## 7. Requisitos Não-Funcionais
+
+* **Arquitetura Visual Premium:** A interface deve seguir padrões de design system modernos (estilo Vercel, Datadog, Supabase), utilizando cores semânticas, tipografia legível/monospaçada para dados numéricos, animações sutis (`animate-pulse` em badges) e ausência de bordas rústicas/espessas.
+* **Alta Densidade de Informações no Admin:** O dashboard institucional não deve desperdiçar espaço com cards superdimensionados, priorizando tabelas compactas e estatísticas resumidas na primeira dobra.
+* **Alta Disponibilidade da Plataforma:** Como o FederalStatus é o local consultado *durante* quedas digitais, a própria infraestrutura do portal deve possuir resiliência máxima e redundância.
+* **Performance:** Carregamento das páginas públicas de status em menos de 1.5 segundo, com renderização otimizada para dispositivos móveis e desktops ultrawide.
+
+---
+
+## 8. Critérios de Sucesso (KPIs do Produto)
+
+1. **Adoção Institucional:** Número de universidades federais que migram de "Monitoradas Publicamente" para "Participantes Ativas" na área institucional.
+2. **Engajamento em Períodos Críticos:** Aumento do volume de acessos ao portal público durante janelas conhecidas de matrícula universitária nacional.
+3. **Redução do MTTR:** Redução no tempo médio de resolução de incidentes pelas equipes de TI das universidades credenciadas utilizando os alertas da plataforma.

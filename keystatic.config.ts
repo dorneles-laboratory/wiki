@@ -3,6 +3,7 @@ import { mark } from '@keystatic/core/content-components';
 import { createElement } from 'react';
 import { Highlighter } from 'lucide-react';
 
+// O schema é o mesmo para todos, centralizado para facilitar manutenção
 const docSchema = {
   title: fields.slug({
     name: { label: 'Título da Página' },
@@ -27,7 +28,7 @@ const docSchema = {
 export default config({
   storage: {
     kind: 'github',
-    repo: 'dorneles-laboratory/wiki',
+    repo: 'dorneles-laboratory/wiki', // Confirme se o nome do repo está correto
   },
 
   ui: {
@@ -56,22 +57,24 @@ export default config({
         );
       },
     },
+    // Organização da barra lateral do painel Keystatic para não ficar poluída
     navigation: {
-      'Geral': [
+      '📌 Geral': [
         'welcome',
         'visaoGeral',
+      ],
+      '📖 Guias e Processos': [
         'guides',
         'processes',
       ],
-      'Recursos': [
+      '🚀 Projetos e Submissões': [
+        'projetos',
+        'submissoes',
+      ],
+      '🛠️ Recursos': [
         'reference',
         'templates',
         'utils',
-      ],
-      'Projeto ARES': [
-        'ares',
-        'aresTasks',
-        'aresFiles',
       ],
     },
   },
@@ -80,47 +83,7 @@ export default config({
     welcome: collection({
       label: 'Bem-vindo',
       slugField: 'title',
-      path: 'src/content/docs/welcome/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-
-    guides: collection({
-      label: 'Guias',
-      slugField: 'title',
-      path: 'src/content/docs/guides/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-
-    processes: collection({
-      label: 'Processos',
-      slugField: 'title',
-      path: 'src/content/docs/processes/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-
-    reference: collection({
-      label: 'Referências',
-      slugField: 'title',
-      path: 'src/content/docs/reference/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-
-    templates: collection({
-      label: 'Templates',
-      slugField: 'title',
-      path: 'src/content/docs/templates/*',
-      format: { contentField: 'content' },
-      schema: docSchema,
-    }),
-
-    utils: collection({
-      label: 'Utilitários e Prompts',
-      slugField: 'title',
-      path: 'src/content/docs/utils/*',
+      path: 'src/content/docs/welcome/**',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
@@ -128,31 +91,65 @@ export default config({
     visaoGeral: collection({
       label: 'Visão Geral',
       slugField: 'title',
-      path: 'src/content/docs/visao-geral/*',
+      path: 'src/content/docs/visao-geral/**',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
 
-    ares: collection({
-      label: 'Projeto: Ares',
+    guides: collection({
+      label: 'Guias',
       slugField: 'title',
-      path: 'src/content/docs/projetos/ares/*',
+      path: 'src/content/docs/guides/**',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
 
-    aresTasks: collection({
-      label: 'Projeto: Ares - Fases',
+    processes: collection({
+      label: 'Processos',
       slugField: 'title',
-      path: 'src/content/docs/projetos/ares/fases/*',
+      path: 'src/content/docs/processes/**',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
 
-    aresFiles: collection({
-      label: 'Projeto: Ares - Arquivos',
+    projetos: collection({
+      label: 'Projetos',
       slugField: 'title',
-      path: 'src/content/docs/projetos/ares/files/*',
+      // Permite criar e navegar nas pastas: ares, ares/fases, federal-status, nematodes, etc.
+      path: 'src/content/docs/projetos/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    submissoes: collection({
+      label: 'Submissões',
+      slugField: 'title',
+      // Permite as subpastas como projetos/ares/...
+      path: 'src/content/docs/submissoes/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    reference: collection({
+      label: 'Referências',
+      slugField: 'title',
+      path: 'src/content/docs/reference/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    templates: collection({
+      label: 'Templates',
+      slugField: 'title',
+      path: 'src/content/docs/templates/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    utils: collection({
+      label: 'Utilitários e Prompts',
+      slugField: 'title',
+      path: 'src/content/docs/utils/**',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
