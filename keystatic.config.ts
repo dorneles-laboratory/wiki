@@ -15,6 +15,14 @@ const docSchema = {
 
   content: fields.mdx({
     label: 'Conteúdo do Documento',
+    options: {
+      image: {
+        // Onde o Keystatic vai salvar a imagem fisicamente no repositório
+        directory: 'public/images',
+        // Como o Keystatic vai escrever o caminho da imagem no arquivo .mdx
+        publicPath: '/images/',
+      },
+    },
     components: {
       mark: mark({
         label: 'Destaque verde',
