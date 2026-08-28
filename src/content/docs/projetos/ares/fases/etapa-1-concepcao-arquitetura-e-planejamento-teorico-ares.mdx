@@ -21,11 +21,11 @@ title: Etapa 1 - Concepção, Arquitetura e Planejamento Teórico (ARES)
 **Foco:** Analisar a literatura e a indústria para não reinventar a roda e entender por que projetos anteriores falharam em desastres.
 
 * \[ ] 1. **Desconstruir projetos similares e documentar falhas:** Analisar *Disaster Radio*, *Meshtastic* e *Serval Project*, detalhando por que falham em escalabilidade, priorização crítica ou gestão de energia em cenários reais.
-* <mark>\[O] 2. **Pesquisar literatura sobre DTN (Delay-Tolerant Networks):** Estudar como redes espaciais e militares lidam com comunicação retida (*store-and-forward*).</mark>
-* \[O ] 3. **Revisão conceitual de LPWAN:** Explicar teoricamente o funcionamento de redes sub-1 GHz (LoRa, Wi-Fi HaLow) e por que são o padrão na IoT de longo alcance.
-* \[ O] 4. **Levantar algoritmos de roteamento Mesh para desastres:** Comparar B.A.T.M.A.N., AODV e OLSR, apontando deficiências em ambientes com perda constante de nós.
+* <mark>\[ ] 2. **Pesquisar literatura sobre DTN (Delay-Tolerant Networks):** Estudar como redes espaciais e militares lidam com comunicação retida (*store-and-forward*).</mark>
+* <mark>\[O ] 3. **Revisão conceitual de LPWAN:** Explicar teoricamente o funcionamento de redes sub-1 GHz (LoRa, Wi-Fi HaLow) e por que são o padrão na IoT de longo alcance.</mark>
+* <mark>\[ O] 4. **Levantar algoritmos de roteamento Mesh para desastres:** Comparar B.A.T.M.A.N., AODV e OLSR, apontando deficiências em ambientes com perda constante de nós.</mark>
 * \[ ] 5. **Estudar Energy-Aware Routing:** Pesquisar redes que tomam decisões de roteamento baseadas no nível de bateria dos nós intermediários.
-* \[ O] 6. **Investigar o uso de Data Mules:** Revisar artigos sobre o uso de agentes móveis (UAVs/drones e veículos) e estáticos temporários para transportar pacotes entre ilhas de conectividade.
+* <mark>\[ O] 6. **Investigar o uso de Data Mules:** Revisar artigos sobre o uso de agentes móveis (UAVs/drones e veículos) e estáticos temporários para transportar pacotes entre ilhas de conectividade.</mark>
 
 ---
 
@@ -46,12 +46,12 @@ title: Etapa 1 - Concepção, Arquitetura e Planejamento Teórico (ARES)
 
 **Foco:** Definir as regras, os papéis e o comportamento do "organismo" da rede.
 
-* \[O] 1. **Definição das propriedades dos Nós de Borda (Sensor e Relay):** Documentar o que leem, como acordam (*Duty Cycle*), retransmitem e voltam a dormir (comportamento de baixo consumo).
-* \[O] 2. **Definição das propriedades dos Nós de Infraestrutura (Router e Storage):** Definir a manutenção da tabela de rotas e o gerenciamento da memória (ex.: política de descarte FIFO vs. descarte por baixa prioridade).
-* \[O] 3. **Definição das propriedades de Saída (Gateway e Mobile):** Definir o gerenciamento da fila para a nuvem e o protocolo de anúncio de nós móveis à malha.
+* <mark>\[O] 1. **Definição das propriedades dos Nós de Borda (Sensor e Relay):** Documentar o que leem, como acordam (*Duty Cycle*), retransmitem e voltam a dormir (comportamento de baixo consumo).</mark>
+* <mark>\[O] 2. **Definição das propriedades dos Nós de Infraestrutura (Router e Storage):** Definir a manutenção da tabela de rotas e o gerenciamento da memória (ex.: política de descarte FIFO vs. descarte por baixa prioridade).</mark>
+* <mark>\[O] 3. **Definição das propriedades de Saída (Gateway e Mobile):** Definir o gerenciamento da fila para a nuvem e o protocolo de anúncio de nós móveis à malha.</mark>
 * \[ ] 4. **Projeto da Máquina de Estados Dinâmica:** Criar o fluxograma lógico ditando sob quais condições matemáticas/energéticas um nó altera seu papel autonomamente.
-* \[O] 5. **Modelo de Self-Healing:** Desenhar o algoritmo distribuído que detecta a queda de vizinhos inoperantes e recalcula a rota sem um controlador central.
-* \[O] 6. **Estruturação de Prioridades (P0 a P4):** Criar a lógica preemptiva onde pacotes de vida (P0) forçam a rede a ignorar tráfego menor (P4).
+* <mark>\[O] 5. **Modelo de Self-Healing:** Desenhar o algoritmo distribuído que detecta a queda de vizinhos inoperantes e recalcula a rota sem um controlador central.</mark>
+* <mark>\[O] 6. **Estruturação de Prioridades (P0 a P4):** Criar a lógica preemptiva onde pacotes de vida (P0) forçam a rede a ignorar tráfego menor (P4).</mark>
 * \[ ] 7. **Definição do Protocolo de Empacotamento e Payload:** Escolher entre *Bundle Protocol* ou customizado, e desenhar a anatomia do pacote (cabeçalho) focando em compressão extrema.
 * \[ ] 8. **Modelo de Controle de Congestionamento e Segurança:** Definir reações a *flood* de dados, limite de tráfego e validação de autenticidade (ex.: chaves pré-compartilhadas ou criptografia leve) sem depender da Internet.
 
@@ -61,9 +61,9 @@ title: Etapa 1 - Concepção, Arquitetura e Planejamento Teórico (ARES)
 
 **Foco:** Justificar cientificamente as escolhas dos componentes físicos e de software base.
 
-* \[O] 1. **Seleção teórica da arquitetura de microcontroladores:** Avaliar famílias de chips (ESP32-S3, STM32WL) baseando-se no consumo documentado em *datasheets* para *Deep Sleep*.
-* \[O] 2. **Avaliar e justificar o RTOS (Sistema Operacional):** Comparar *Zephyr* vs. *FreeRTOS* com foco em *threads* e eficiência energética.
-* \[O] 3. **Avaliar e justificar a banda de RF primária:** Comparar LoRa (modulação CSS) com Wi-Fi HaLow (OFDM sub-1 GHz) para a camada física da rede.
+* <mark>\[O] 1. **Seleção teórica da arquitetura de microcontroladores:** Avaliar famílias de chips (ESP32-S3, STM32WL) baseando-se no consumo documentado em *datasheets* para *Deep Sleep*.</mark>
+* <mark>\[O] 2. **Avaliar e justificar o RTOS (Sistema Operacional):** Comparar *Zephyr* vs. *FreeRTOS* com foco em *threads* e eficiência energética.</mark>
+* <mark>\[O] 3. **Avaliar e justificar a banda de RF primária:** Comparar LoRa (modulação CSS) com Wi-Fi HaLow (OFDM sub-1 GHz) para a camada física da rede.</mark>
 * \[ ] 4. **Estudo de propagação RF em desastres:** Pesquisar as equações de atenuação do sinal de rádio causadas por chuva extrema e obstáculos úmidos.
 * \[ ] 5. **Definir barramentos de hardware de sensores:** Analisar protocolos de leitura física (I2C vs. SPI) e seus impactos em velocidade/energia.
 * \[ ] 6. **Avaliar tecnologias de Backhaul:** Definir a stack para a integração do Gateway com satélites de baixo consumo (Swarm/Starlink) e 4G/NB-IoT.
@@ -87,11 +87,11 @@ title: Etapa 1 - Concepção, Arquitetura e Planejamento Teórico (ARES)
 
 * \[X ] 1. **Definir a stack do sistema de backend e dashboard:** Especificar como o painel em nuvem receberá e processará os dados do Gateway.
 * \[ ] 2. **Definir as métricas de validação (KPIs):** Oficializar metas para PDR (*Packet Delivery Ratio*), Latência de P0 e *Overhead* de rotas.
-* \[O] 3. **Aprovar e parametrizar o simulador:** Confirmar a viabilidade do NS-3 + SUMO e listar as variáveis ambientais que serão injetadas nos scripts (atenuação, falhas).
+* <mark>\[O] 3. **Aprovar e parametrizar o simulador:** Confirmar a viabilidade do NS-3 + SUMO e listar as variáveis ambientais que serão injetadas nos scripts (atenuação, falhas).</mark>
 * \[ ] 4. **Modelar topologias de teste:** Desenhar as áreas exatas e a quantidade de nós virtuais que serão provisionados na Etapa 2.
 * \[ ] 5. **Análise de Riscos e Restrições Teóricas:** Documentar premissas que podem falhar (ex.: dessincronização de relógios na malha, indisponibilidade de componentes).
-* \[O] 6. **Análise de Viabilidade Financeira (BOM preliminar):** Elaborar uma estimativa de custos para comprovar que escalar a rede é economicamente possível.
-* \[O] 7. **Estruturação do repositório GitHub:** Criar a organização, padronização de commits e *branches* para versionar os futuros códigos do simulador e firmware.
+* <mark>\[O] 6. **Análise de Viabilidade Financeira (BOM preliminar):** Elaborar uma estimativa de custos para comprovar que escalar a rede é economicamente possível.</mark>
+* <mark>\[O] 7. **Estruturação do repositório GitHub:** Criar a organização, padronização de commits e *branches* para versionar os futuros códigos do simulador e firmware.</mark>
 * \[ X] 8. **Tradução para Backlog e Cronograma:** Converter toda a arquitetura em Épicos/Tarefas no Kanban (GitHub Projects/Notion) e montar o Gantt/Roadmap de execução.
 * \[ X] 9. **Compilação e Reunião de Design Review:** Consolidar diagramas, equações e decisões lógicas, apresentando a base arquitetural para validação formal com algum profissional/professor.
-* \[O] 10. **Revisão Final e Congelamento (Milestone):** Finalizar a formatação no LaTeX, aprovar a documentação e declarar a Etapa 1 concluída, liberando o início da codificação do simulador.
+* <mark>\[O] 10. **Revisão Final e Congelamento (Milestone):** Finalizar a formatação no LaTeX, aprovar a documentação e declarar a Etapa 1 concluída, liberando o início da codificação do simulador.</mark>
