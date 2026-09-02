@@ -1,0 +1,77 @@
+---
+title: Ambientes Dev vs Produção (VPS)
+description: Paridade de execução, gerenciamento de variáveis de ambiente e deploy em servidores VPS com os mesmos repositórios.
+---
+
+# 🚀 Paridade de Ambientes: Dev vs Produção (VPS)
+
+O **CMS Murais Digitais** foi arquitetado com **paridade total de ambiente**: o mesmo conjunto de repositórios polyrepo e arquivos de orquestração pode ser baixado e executado tanto em computadores de desenvolvimento quanto em **servidores VPS remotos de produção**.
+
+---
+
+## 🧭 Estrutura de Branches e Ambientes
+
+| Ambiente | Branch Git | Arquivos de Ambiente | Modo de Execução | Portas Padrão |
+|---|---|---|---|---|
+| **Desenvolvimento** | `dev` | `.env.development`, `.env.test` | Hot-Reload (Vite dev server + TSX Backend + Volumes montados) | Backend: `5006`<br/>Frontend: `5179`<br/>DB: `5445`<br/>MinIO: `9000/9001` |
+| **Produção (VPS)** | `main` | `.env.production` | Otimizado (Nginx SPA + Backend JS compilado + Cloudflare Tunnel) | Frontend: `80` / `443`<br/>Backend: Interno na rede Docker |
+
+---
+
+## 💻 1. Rodando em Ambiente de Desenvolvimento
+
+Em máquinas de desenvolvimento (ou na VPS durante testes de homologação):
+
+```bash
+# 1. Clonar e inicializar os submódulos na branch dev
+git clone --recurse-submodules git@github.com:dorneles-laboratory/csm.git
+cd csm
+
+# 2. Sincronizar na branch dev e instalar dependências
+make sync-dev
+make install
+
+# 3. Subir a stack de desenvolvimento com hot-reload
+make dev-upd
+
+# 4. Acessar os serviços:
+# Frontend:   http://localhost:5179
+# Backend:    http://localhost:5006/api
+# Swagger UI: http://localhost:5006/api-docs
+# MinIO:      http://localhost:9001
+# Jaeger:     http://localhost:16692
+```
+
+---
+
+## 🌐 2. Rodando em Servidor de Produção (VPS)
+
+Na VPS de produção, o sistema executa a stack compilada de alta performance:
+
+```bash
+# 1. Clonar o orquestrador com submódulos na VPS
+git clone --recurse-submodules git@github.com:dorneles-laboratory/csm.git
+cd csm
+
+# 2. Sincronizar na branch de produção (main)
+make sync-main
+
+# 3. Configurar os arquivos .env.production (com segredos reais, JWT secrets e tokens)
+# apps/backend/.env.production
+# apps/frontend/.env.production
+
+# 4. Executar o pipeline de entrega contínua em produção
+make cd-prod
+```
+
+### O que o `make cd-prod` executa na VPS:
+1. **`sync-main`:** Puxa os commits mais recentes da branch `main` na raiz e em todos os submódulos.
+2. **`ci-local`:** Roda toda a bateria de testes automatizados e validações antes de colocar o código no ar.
+3. **`build-shared`:** Compila o `@lib/shared` em TypeScript estrito.
+4. **`prod-up`:** Constrói as imagens de produção com BuildKit e inicia os containers:
+   - `csm_backend_prod`: Executa o código JavaScript compilado via `tsup` no estágio runner.
+   - `csm_frontend_prod`: Servido via **Nginx** de alta performance com compressão Gzip e suporte a SPA.
+   - `csm_minio_prod`: Armazenamento de mídias persistido em volume Docker.
+   - `csm_tunnel_prod`: Cloudflare Tunnel seguro para publicação web com TLS automático sem abrir portas no firewall da VPS.
+5. **`migrate`:** Aplica migrações pendentes no banco de dados PostgreSQL com `prisma migrate deploy`.
+6. **`prune`:** Limpa imagens e camadas antigas do Docker, economizando espaço em disco na VPS.

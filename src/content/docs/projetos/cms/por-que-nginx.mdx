@@ -1,0 +1,125 @@
+---
+title: Por que usamos Nginx em Produção?
+description: Análise técnica e fundamentação da escolha do Nginx para entrega de Single Page Applications (SPA) em produção.
+---
+
+# 🌐 Por que usamos Nginx em Produção para o Frontend?
+
+Uma das decisões arquiteturais mais importantes em aplicações web modernas (especialmente ecossistemas React / Single Page Applications) é a **separação clara entre o servidor de desenvolvimento e o servidor de entrega estática de produção**.
+
+No **CMS Murais Digitais**, o frontend utiliza **Vite Dev Server** durante o desenvolvimento e uma imagem dedicada com **Nginx** em produção. Abaixo estão os motivos técnicos e práticos que fundamentam essa escolha.
+
+---
+
+## 1. 🔄 O Problema do Roteamento em Single Page Applications (SPA Routing)
+
+### Como o React Router DOM funciona no navegador
+Em uma SPA com **React Router DOM**, as rotas como `/screens`, `/contents`, `/playlist` e `/player` não correspondem a pastas ou arquivos físicos no disco do servidor. Elas são manipuladas dinamicamente no navegador via JavaScript através da **HTML5 History API** (`pushState` e `replaceState`).
+
+### O que acontece sem o Nginx (Erro 404)
+Quando um usuário acessa inicialmente `https://cms.universidade.br/`, o servidor entrega o arquivo `index.html`. O JavaScript carrega, lê a URL atual e renderiza a tela correta.
+
+Contudo, se o usuário estiver na rota `https://cms.universidade.br/screens` e **pressionar F5 (recarregar a página)**, o navegador enviará uma requisição HTTP direta ao servidor pedindo pelo arquivo `/screens/index.html` ou `/screens`.
+- Em servidores de arquivos estáticos simples sem configuração de roteamento, o servidor busca essa pasta física, não a encontra e devolve um erro **HTTP 404 Not Found**.
+
+### A Solução no Nginx: Diretiva `try_files`
+No Nginx, configuramos o bloco de roteamento:
+
+```nginx
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
+
+**Como funciona a resolução:**
+1. O Nginx verifica se existe um arquivo físico correspondente à URL (`$uri`, como `logo.svg` ou `assets/index-K11b.js`). Se existir, ele entrega diretamente.
+2. Se for um diretório (`$uri/`), ele tenta servir o índice.
+3. Se não for nenhum dos anteriores (como `/screens` ou `/player`), ele **redireciona internamente a requisição para `/index.html`** com status HTTP 200.
+4. O React é carregado e assume o controle da rota correta no cliente sem gerar nenhum erro 404 para o usuário ou para a Smart TV.
+
+---
+
+## 2. ⚡ Performance e Baixo Consumo de Recursos (Vite Dev Server vs Nginx)
+
+| Aspecto | Vite Dev Server (`npm run dev`) | Nginx em Produção |
+|---|---|---|
+| **Propósito** | DX (Developer Experience), HMR (Hot Module Replacement), compilação On-Demand. | Entrega de alta vazão de arquivos estáticos em disco com mínimo uso de CPU/RAM. |
+| **Consumo de Memória** | ~150MB a 300MB de RAM (processo Node.js com watchers de arquivo em memória). | **Menos de 10MB de RAM** por container Nginx. |
+| **I/O de Arquivos** | Processado via Event Loop assíncrono do Node.js. | Chamada de sistema nativa `sendfile()` do kernel Linux com Zero-Copy. |
+| **Concorrência** | Adequado para 1 desenvolvedor local. | Milhares de requisições simultâneas por segundo por processo worker. |
+
+Em ambientes de produção na VPS (onde múltiplos serviços rodam lado a lado, como Backend, Banco de Dados PostgreSQL, MinIO e Jaeger), usar Nginx reduz drasticamente o consumo de memória da máquina.
+
+---
+
+## 3. 🗜️ Compressão Gzip Automática para Telas e Displays
+
+Muitas Smart TVs universitárias e murais digitais operam conectados via **redes Wi-Fi institucionais** sujeitas a instabilidades de sinal ou alta concorrência de banda.
+
+No `nginx.conf` de produção do CMS, a compressão Gzip ativa reduz o tamanho dos bundles JavaScript e folhas de estilo CSS em **mais de 70%**:
+
+```nginx
+gzip on;
+gzip_vary on;
+gzip_min_length 10240;
+gzip_proxied expired no-cache no-store private auth;
+gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml application/javascript;
+```
+
+**Impacto:**
+- O bundle principal JS minificado cai de ~1.4MB para ~450KB transmitidos na rede.
+- O carregamento inicial do Player Kiosk na Smart TV torna-se quase instantâneo.
+
+---
+
+## 4. 🛡️ Estratégia de Caching de Assets Imutáveis
+
+O Vite utiliza **content hashing** nos nomes dos arquivos de saída (exemplo: `index-CfBrJXhu.js`, `index-K11bMtou.css`). Se o código mudar, o nome do arquivo muda.
+
+Com o Nginx, configuramos cache imutável de longa duração para assets com hash:
+
+```nginx
+location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+    expires 1y;
+    add_header Cache-Control "public, no-transform";
+}
+```
+
+Isso garante que o navegador da Smart TV só baixe os assets pesados **uma única vez**. Em recargas subsequentes ou reconexões, os arquivos são carregados instantaneamente do cache de disco local da TV.
+
+---
+
+## 5. 📦 Configuração do `apps/frontend/nginx.conf`
+
+```nginx
+server {
+    listen 80;
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Compressão Gzip
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 10240;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml application/javascript;
+    gzip_disable "MSIE [1-6]\.";
+
+    # Roteamento SPA
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Cache de Assets Estáticos
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+}
+```

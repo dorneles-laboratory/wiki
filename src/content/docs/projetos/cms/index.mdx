@@ -1,0 +1,39 @@
+---
+title: CMS - Murais Digitais
+description: Plataforma centralizada de gestão de conteúdo e agendamento para murais digitais, totens e TVs universitárias.
+---
+
+# 📺 Murais Digitais (CMS)
+
+**Murais Digitais (CMS - Content Management System)** é uma plataforma centralizada, moderna e robusta para gestão, distribuição, agendamento e exibição de conteúdos digitais em telas institucionais, totens universitários, murais informativos e Smart TVs.
+
+O sistema controla o ciclo completo de comunicação visual: desde a criação de avisos informativos com texto formatado, upload e transcodificação de mídias (imagens, vídeos) e links web em tempo real, até a organização em grades de programação (playlists dinâmicas) segmentadas por Centro Universitário, Prédio e Tela específica, além de um fluxo inovador de pareamento automatizado de novos displays via PIN de 6 dígitos e QR Code.
+
+---
+
+## 🎯 Objetivos do Produto
+
+1. **Centralização e Governança da Comunicação:** Eliminar a gestão descentralizada e manual de pen-drives e displays em prédios universitários.
+2. **Segmentação Geográfica e Institucional:** Permitir que cada Centro Universitário (ex: CT, CCNE, CCS) e cada Prédio possua sua grade de programação independente, além de receber campanhas institucionais globais.
+3. **Pareamento Zero-Touch (Kiosk Player):** Qualquer Smart TV ou display conectado à internet pode ser pareado em segundos através da leitura de um QR Code ou inserção de um PIN temporário de 6 dígitos no painel administrativo.
+4. **Alta Disponibilidade e Resiliência:** O player web opera em modo Kiosk em tela cheia, com sincronização periódica de playlists e reprodução contínua mesmo com instabilidades temporárias de rede.
+
+---
+
+## 👥 Personas e Perfis de Acesso (RBAC)
+
+| Perfil (`Role`) | Descrição | Escopo de Acesso |
+|---|---|---|
+| `SUPER_ADMIN` | Administrador Geral de TI / Reitoria | Controle irrestrito sobre todos os Centros, Prédios, Telas, Usuários, Playlists e Conteúdos do ecossistema. |
+| `CENTER_ADMIN` | Administrador de Centro Universitário | Gestão total dos Prédios, Telas, Operadores (`PUBLISHER`) e Playlists vinculadas ao seu Centro específico. |
+| `PUBLISHER` | Operador / Editor de Conteúdo | Criação, edição, agendamento e publicação de avisos, vídeos e comunicados institucionais. |
+
+---
+
+## 🧭 Estrutura da Documentação
+
+- [Arquitetura do Sistema](/projetos/cms/arquitetura) — Organização Polyrepo, Contratos Zod compartilhados, Backend Express 5 e Frontend React 19.
+- [Paridade de Ambientes: Dev vs Produção (VPS)](/projetos/cms/ambientes-dev-prod) — Como o sistema executa localmente e na VPS de produção com os mesmos repositórios.
+- [Por que usamos Nginx em Produção?](/projetos/cms/por-que-nginx) — Justificativa técnica do Nginx para SPAs, resolução de rotas com `try_files`, caching e compressão Gzip.
+- [Fluxo de Pareamento de Telas (PIN / QR Code)](/projetos/cms/pareamento-displays) — Protocolo de autenticação e pareamento em 5 etapas para displays.
+- [CI/CD Local e Comandos Operacionais](/projetos/cms/ci-cd-e-operacao) — Pipeline de integração e entrega contínua local com Husky, Docker Compose V2 e Makefile.

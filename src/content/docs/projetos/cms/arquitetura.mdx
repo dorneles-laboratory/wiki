@@ -1,0 +1,87 @@
+---
+title: Arquitetura do CMS
+description: Detalhes da arquitetura Polyrepo, pacotes compartilhados, backend RESTful, frontend reativo e modelo de dados relacional.
+---
+
+# 🏗️ Arquitetura do CMS
+
+O **CMS Murais Digitais** adota uma arquitetura de **Monorepo por Acoplamento via Git Submodules**, onde o repositório raiz orquestra os repositórios independentes dos serviços da aplicação.
+
+```
+csm/                              ← Raiz orquestradora (dorneles-laboratory/csm)
+├── apps/
+│   ├── backend/                  ← Submódulo: csm.backend (Express 5 + Prisma 7 + PostgreSQL)
+│   ├── frontend/                 ← Submódulo: csm.frontend (React 19 + Vite 7 + CSS Modules)
+│   └── wiki/                     ← Submódulo: wiki (Astro Starlight)
+├── packages/
+│   └── shared/                   ← Submódulo: csm.shared (Contratos Zod + OpenAPI Registry)
+├── docs/                         ← Documentação arquitetural
+├── Makefile                      ← Orquestrador central de comandos
+└── GEMINI.md                     ← Diretrizes contextuais para agentes de IA
+```
+
+---
+
+## 📦 1. Pacote Compartilhado (`packages/shared` / `@lib/shared`)
+
+O `@lib/shared` é a **Fonte Única de Verdade (Single Source of Truth)** do ecossistema. Ele elimina qualquer dessincronização entre o Frontend e o Backend ao centralizar:
+
+- **Schemas Zod Estritos:** Validação de entradas, payloads, query parameters e enums.
+- **Tipagem TypeScript E2E:** Tipos inferidos via `z.infer<typeof schema>` exportados diretamente para o frontend e backend.
+- **OpenAPI / Swagger Registry:** Registro declarativo de rotas, respostas e modelos via `@asteasolutions/zod-to-openapi`.
+- **Formato de Erro RFC 7807:** Contrato padrão para respostas de erro HTTP em toda a API.
+
+```
+packages/shared/src/
+├── auth/            ← Schemas de login, JWT e tokens
+├── users/           ← CRUD de usuários e RBAC
+├── centers/         ← Centros Universitários
+├── buildings/       ← Prédios dos Centros
+├── screens/         ← Telas e pareamento
+├── content/         ← Avisos, mídias e agendamento
+├── playlist/        ← Grade de exibição e durações
+├── kiosk/           ← Contratos do Player Kiosk
+└── common/          ← Paginação e RFC 7807 Problem Details
+```
+
+---
+
+## ⚙️ 2. Backend RESTful (`apps/backend`)
+
+O backend é construído sobre **Node.js com Express 5** e segue os princípios da **Clean Architecture**:
+
+- **Controllers:** Responsáveis exclusivamente por receber a requisição HTTP, validar os parâmetros com `schema.safeParse()`, delegar a execução ao Service e formatar a resposta.
+- **Services:** Contêm 100% das regras de negócio, transações e interações com o banco de dados via **Prisma ORM 7**. Em caso de violações de regra, lançam exceções customizadas `AppError`.
+- **Middlewares Globais:**
+  - `errorMiddleware`: Captura erros de forma centralizada e responde no formato padronizado **RFC 7807**.
+  - `authMiddleware` / `roleMiddleware`: Autenticação segura via cookies HTTP-Only e controle de acesso RBAC.
+  - `screenAuth`: Autenticação e validação do token das telas/Smart TVs.
+- **Armazenamento de Mídias:** Integração com serviço compatível com S3 (**MinIO**) para upload de imagens e vídeos institucionais.
+- **Observabilidade:** Logs estruturados com **Pino** e rastreamento distribuído via **OpenTelemetry + Jaeger**.
+
+---
+
+## 🖥️ 3. Frontend Reativo & Player Kiosk (`apps/frontend`)
+
+Interface construída com **React 19 + Vite 7**:
+
+- **Regra de Ouro da UI (CSS Modules Exclusivo):** Proibição total de Tailwind CSS ou classes utilitárias não modulares. Todo componente possui seu arquivo `<Componente>.module.css` consumindo os tokens semânticos declarados em `src/styles/global.css`.
+- **Gerenciamento de Estado do Servidor:** **TanStack React Query** gerencia cache, invalidação e sincronização com a API REST. **Não há dados mockados ou estáticos.**
+- **Player Kiosk (`/player`):** Aplicação executada em tela cheia na TV com transição dinâmica de imagens, vídeos e comunicados em texto com tempo configurável por item da playlist.
+- **Formulários:** **React Hook Form** integrado com **@hookform/resolvers/zod** consumindo os contratos do `@lib/shared`.
+
+---
+
+## 🗄️ 4. Modelo de Dados Relacional (Prisma Schema)
+
+```
+Center (Centro Universitário)
+  ├── Building (Prédio)
+  │     ├── Screen (Tela / Display / TV)
+  │     │     └── PairingRequest (Solicitações de Pareamento via PIN/QR Code)
+  │     └── PlaylistItem (Grade de Programação do Prédio)
+  └── User (Usuário Administrador / Editor)
+        ├── RefreshToken (Sessões JWT Ativas)
+        └── Content (Mídias, Avisos, Vídeos, URLs)
+              └── PlaylistItem (Item na Grade com Ordem e Duração em Segundos)
+```

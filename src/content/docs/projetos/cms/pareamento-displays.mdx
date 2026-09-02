@@ -1,0 +1,71 @@
+---
+title: Fluxo de Pareamento de Displays
+description: Protocolo de autenticação e handshake de pareamento de novas Smart TVs e murais digitais via PIN de 6 caracteres e QR Code.
+---
+
+# 📺 Fluxo de Pareamento de Displays (PIN & QR Code)
+
+Um dos diferenciais técnicos do **CMS Murais Digitais** é o seu fluxo de **pareamento automatizado de novas Smart TVs**, totens e monitores institucionais. O objetivo é permitir que qualquer display seja instalado e vinculado a um prédio específico sem necessidade de digitação complexa de senhas na TV.
+
+---
+
+## 🔄 Protocolo de Handshake em 5 Etapas
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant TV as Smart TV / Display (/pairing)
+    participant API as Backend API
+    participant Admin as Operador / Painel Web (/screens)
+
+    TV->>API: POST /screens/pairing/request
+    API-->>TV: { pin: "AB39X2", pairingToken: "...", expiresAt: "..." }
+    TV->>TV: Renderiza PIN em destaque e QR Code com URL de autorização
+
+    alt Opção A: Leitura de QR Code
+        Admin->>TV: Escaneia QR Code com celular
+    else Opção B: Digitação Manual do PIN
+        Admin->>API: Acessa /screens e digita PIN "AB39X2"
+    end
+
+    Admin->>API: POST /screens/pairing/authorize (PIN, prédio, nome da tela)
+    API->>API: Gera ScreenToken persistente e aprova requisição
+    API-->>Admin: { status: "APPROVED", screenId: "..." }
+
+    TV->>API: Polling / Verificação de status do pareamento
+    API-->>TV: { status: "APPROVED", screenToken: "jwt_screen_token" }
+    TV->>TV: Salva screenToken em localStorage e redireciona para /player
+    TV->>API: GET /kiosk/playlist (com Bearer screenToken)
+    API-->>TV: Retorna grade de reprodução ativa
+```
+
+---
+
+## 🔍 Detalhamento das Etapas
+
+### 1. Abertura do Player Kiosk na TV
+Ao ser ligada pela primeira vez, a TV acessa a rota pública `/pairing` do frontend. O sistema verifica se existe um token de tela salvo no armazenamento local (`localStorage.getItem('screenToken')`).
+- Se existir um token válido, a TV é redirecionada imediatamente para `/player`.
+- Se não existir, inicia o processo de pareamento.
+
+### 2. Geração do PIN Temporário
+O player dispara uma requisição `POST /screens/pairing/request` para o backend:
+- O servidor gera um PIN alfanumérico único de **6 caracteres em caixa alta** (exemplo: `K9X2B4`).
+- Cria um registro no banco de dados com expiração automática (padrão de 15 minutos).
+- Devolve o PIN e o ID da requisição para a TV.
+
+### 3. Exibição Visual (PIN + QR Code)
+A interface do display renderiza:
+- O **PIN de 6 dígitos** com alta legibilidade para visualização à distância.
+- Um **QR Code dinâmico** contendo a URL de autorização direta do painel administrativo com o PIN pré-preenchido.
+
+### 4. Autorização pelo Operador Autenticado
+O operador credenciado (com papel `SUPER_ADMIN` ou `CENTER_ADMIN` do centro correspondente):
+- Escaneia o QR Code ou abre a tela `/screens` no painel web.
+- Informa o PIN exibido na tela, seleciona o Centro Universitário, o Prédio onde a TV está fisicamente localizada e define um nome amigável (ex: *"Hall de Entrada - Prédio 7"*).
+- Envia `POST /screens/pairing/authorize`.
+
+### 5. Emissão do Screen Token e Reprodução Automática
+- O backend associa a tela ao prédio, altera o status da requisição para `APPROVED` e emite um **token JWT persistente de tela (`screenToken`)**.
+- A TV detecta a aprovação, grava o `screenToken` com segurança no navegador e transiciona automaticamente para a rota `/player`.
+- O player inicia a execução da playlist do prédio (`GET /kiosk/playlist`) em tela cheia.
