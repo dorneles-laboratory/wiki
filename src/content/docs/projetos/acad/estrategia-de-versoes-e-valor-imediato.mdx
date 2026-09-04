@@ -1,0 +1,137 @@
+---
+title: Estratégia de Versões & Valor Imediato
+description: Como entregar valor tangível ao estudante desde o primeiro dia com custo zero de IA, planejando a evolução progressiva com sustentabilidade.
+sidebar:
+  order: 15
+---
+
+# 🎯 Estratégia de Versões & Valor Imediato
+
+## 1. O Princípio do "Valor no Dia 1"
+
+Um dos maiores erros no desenvolvimento de plataformas inovadoras é condicionar a utilidade do produto à presença de Inteligência Artificial avançada. Quando um sistema só entrega valor se o usuário interagir com uma IA dispendiosa:
+1. O mantenedor assume um risco financeiro desmedido antes de validar a adesão dos estudantes;
+2. Usuários comuns abandonam a plataforma quando deparam-se com limites de cota;
+3. O produto torna-se dependente de infraestrutura de terceiros para suas funções mais básicas.
+
+No **Academic Companion**, a estratégia de produto inverte essa lógica:
+
+> **O Academic Companion é indispensável para o estudante mesmo que a Inteligência Artificial esteja desligada.**
+
+A maior dor do estudante universitário não é a falta de um robô de conversa; **é a desorganização crônica de sua própria história**. O valor primordial da plataforma reside em ser o arquivo vivo, organizado e permanente da sua formação.
+
+---
+
+## 2. A Matriz de Valor vs. Custo Computacional
+
+Para estruturar as versões de forma responsável, as funcionalidades foram mapeadas em uma matriz de retorno acadêmico por custo marginal:
+
+```text
+VALOR ACADÊMICO
+       ▲
+       │  [ALTO VALOR / CUSTO ZERO]         [ALTO VALOR / CUSTO VARIÁVEL]
+       │  • Diário de Memória Textual       • Transcrição de Voz (Gemini Audio)
+       │  • Linha do Tempo Cronológica      • Copiloto de IA da Trajetória
+       │  • Gestão de Experiências (IC/Ext) • Parsing Multimodal de PDFs
+       │  • Validação de Horas Comp.        • Recomendações Preditivas
+       │  • Planejamento de Disciplinas
+       │
+       │  [VALOR BASE / CUSTO BAIXO]        [RISCO DE CUSTO / VALOR DUVIDOSO]
+       │  • Cadastro de Perfil e Metas      • Chat genérico sem contexto
+       │  • Catálogo Estático de Editais    • Geração indiscriminada de imagens
+       │  • Exportação de Relatórios PDF    • Web crawling não direcionado
+       └───────────────────────────────────────────────────────────────────►
+                                                      CUSTO COMPUTACIONAL (IA)
+```
+
+Essa análise orienta a divisão cirúrgica das versões da plataforma.
+
+---
+
+## 3. Versão 1.0 — A Fundação de Valor Imediato (Custo de IA: R$ 0,00)
+
+A V1.0 foi desenhada para resolver 80% da frustração diária do estudante universitário consumindo **apenas recursos de banco de dados e servidor web estático**. O custo marginal por novo usuário ativo nesta versão é praticamente nulo.
+
+### Módulos e Entregas da V1.0:
+
+#### 1. Identidade Acadêmica Completa
+* Cadastro universitário: curso, campus, matrícula, semestre atual e previsão de formatura;
+* Registro de interesses e metas acadêmicas de médio prazo;
+* Controle do progresso geral da graduação (percentual de integralização curricular).
+
+#### 2. Diário de Memória em Texto (Sem custo de tokens)
+* Registro rápido de relatos diários, reflexões de aula e aprendizados práticos;
+* Formatação rica em Markdown com sistema flexível de tags (`#pesquisa`, `#calculo2`, `#extensao`);
+* Busca textual instantânea de registros passados.
+
+#### 3. Gestão Centralizada de Experiências (`Experience`)
+* Cadastro unificado de todas as vivências práticas: Projetos, Iniciação Científica, Estágios, Monitorias, Extensão, Competições e Eventos;
+* Associação de datas de início e conclusão, carga horária semanal e supervisores/orientadores;
+* Registro dos aprendizados e entregas de cada vivência.
+
+#### 4. Linha do Tempo Visual Interativa
+* Agrupamento cronológico automático de todas as memórias e experiências por semestre letivo;
+* Filtros por categoria para que o estudante visualize facilmente sua dedicação temporal.
+
+#### 5. Gestão e Validação de Certificados
+* Upload seguro de arquivos de comprovantes e declarações em PDF e imagem;
+* Classificação manual por modalidade (ensino, pesquisa, extensão, cursos);
+* **Calculadora Automática de Horas Complementares:** O estudante acompanha em tempo real quantas horas de atividades formativas já acumulou e quantas faltam para a colação de grau.
+
+#### 6. Planejamento Semestral de Disciplinas e Metas
+* Montagem da grade semestral pretendida;
+* Definição de metas de notas e presença por disciplina;
+* Checkpoints de revisão no meio e no final do semestre.
+
+#### 7. Radar Inicial de Editais Nacionais (Crawler Estático)
+* Coleta de editais de universidades federais e agências (CAPES, CNPq) utilizando leitores diretos de feeds RSS e sitemaps HTML públicos;
+* Listagem organizada com filtros por estado e categoria, **sem acionar modelos de linguagem caros para parsing**.
+
+---
+
+## 4. Versão 1.5 — A Chegada da IA Sustentável & Apoio Solidário
+
+Uma vez validada a retenção dos estudantes na V1.0 com suas memórias e experiências já cadastradas, a V1.5 introduz as primeiras capacidades de inteligência, **ancoradas na receita solidária do Cardápio Universitário via Stripe**.
+
+### Inovações da V1.5:
+
+#### 1. Ativação do Cardápio Solidário (Stripe)
+* Interface humilde permitindo "pagar um cafezinho" (R$ 2,90), "salgado" (R$ 5,90) ou "almoço RU" (R$ 9,90) para expandir cotas;
+* Gestão transparente de cotas de uso no perfil do usuário.
+
+#### 2. Transcrição de Voz Inteligente (Speech-to-Text Gemini)
+* Gravação de áudio direto pelo navegador após aulas ou reuniões de laboratório;
+* O áudio é compactado no cliente e transcrito de forma eficiente;
+* Consome minutos da cota mensal do estudante, com fallback gracioso para gravação em texto quando a cota atinge o teto.
+
+#### 3. Academic Assistant Copilot (RAG da Trajetória)
+* Como o estudante já acumulou semanas de memórias na V1.0, o copiloto agora possui um repositório rico de contexto;
+* O assistente responde a consultas em linguagem natural:
+  * *"Quais projetos participei no ano passado que envolveram análise de dados?"*
+  * *"Quantas horas de extensão eu já comprovei até hoje?"*
+* Protegido por rate-limit e contadores de mensagens por plano.
+
+---
+
+## 5. Versão 2.0+ — Automação Avançada e Inteligência Preditiva
+
+Com o modelo financeiro comprovadamente sustentável e a base de usuários consolidada, as versões avançadas desbloqueiam automações profundas:
+
+1. **Parsing Multimodal de Editais:** Extração automática de regras e tabelas de editais escaneados complexos via visão computacional e LLMs.
+2. **Motor de Match Personalizado:** Cruzamento matemático entre o histórico de competências do aluno e os critérios de seleção de editais abertos.
+3. **Integração com Currículo Lattes:** Sincronização automatizada da produção científica e coautorias.
+4. **Dossiês com 1 Clique para Seleções:** Geração de pacotes ZIP com todos os comprovantes exigidos por um edital organizados e renomeados conforme o padrão da banca.
+
+---
+
+## 6. Comparativo de Entregas por Versão
+
+| Capacidade | V1.0 (Zero IA / Grátis) | V1.5 (IA Sustentável) | V2.0+ (Inteligência Plena) |
+|---|---|---|---|
+| **Custo de IA para o Mantenedor** | **R$ 0,00** | Autossustentável via Stripe | Autossustentável com superávit |
+| **Registro de Memória** | Texto formatado | Texto + Áudio transcrito | Multimodal (Áudio/Imagem/Docs) |
+| **Linha do Tempo** | Cronológica completa | Enriquecida com resumos de IA | Preditiva com metas futuras |
+| **Horas Complementares** | Calculadora manual | Validação semi-automática | Extração automática via OCR |
+| **Assistente Conversacional** | — | Chat contextual com histórico | Copiloto ativo com recomendações |
+| **Editais e Oportunidades** | Catálogo estático (RSS) | Filtros inteligentes | Match algorítmico e alertas |
+| **Infraestrutura Financeira** | Servidor VPS comum | Stripe Checkout integrado | Stripe Customer Portal avançado |
