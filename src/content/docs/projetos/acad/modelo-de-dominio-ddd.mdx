@@ -1,0 +1,182 @@
+---
+title: Modelo de Domínio (DDD Tático)
+description: Agregados, Entidades, Objetos de Valor, Serviços de Domínio e Invariantes do Academic Companion.
+sidebar:
+  order: 9
+---
+
+# 🧩 Modelo de Domínio (DDD Tático)
+
+## 1. Princípios de Modelagem do Domínio
+
+O domínio do Academic Companion foi concebido a partir dos seguintes fundamentos de Domain-Driven Design (DDD):
+
+1. **O Estudante é a Raiz do Domínio:** Todos os demais agregados e entidades existem para representar e potencializar aspectos da trajetória do estudante.
+2. **Evidências Derivam de Experiências:** Certificados e produções não são entidades soltas; seu valor reside nas experiências e práticas que os geraram.
+3. **Competências são Construídas:** Uma competência não é uma simples string cadastrada; ela possui origem rastreável em vivências reais.
+4. **Trajetória Antes de Documentos:** Prioriza-se o fluxo contínuo de evolução humana e intelectual sobre arquivos estáticos.
+
+---
+
+## 2. Visão Geral dos Agregados
+
+```text
+Student Aggregate (Raiz Principal)
+│
+├── AcademicProfile         [Value Object]
+├── Experience             [Entity]
+│   └── ExperiencePeriod    [Value Object]
+├── AcademicMemory          [Entity]
+│   └── MemoryContent       [Value Object]
+├── Competency              [Entity]
+├── AcademicGoal            [Entity]
+└── AcademicPlan            [Entity]
+
+Evidence Aggregate
+│
+├── Evidence                [Aggregate Root]
+├── Certificate             [Entity - herda de Evidence]
+└── Publication             [Entity - herda de Evidence]
+
+Opportunity Aggregate
+│
+├── Opportunity             [Aggregate Root]
+└── Application             [Entity]
+
+Assistant Aggregate
+│
+└── AcademicAssistantContext [Aggregate Root]
+
+Analytics Aggregate
+│
+└── AcademicAnalytics       [Aggregate Root]
+```
+
+---
+
+## 3. Agregado Principal: Student
+
+* **Aggregate Root:** `Student`
+* **Identidade:** UUID único.
+* **Responsabilidade:** Garantir a consistência e integridade de toda a trajetória do indivíduo. Qualquer alteração de estado no perfil, experiências ou memórias passa pelas invariantes da raiz `Student`.
+
+### Métodos de Negócio e Comportamentos
+* `student.registerExperience(experienceData)` — Valida e adiciona nova experiência à trajetória.
+* `student.addMemory(memoryData)` — Cria um novo registro cronológico no diário acadêmico.
+* `student.createGoal(goalData)` — Registra um novo objetivo com prazos e prioridades.
+* `student.updateProfile(profileData)` — Atualiza dados cadastrais e interesses acadêmicos.
+* `student.generateTimeline(filterCriteria)` — Compila a linha do tempo cronológica do estudante.
+
+---
+
+## 4. Entidades e Value Objects do Agregado Student
+
+### Value Object: AcademicProfile
+* **Natureza:** Value Object (imutável, sem identidade própria; dois perfis com os mesmos dados são idênticos).
+* **Propriedades:** `university`, `campus`, `course`, `semester`, `enrollmentId`, `interests: string[]`, `academicObjectives: string[]`.
+
+### Entidade: Experience
+* **Natureza:** Entidade com ciclo de vida próprio e identificador único.
+* **Tipos Suportados:** Projeto, Estágio, Iniciação Científica, Extensão, Monitoria, Competição, Evento.
+* **Comportamentos:**
+  * `experience.start(date)` — Marca início formal da atividade;
+  * `experience.finish(date, outcomeSummary)` — Finaliza e calcula duração;
+  * `experience.attachEvidence(evidenceId)` — Vincula comprovante oficial;
+  * `experience.linkCompetency(competencyId)` — Associa competências desenvolvidas.
+
+### Value Object: ExperiencePeriod
+* **Propriedades:** `startDate: Date`, `endDate?: Date`.
+* **Invariante:** Se `endDate` estiver presente, deve ser obrigatoriamente posterior ou igual a `startDate`.
+
+### Entidade: AcademicMemory
+* **Natureza:** Registro cronológico de acontecimento formativo.
+* **Comportamentos:**
+  * `memory.create(content, format)` — Cria memória textual, por áudio ou multimídia;
+  * `memory.categorize(tags)` — Atribui tópicos e categorias temáticas;
+  * `memory.linkExperience(experienceId)` — Vincula o relato a uma experiência ativa.
+
+### Value Object: MemoryContent
+* **Propriedades:** `title: string`, `body: string`, `format: 'TEXT' | 'AUDIO' | 'IMAGE' | 'MULTIMEDIA'`, `tags: string[]`, `audioUrl?: string`.
+
+### Entidade: Competency
+* **Natureza:** Competência prática ou teórica demonstrada.
+* **Invariante Central:** Deve possuir fonte de origem rastreável (experiência, produção, curso ou evento).
+* **Comportamentos:**
+  * `competency.evolve(newEvidence)` — Incrementa nível de maturidade;
+  * `competency.attachEvidence(evidenceId)` — Associa prova documental;
+  * `competency.validate()` — Marca como formalmente comprovada.
+
+### Entidade: AcademicGoal
+* **Natureza:** Meta acadêmica ou profissional.
+* **Comportamentos:**
+  * `goal.create(title, targetDate, priority)` — Registra objetivo;
+  * `goal.updateProgress(progressPercentage)` — Atualiza taxa de conclusão;
+  * `goal.complete()` — Marca como concluído (invariante: não pode retornar a rascunho).
+
+### Entidade: AcademicPlan
+* **Natureza:** Plano de execução de metas com etapas temporais.
+* **Comportamentos:** `plan.addStep()`, `plan.updateStep()`, `plan.finish()`.
+
+---
+
+## 5. Agregado: Evidence
+
+* **Aggregate Root:** `Evidence`
+* **Objetivo:** Custodiar documentos e produções comprobatórias verificáveis.
+
+### Entidade: Certificate (Especialização de Evidence)
+* **Propriedades:** `issuingInstitution`, `issueDate`, `workloadHours`, `validationCode`, `certificateUrl`.
+
+### Entidade: Publication (Especialização de Evidence)
+* **Propriedades:** `title`, `authors: string[]`, `publicationDate`, `venue` (revista/congresso), `doi?: string`, `issn?: string`, `qualis?: string`.
+* **Comportamentos:**
+  * `publication.addAuthor(name, affiliation)`;
+  * `publication.linkEvent(eventId)`.
+
+---
+
+## 6. Agregado: Opportunity
+
+* **Aggregate Root:** `Opportunity`
+* **Objetivo:** Gestão de editais, bolsas, intercâmbios e eventos coletados externamente.
+* **Propriedades:** `title`, `organization`, `category`, `deadline`, `requirements: string[]`, `stipendAmount?: number`, `sourceUrl`.
+* **Entidade: Application:** Representa a candidatura de um estudante a uma oportunidade específica (`status: 'DRAFT' | 'SUBMITTED' | 'ACCEPTED' | 'REJECTED'`).
+
+---
+
+## 7. Serviços de Domínio (Domain Services)
+
+Operações de negócio complexas que envolvem múltiplos agregados:
+
+| Serviço de Domínio | Responsabilidade | Entradas | Saída |
+|---|---|---|---|
+| **OpportunityMatchingService** | Calcula aderência percentual entre perfil do aluno e requisitos de um edital. | `Student`, `Opportunity` | `MatchScore` (0-100%) e justificativas |
+| **CompetencyEvolutionService** | Determina o nível de evolução das competências a partir das vivências do aluno. | `Experiences`, `Evidence`, `Publications` | `CompetencyMap` consolidado |
+| **TrajectoryAnalysisService** | Realiza diagnóstico holístico de consistência, equilíbrio e lacunas na formação. | `Student` (histórico completo) | `TrajectoryReport` com insights |
+
+---
+
+## 8. Eventos de Domínio (Domain Events)
+
+Eventos assíncronos disparados quando ocorrem fatos relevantes no domínio:
+
+* `StudentCreated` — Novo estudante registrado na plataforma.
+* `ExperienceRegistered` — Nova experiência associada à trajetória.
+* `MemoryCreated` — Novo relato persistido no diário acadêmico.
+* `EvidenceAttached` — Comprovante documental vinculado a uma experiência.
+* `CompetencyDeveloped` — Competência atingiu novo nível de maturidade.
+* `GoalCreated` / `GoalCompleted` — Metas traçadas e atingidas.
+* `OpportunityMatched` — Nova oportunidade compatível detectada pelo coletor.
+* `ApplicationSubmitted` — Candidatura enviada pelo estudante.
+* `PublicationRegistered` — Novo artigo ou patente anexado ao portfólio.
+
+---
+
+## 9. Invariantes de Negócio (Regras de Consistência)
+
+* **INV-001:** Toda experiência pertence obrigatoriamente a um único estudante.
+* **INV-002:** Toda competência reconhecida pelo sistema deve possuir pelo menos uma origem comprovada (experiência, produção ou certificado).
+* **INV-003:** Toda evidência documental deve estar vinculada a pelo menos uma experiência, publicação ou evento registrado.
+* **INV-004:** Objetivos acadêmicos marcados como concluídos (`COMPLETED`) não podem ter seu status revertido para rascunho.
+* **INV-005:** Uma candidatura (`Application`) deve estar associada a exatamente uma oportunidade (`Opportunity`).
+* **INV-006:** Publicações científicas devem possuir obrigatoriamente pelo menos um autor cadastrado e data válida.

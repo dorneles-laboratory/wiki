@@ -1,0 +1,103 @@
+---
+title: Versionamento e Escopo Inicial
+description: Ciclo de releases planejadas, convenção SemVer, fontes prioritárias de dados e cronograma de versões do Academic Companion.
+sidebar:
+  order: 13
+---
+
+# 📦 Versionamento e Escopo Inicial
+
+## 1. Convenção de Versionamento
+
+O Academic Companion adota estritamente o padrão internacional **Semantic Versioning 2.0.0 (SemVer)** no formato:
+
+`MAJOR.MINOR.PATCH`
+
+* **MAJOR:** Modificações incompatíveis de API, refatorações estruturais ou mudanças de modelo de dados com quebra de contratos;
+* **MINOR:** Adição de novos módulos funcionais de forma retrocompatível (ex: novo coletor de editais, nova integração);
+* **PATCH:** Correções de bugs, pequenas melhorias de interface e patches de segurança.
+
+---
+
+## 2. Cronograma de Versões Planejadas
+
+### Versão 0.1.0 — Concepção e Arquitetura Base
+* **Status:** Concluída / Em implementação.
+* **Objetivos:**
+  * Definição da arquitetura monorepo por acoplamento (`packages/shared`, `apps/backend`, `apps/frontend`, `apps/wiki`);
+  * Definição dos contratos Zod e schema Prisma inicial;
+  * Estruturação dos fluxos de coleta e domínio de negócio;
+  * Publicação da base de conhecimento na Wiki oficial.
+
+---
+
+### Versão 0.2.0 — MVP Nacional
+* **Status:** Planejada.
+* **Objetivos:** Disponibilizar uma plataforma funcional para estudantes de universidades brasileiras.
+* **Funcionalidades:**
+  * Cadastro e autenticação segura de estudantes;
+  * Configuração de perfil acadêmico e interesses;
+  * Diário de memória e linha do tempo de experiências;
+  * Upload de comprovantes e catálogo de produções;
+  * Coleta automatizada de editais e bolsas de instituições brasileiras;
+  * Busca e filtragem por oportunidades com marcação de favoritos.
+* **Fontes Prioritárias de Coleta:**
+  * Universidades Federais (UFSM, UFRGS, UFMG, UFRJ, etc.);
+  * Institutos Federais de Educação, Ciência e Tecnologia (IFs);
+  * Agências Nacionais: CAPES e CNPq;
+  * Fundações Estaduais de Amparo à Pesquisa (FAPERGS, FAPESP, FAPEMIG, etc.).
+
+---
+
+### Versão 0.3.0 — Inteligência Artificial e Parsing de Editais
+* **Status:** Planejada.
+* **Objetivos:** Automatizar a interpretação e classificação de editais e memórias.
+* **Funcionalidades:**
+  * Leitura e processamento de editais em PDF;
+  * Extração automatizada de requisitos, datas e bolsas por LLMs;
+  * Geração de resumos executivos de editais;
+  * Algoritmo de cálculo de aderência (*Match Score* perfil ↔ oportunidade);
+  * Transcrição e formatação de memórias narradas por voz.
+
+---
+
+### Versão 0.4.0 — Expansão Internacional
+* **Status:** Planejada.
+* **Objetivos:** Conectar estudantes a programas e bolsas no exterior.
+* **Funcionalidades:**
+  * Suporte multilíngue de interface (Português, Inglês, Espanhol);
+  * Coleta de oportunidades em universidades estrangeiras e programas de mobilidade (ex: DAAD, Chevening, Fulbright);
+  * Conversão cambial e normalização de calendários acadêmicos internacionais;
+  * Tradução automatizada de chamadas de artigos e congressos.
+
+---
+
+### Versão 0.5.0 — Motor Autônomo de Coleta
+* **Status:** Planejada.
+* **Objetivos:** Automatizar 100% da descoberta de novas fontes de editais.
+* **Funcionalidades:**
+  * Crawler com autodetecção de portais de editais, feeds RSS e sitemaps;
+  * Atualização incremental e monitoramento de taxas de alteração de editais;
+  * Módulo de OCR resiliente para documentos escaneados antigos.
+
+---
+
+### Versão 0.6.0 — Plataforma de Recomendação Inteligente
+* **Status:** Planejada.
+* **Objetivos:** Transformar o sistema em um ambiente de curadoria e assistência ativa.
+* **Funcionalidades:**
+  * Recomendações personalizadas proativas via notificações push e e-mail;
+  * Assistente de preparação de documentação para candidaturas;
+  * Calendário automatizado de prazos de inscrição;
+  * Histórico de submissões e acompanhamento de resultados.
+
+---
+
+### Versão 1.0.0 — Primeira Versão Estável de Produção
+* **Status:** Marco Geral de Lançamento.
+* **Objetivos:** Ecossistema completo, auditado, escalável e de alta disponibilidade.
+* **Entregas:**
+  * Suite completa de Core Academic, Evidence, Opportunity, Assistant e Analytics;
+  * API pública fortemente tipada para integrações institucionais;
+  * Cobertura de testes unitários e de integração superior a 80%;
+  * Deploy orquestrado em contêineres Docker e observabilidade completa (Pino, OpenTelemetry).

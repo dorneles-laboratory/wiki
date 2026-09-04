@@ -1,0 +1,134 @@
+---
+title: Domínios e Arquitetura Conceitual
+description: Arquitetura de negócio em 3 camadas, limites de contexto (Bounded Contexts) e fluxos de dados do Academic Companion.
+sidebar:
+  order: 6
+---
+
+# 🏗️ Domínios e Arquitetura Conceitual
+
+## 1. Princípio Arquitetural Central
+
+> **O estudante é o núcleo de toda a arquitetura.**
+
+Em contraste com sistemas educacionais legados (que organizam seus esquemas ao redor de turmas, departamentos ou processos burocráticos), o Academic Companion estrutura todas as suas entidades ao redor da **trajetória do indivíduo**.
+
+Todos os domínios convergem para representar, enriquecer, preservar e interpretar essa jornada.
+
+```text
+                          Academic Companion
+                                  │
+                                  ▼
+                          Academic Identity
+                                  │
+          ┌───────────────────────┼───────────────────────┐
+          │                       │                       │
+          ▼                       ▼                       ▼
+   Academic Memory        Academic Planning       Opportunity Engine
+          │                       │                       │
+          └───────────┬───────────┴───────────┬───────────┘
+                      │                       │
+                      ▼                       ▼
+              Academic Evidence       Academic Analytics
+                      │                       │
+                      └───────────┬───────────┘
+                                  │
+                                  ▼
+                          Academic Assistant
+```
+
+---
+
+## 2. As Três Camadas Conceituais
+
+### Camada 1: Identidade
+* **Domínio Central:** `Academic Identity`
+* **Pergunta:** *"Quem é este estudante?"*
+* **Responsabilidades:**
+  * Dados de universidade, campus, curso, semestre e matrícula;
+  * Histórico educacional e acadêmico;
+  * Interesses declarados e objetivos gerais de formação;
+  * Competências auto-declaradas e idiomas.
+* **Papel Arquitetural:** Fonte primária e raiz de contexto para todos os demais domínios.
+
+---
+
+### Camada 2: Construção da Trajetória
+Compreende os domínios que registram o passado, organizam o futuro e descobrem oportunidades no presente.
+
+#### A. Academic Memory
+* **Responsabilidade:** Preservar a história viva do estudante.
+* **Entradas:** Notas rápidas, áudio com transcrição, fotos, marcos, reflexões e participações.
+* **Saídas:** Timeline interativa, resumo cronológico e histórico de experiências.
+
+#### B. Academic Planning
+* **Responsabilidade:** Estruturar o planejamento de curto, médio e longo prazo.
+* **Entradas:** Metas acadêmicas, créditos restantes, disciplinas eletivas, calendário institucional.
+* **Saídas:** Plano semestral, metas de estudo, prazos de intercâmbio e plano de carreira.
+
+#### C. Opportunity Engine
+* **Responsabilidade:** Conectar o estudante a oportunidades acadêmicas e profissionais.
+* **Entradas:** Editais coletados (bolsas, monitorias, IC, eventos, congressos, estágios).
+* **Saídas:** Recomendações personalizadas por compatibilidade (*matching*), alertas de prazos.
+
+---
+
+### Camada 3: Inteligência e Suporte
+Transforna informações dispersas em conhecimento acionável e assistência direta.
+
+#### A. Academic Evidence
+* **Responsabilidade:** Transformar experiências em patrimônio verificável.
+* **Entradas:** Certificados, declarações, produções científicas (artigos, patentes), projetos concluídos.
+* **Saídas:** Dossiês validados, mapa de competências demonstradas e portfólios compartilháveis.
+
+#### B. Academic Analytics
+* **Responsabilidade:** Analisar a trajetória de forma sistêmica.
+* **Entradas:** Dados consolidados de todos os módulos (memória, planejamento, evidências).
+* **Saídas:** Indicadores de evolução temporal, diagnóstico de lacunas formativas e previsões de potencial.
+
+#### C. Academic Assistant
+* **Responsabilidade:** Interface conversacional e copiloto do estudante.
+* **Entradas:** Consultas em linguagem natural por texto ou voz.
+* **Saídas:** Respostas contextuais sobre a trajetória, sugestões de ação e apoio à elaboração de candidaturas.
+
+---
+
+## 3. Contextos Delimitados Externos (External Contexts)
+
+O Academic Companion não opera isolado; ele se comunica com o ecossistema educacional e profissional:
+
+```text
+┌────────────────────────┐       ┌────────────────────────┐
+│ Plataformas Acadêmicas │       │ Plataformas Científicas│
+│ (SIGAA, Moodle, Portais│       │ (Lattes, CrossRef, etc)│
+└───────────┬────────────┘       └───────────┬────────────┘
+            │                                │
+            ▼                                ▼
+  ┌─────────────────────────────────────────────────────┐
+  │                 ACADEMIC COMPANION                  │
+  └─────────────────────────────────────────────────────┘
+            ▲                                ▲
+            │                                │
+┌───────────┴────────────┐       ┌───────────┴────────────┐
+│ Plataformas Profiss.   │       │      Project Hub       │
+│ (LinkedIn, GitHub)     │       │(Gestão de Projetos Col)│
+└────────────────────────┘       └────────────────────────┘
+```
+
+* **Plataformas Acadêmicas Formais (SIGAA, Moodle):** Histórico de notas, matrículas oficiais e calendários institucionais.
+* **Plataformas Científicas (Lattes):** Produções científicas, coautorias, bancas e apresentações.
+* **Plataformas Profissionais e Técnicas (LinkedIn, GitHub):** Repositórios de código, commits, projetos de software e estágios.
+* **Project Hub (Ecossistema Interno):** Gestão colaborativa de equipes e tarefas. O Academic Companion consome apenas o papel individual do estudante no projeto e suas entregas para gerar evidência em sua trajetória pessoal.
+
+---
+
+## 4. Fluxos de Dados e Informação Principais
+
+1. **Fluxo de Construção de Memória e Evidência:**
+   `Estudante → Academic Memory → Academic Evidence → Academic Analytics`
+2. **Fluxo de Planejamento Orientado a Dados:**
+   `Academic Identity + Analytics → Academic Planning`
+3. **Fluxo de Oportunidades por Compatibilidade:**
+   `Identity + Competências + Objetivos → Opportunity Matching → Notificação`
+4. **Fluxo de Consulta do Assistente Copiloto:**
+   `Pergunta do Estudante → Assistant Contextualizer → Consulta a todos os Domínios → Resposta`

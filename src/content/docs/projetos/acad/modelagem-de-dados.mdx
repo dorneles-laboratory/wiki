@@ -1,0 +1,142 @@
+---
+title: Modelagem Lógica de Dados & Entidade Experience
+description: Transição conceitual para lógico-físico, organização modular do banco e a centralidade da entidade Experience.
+sidebar:
+  order: 10
+---
+
+# 🗄️ Modelagem Lógica de Dados & Entidade Experience
+
+## 1. Da Concepção ao Banco de Dados
+
+Para garantir que o banco de dados seja escalável, coerente e reflita com precisão as regras de negócio do Academic Companion, o desenvolvimento segue rigorosamente a sequência profissional de engenharia de dados:
+
+```text
+Modelo Conceitual (Negócio puro / Sem tabelas)
+      ↓
+Modelo Lógico (Relacionamentos entre entidades / Cardinalidade)
+      ↓
+DBML (Linguagem declarativa de modelagem de dados)
+      ↓
+Modelo Físico Prisma ORM (PostgreSQL fortemente tipado)
+```
+
+Essa abordagem evita a criação precipitada de tabelas desarticuladas e preserva a fidelidade do domínio.
+
+---
+
+## 2. A Entidade Mais Importante: Experience
+
+Durante a concepção da arquitetura, constatou-se que a maioria das vivências acadêmicas compartilhava da mesma natureza ontológica:
+
+```text
+Projeto de Engenharia
+Estágio Supervisionado
+Monitoria de Disciplina
+Participação em Evento
+Competição / Hackathon
+Iniciação Científica (IC)
+Curso de Extensão
+Empresa Júnior
+Atividade Voluntária
+```
+
+Embora recebam nomes diferentes no ambiente universitário, **todas essas vivências são instâncias da mesma entidade: `Experience`**.
+
+```text
+                             Experience
+                                 │
+     ┌───────────────────────────┼───────────────────────────┐
+     │                           │                           │
+     ▼                           ▼                           ▼
+Project Experience      Internship Experience       Research (IC) Experience
+     │                           │                           │
+     ▼                           ▼                           ▼
+Event Experience        Extension Experience        Teaching (Monitoria) Exp.
+```
+
+### Por que `Experience` é a Raiz Geradora?
+A entidade `Experience` é a geradora primária de todo o valor percebido na plataforma. Ela não é um registro estático; ela produz derivados imediatos:
+
+```text
+Experience ──┬──> Competencies        (Habilidades exercitadas)
+             ├──> Evidence            (Certificados, relatórios e produções)
+             ├──> Academic Memories   (Reflexões e anotações diárias)
+             ├──> Timeline Events     (Marcos cronológicos na formação)
+             └──> Analytics           (Carga horária e dedicação)
+```
+
+Ao adotar `Experience` como entidade unificadora, o modelo de dados torna-se extremamente elegante, reutilizável e extensível.
+
+---
+
+## 3. Módulos de Dados do Sistema
+
+Devido à amplitude do domínio, o banco de dados é subdividido em módulos lógicos claros:
+
+### 1. Core Academic (Identidade & Trajetória Base)
+* `Student` — Entidade raiz do usuário estudante;
+* `AcademicProfile` — Instituição, campus, curso, matrícula e metas;
+* `Experience` — Registro polimórfico de todas as atividades práticas;
+* `AcademicMemory` — Anotações em texto, voz ou imagem;
+* `TimelineEvent` — Eventos cronológicos da linha do tempo;
+* `AcademicGoal` — Metas de curto, médio e longo prazo;
+* `AcademicPlan` — Planos semestrais estruturados em etapas.
+
+### 2. Evidence (Comprovações e Produções)
+* `Evidence` — Tabela base de evidências verificáveis;
+* `Certificate` — Comprovantes com instituição emissora, carga horária e link de validação;
+* `Publication` — Artigos, pôsteres, patentes e trabalhos técnicos;
+* `PortfolioItem` — Itens selecionados para exibição pública.
+
+### 3. Competencies (Habilidades e Maturidade)
+* `Competency` — Catálogo de habilidades (técnicas, comportamentais e científicas);
+* `CompetencyCategory` — Categorias e eixos do conhecimento;
+* `CompetencyEvidence` — Tabela intermediária associando a evidência à competência comprovada;
+* `CompetencyEvolution` — Histórico de progressão de nível do estudante em cada competência.
+
+### 4. Opportunities (Coleta e Candidaturas)
+* `Opportunity` — Editais, bolsas, eventos e estágios coletados;
+* `OpportunityCategory` — Taxonomia das oportunidades;
+* `Application` — Registro da candidatura do estudante com status do processo seletivo.
+
+### 5. Integrations (Sincronização Externa)
+* `IntegrationProvider` — Provedores suportados (GitHub, Lattes, Moodle, Google);
+* `IntegrationAccount` — Credenciais OAuth e IDs externos vinculados ao estudante;
+* `IntegrationSync` — Log de execuções de sincronização e telemetria de erros.
+
+### 6. Assistant (Copiloto Contextual)
+* `Conversation` — Sessão de conversa do estudante com a IA;
+* `Message` — Mensagens trocadas com papéis `user` e `assistant`;
+* `ContextSnapshot` — Recorte de memórias e perfil injetados no contexto da IA;
+* `Recommendation` — Sugestões formais geradas pelo copiloto.
+
+### 7. Analytics (Métricas e Diagnósticos)
+* `Indicator` — Métricas de engajamento e horas acumuladas;
+* `StudentSnapshot` — Fotografia periódica do perfil do estudante para análise de séries temporais;
+* `TrajectoryAnalysis` — Diagnósticos computados de consistência e lacunas formativas.
+
+---
+
+## 4. Estrutura Lógica de Alto Nível
+
+```text
+Student
+│
+├── AcademicProfile
+├── Experience
+│       ├── Evidence (Certificates, Publications)
+│       ├── Competency (vinculadas via CompetencyEvidence)
+│       ├── AcademicMemory
+│       └── TimelineEvent
+│
+├── AcademicGoal
+├── AcademicPlan
+│
+├── Application
+│       └── Opportunity
+│
+└── IntegrationAccount
+```
+
+Essa estrutura estabelece um alicerce robusto para o esquema físico do **Prisma ORM** no backend (`apps/backend/prisma/schema.prisma`), garantindo integridade referencial, consultas de alta performance e conformidade com os contratos do `@lib/shared`.

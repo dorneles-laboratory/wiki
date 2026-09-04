@@ -1,0 +1,239 @@
+---
+title: Catálogo de Funcionalidades
+description: Catálogo exaustivo de todas as capacidades e funcionalidades mapeadas para o Academic Companion.
+sidebar:
+  order: 7
+---
+
+# 📚 Catálogo de Funcionalidades
+
+Este documento estabelece o catálogo completo de capacidades funcionais do Academic Companion, organizadas por domínios de negócio com identificadores padronizados para rastreamento em desenvolvimento, testes e especificações de software.
+
+```text
+Academic Companion
+├── 1. Academic Identity   (FID)
+├── 2. Academic Memory     (FAM)
+├── 3. Academic Evidence   (FAE)
+├── 4. Academic Planning   (FAP)
+├── 5. Opportunity Engine  (FOE)
+├── 6. Academic Assistant  (FAA)
+├── 7. Academic Analytics  (FAN)
+├── 8. Transversais        (FT)
+└── 9. Futuras             (FTF)
+```
+
+---
+
+## 1. Academic Identity (FID)
+
+Representa e estrutura a identidade formal, histórica e intencional do estudante.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FID-001** | Cadastro Universitário Base | Registro estruturado de universidade, campus, curso, semestre letivo atual e matrícula. |
+| **FID-002** | Histórico Educacional | Registro de formações anteriores, ensino médio, cursos técnicos e intercâmbios prévios. |
+| **FID-003** | Objetivos Acadêmicos | Declaração de metas de formação (ex: publicação de artigo, ingresso em IC, intercâmbio, mestrado). |
+| **FID-004** | Objetivos Profissionais | Declaração de áreas de interesse de atuação no mercado (ex: indústria, pesquisa, docência, empreendedorismo). |
+| **FID-005** | Áreas de Interesse | Áreas temáticas e subáreas do conhecimento de maior interesse do estudante. |
+| **FID-006** | Competências Declaradas | Habilidades técnicas e comportamentais autodeclaradas pelo usuário. |
+| **FID-007** | Idiomas | Nível de proficiência em leitura, escrita e conversação em diferentes idiomas. |
+| **FID-008** | Certificações Relevantes | Lista de certificações profissionais e acadêmicas de destaque. |
+| **FID-009** | Perfil Acadêmico Público | Página pública ou compartilhável com resumo da identidade e trajetória do estudante. |
+| **FID-010** | Importação Institucional | Mecanismo de importação inicial de dados cadastrais de portais acadêmicos. |
+
+---
+
+## 2. Academic Memory (FAM)
+
+Preserva a história viva, os acontecimentos diários e os aprendizados do estudante.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FAM-001** | Registro Textual | Diário rápido de anotações, pensamentos e reflexões diárias sobre aulas e projetos. |
+| **FAM-002** | Registro por Voz | Captura em áudio de relatos com transcrição automática para texto. |
+| **FAM-003** | Registro por Imagem | Anexação de fotos de quadros, eventos, protótipos de laboratório e momentos acadêmicos. |
+| **FAM-004** | Registro Multimídia | Memórias compostas combinando áudio, texto e anexos. |
+| **FAM-005** | Categorização & Tags | Sistema de marcação por disciplina, projeto, evento ou tema livre. |
+| **FAM-006** | Registro de Reflexões | Espaço guiado para autoavaliação de aprendizados e dificuldades superadas. |
+| **FAM-007** | Registro de Aprendizados | Destaque explícito de conceitos, técnicas ou ferramentas assimiladas no dia. |
+| **FAM-008** | Linha do Tempo Unificada | Visualização cronológica contínua de todos os marcos e memórias da formação. |
+| **FAM-009** | Linha do Tempo Filtrável | Filtros avançados por ano, semestre, tipo de evento ou projeto. |
+| **FAM-010** | Visualização por Período | Agrupamento de memórias por semestre letivo ou férias. |
+| **FAM-011** | Visualização por Categoria | Agrupamento por pesquisa, extensão, aula, evento ou lazer formativo. |
+| **FAM-012** | Registro de Conquistas | Destaque especial para aprovações em processos seletivos, notas altas, prêmios e bolsas. |
+| **FAM-013** | Registro de Eventos | Participação em palestras, congressos, simpósios, conferências e workshops. |
+| **FAM-014** | Registro de Experiências | Vinculação direta a projetos, estágios ou monitorias em andamento. |
+| **FAM-015** | Registro de Participações | Atuação em centros acadêmicos, atléticas, empresas juniores e ligas acadêmicas. |
+| **FAM-016** | Memórias Destacadas | Marcação de memórias como favoritas ou marcos definidores da trajetória. |
+| **FAM-017** | Captura Inteligente Voz → Memória | IA que resume e formata notas narradas por áudio em memórias estruturadas. |
+| **FAM-018** | Sugestão Automática de Eventos | Detecção e sugestão de inclusão de eventos ocorridos no calendário. |
+| **FAM-019** | Extração de Contexto | Detecção automática de disciplinas, tecnologias e professores citados nas anotações. |
+| **FAM-020** | Resumo Automático de Registros | Geração de sínteses mensais ou semestrais das memórias acumuladas. |
+
+---
+
+## 3. Academic Evidence (FAE)
+
+Transforma vivências práticas em evidências verificáveis e portfólios estruturados.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FAE-001** | Upload de Certificados | Armazenamento seguro de arquivos de comprovantes e declarações (PDF, PNG). |
+| **FAE-002** | Organização por Categoria | Separação de certificados em: ensino, pesquisa, extensão, cursos e eventos. |
+| **FAE-003** | Validação de Documentos | Registro de autenticidade (código de validação, link e instituição emissora). |
+| **FAE-004** | Extração Automática de Metadados | Leitura por OCR/IA de certificados para preenchimento de horas, data e emissor. |
+| **FAE-005** | Cadastro de Artigos | Registro de artigos científicos publicados ou submetidos com DOI, ISSN e Qualis. |
+| **FAE-006** | Cadastro de Trabalhos Técnicos | Registro de TCCs, relatórios técnicos, whitepapers e monografias. |
+| **FAE-007** | Cadastro de Apresentações | Registro de pôsteres, comunicações orais e palestras ministradas. |
+| **FAE-008** | Cadastro de Patentes | Registro de depósitos de patentes, registros de software e propriedade intelectual. |
+| **FAE-009** | Projetos Concluídos | Registro completo de projetos de pesquisa, extensão ou engenharia finalizados. |
+| **FAE-010** | Mapeamento Experiência → Competência | Associação declarativa de quais habilidades foram aplicadas em cada projeto. |
+| **FAE-011** | Mapeamento Produção → Competência | Associação das publicações às competências científicas comprovadas. |
+| **FAE-012** | Mapa Visual de Competências | Gráfico ou matriz exibindo competências técnicas e comportamentais desenvolvidas. |
+| **FAE-013** | Evolução de Competências | Acompanhamento da profundidade e maturidade das competências ao longo do tempo. |
+| **FAE-014** | Portfólio Acadêmico | Página consolidada com produção científica e projetos acadêmicos. |
+| **FAE-015** | Portfólio Científico | Foco estrito em publicações, citações, apresentações em congressos e bancas. |
+| **FAE-016** | Portfólio Profissional | Portfólio voltado a recrutadores, destacando projetos de código, estágios e entregas. |
+| **FAE-017** | Compartilhamento Seguro | Geração de links públicos ou com senha para compartilhamento de portfólio. |
+| **FAE-018** | Currículo Acadêmico Padronizado | Exportação nos padrões de agências de fomento e processos de seleção. |
+| **FAE-019** | Currículo Profissional | Exportação resumida em PDF nos padrões de mercado corporativo. |
+| **FAE-020** | Exportação para Editais | Pacote em arquivo ZIP com todas as evidências solicitadas em um edital específico. |
+| **FAE-021** | Preparação de Dados para Lattes | Estruturação de dados para preenchimento ágil na Plataforma Lattes. |
+
+---
+
+## 4. Academic Planning (FAP)
+
+Planejamento acadêmico de curto, médio e longo prazo.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FAP-001** | Planejamento de Disciplinas | Organização da grade curricular pretendida para o semestre. |
+| **FAP-002** | Planejamento de Créditos | Controle de créditos obrigatórios, eletivos e horas complementares restantes. |
+| **FAP-003** | Metas de Desempenho | Definição de metas de notas, frequência e aproveitamento. |
+| **FAP-004** | Acompanhamento Semestral | Checkpoints periódicos de progresso nas metas traçadas. |
+| **FAP-005** | Rotina e Blocos de Estudo | Organização de blocos semanais dedicados a cada disciplina e projeto. |
+| **FAP-006** | Gestão de Descanso & Bem-estar | Inclusão deliberada de momentos de recuperação na rotina acadêmica. |
+| **FAP-007** | Rastreamento de Hábitos Acadêmicos | Monitoramento de consistência de leitura, escrita e revisão de aulas. |
+| **FAP-008** | Planejamento Semanal | Visão ágil das prioridades e entregas da semana em curso. |
+| **FAP-009** | Planejamento de IC | Cronograma de ingresso e execução de plano de trabalho de Iniciação Científica. |
+| **FAP-010** | Planejamento de Estágio | Estratégia de busca, capacitação e período ideal para estágio curricular. |
+| **FAP-011** | Planejamento de Intercâmbio | Preparação de idiomas, editais de mobilidade e equivalência de créditos. |
+| **FAP-012** | Planejamento de Pós-Graduação | Roteiro de preparação de currículo e projeto de pesquisa para Mestrado/Doutorado. |
+| **FAP-013** | Planejamento de Carreira | Mapeamento das competências necessárias para a atuação profissional almejada. |
+| **FAP-014** | Calendário Acadêmico Oficial | Prazos de matrícula, trancamento, provas e feriados da universidade. |
+| **FAP-015** | Calendário Pessoal | Compromissos e prazos definidos pelo próprio estudante. |
+| **FAP-016** | Calendário Integrado | Visão unificada combinando datas institucionais, pessoais e prazos de editais. |
+
+---
+
+## 5. Opportunity Engine (FOE)
+
+Mecanismo central de coleta e recomendação inteligente de oportunidades.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FOE-001** | Editais Institucionais | Coleta contínua de editais da própria universidade e de órgãos de fomento. |
+| **FOE-002** | Bolsas de Estudo | Oportunidades de bolsas de ensino, assistência, pesquisa e extensão. |
+| **FOE-003** | Monitorias | Vagas de monitoria remunerada ou voluntária por departamento. |
+| **FOE-004** | Iniciações Científicas | Projetos de IC abertos por professores e laboratórios. |
+| **FOE-005** | Vagas em Projetos | Chamadas para equipes de extensão, competição ou inovação. |
+| **FOE-006** | Congressos & Simpósios | Prazos de submissão e datas de eventos científicos da área. |
+| **FOE-007** | Eventos & Palestras | Seminários, aulas magnas e conferências locais ou remotas. |
+| **FOE-008** | Workshops & Cursos Livres | Cursos de capacitação complementar recomendados. |
+| **FOE-009** | Competições Acadêmicas | Maratonas de programação, desafios de engenharia e olimpíadas do conhecimento. |
+| **FOE-010** | Hackathons | Desafios intensivos de inovação e tecnologia. |
+| **FOE-011** | Intercâmbios & Mobilidade | Editais de mobilidade acadêmica nacional e internacional. |
+| **FOE-012** | Programas de Mestrado | Processos seletivos de pós-graduação stricto sensu em todo o país. |
+| **FOE-013** | Programas de Doutorado | Editais de doutorado e doutorado sanduíche. |
+| **FOE-014** | Grupos de Pesquisa | Diretório de grupos do CNPq com vagas para novos pesquisadores. |
+| **FOE-015** | Vagas de Estágio | Oportunidades de estágio compatíveis com o semestre e o curso. |
+| **FOE-016** | Oportunidades Profissionais | Vagas de trainee e posições júnior para concluintes. |
+| **FOE-017** | Cálculo de Match Perfil ↔ Oportunidade | Algoritmo que calcula a aderência percentual entre perfil do aluno e requisitos. |
+| **FOE-018** | Ranking de Aderência | Ordenação das oportunidades pela maior probabilidade de elegibilidade e interesse. |
+| **FOE-019** | Alertas Personalizados | Notificações push/e-mail para editais com alta pontuação de match. |
+| **FOE-020** | Recomendação Automática Semanal | Digest semanal com as melhores oportunidades encontradas. |
+
+---
+
+## 6. Academic Assistant (FAA)
+
+Copiloto conversacional contextualizado em IA.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FAA-001** | Chat Contextual | Conversação em texto com conhecimento integral da trajetória e memórias do estudante. |
+| **FAA-002** | Interação por Voz | Comando e consulta através de áudio natural. |
+| **FAA-003** | Consultas Históricas | Respostas sobre vivências passadas (*"Em qual projeto usei a biblioteca X?"*). |
+| **FAA-004** | Consulta de Trajetória | Síntese de marcos e conquistas alcançadas em determinado período. |
+| **FAA-005** | Consulta de Competências | Análise rápida das competências consolidadas pelo usuário. |
+| **FAA-006** | Consulta de Oportunidades | Apoio na triagem de editais com base em perguntas específicas. |
+| **FAA-007** | Consulta de Planejamento | Sugestões sobre o que priorizar nos próximos dias ou meses. |
+| **FAA-008** | Planejamento Assistido | Geração assistida de cronogramas de estudo e planos de semestre. |
+| **FAA-009** | Registro Assistido | O assistente entrevista o usuário e monta automaticamente o registro de uma experiência. |
+| **FAA-010** | Preparação para Editais | Comparativo entre exigências de um edital e as evidências que o aluno possui. |
+| **FAA-011** | Preparação para Entrevistas | Simulação de perguntas de entrevista com base nas experiências reais do aluno. |
+| **FAA-012** | Apoio a Cartas de Motivação | Redação e revisão de cartas de motivação e memoriais acadêmicos. |
+| **FAA-013** | Orientação para Pós-Graduação | Sugestões de estrutura para anteprojetos de pesquisa científica. |
+
+---
+
+## 7. Academic Analytics (FAN)
+
+Inteligência de dados sobre a trajetória do estudante.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FAN-001** | Indicadores de Evolução | Gráficos temporais de acúmulo de horas, produções e créditos. |
+| **FAN-002** | Indicadores de Participação | Distribuição percentual em pesquisa, ensino, extensão e mercado. |
+| **FAN-003** | Indicadores de Produção | Frequência de escrita de relatórios, códigos e publicações. |
+| **FAN-004** | Indicadores de Engajamento | Consistência de registros na memória acadêmica ao longo dos meses. |
+| **FAN-005** | Grafo de Competências | Visualização em rede conectando tecnologias, conceitos e projetos. |
+| **FAN-006** | Competências Emergentes | Identificação de novas habilidades iniciadas nos últimos meses. |
+| **FAN-007** | Competências Consolidadas | Habilidades validadas por múltiplas experiências e certificados. |
+| **FAN-008** | Diagnóstico de Lacunas | Alerta sobre competências esperadas para a área que ainda não foram praticadas. |
+| **FAN-009** | Análise de Trajetória Sistêmica | Diagnóstico holístico de consistência da formação do estudante. |
+| **FAN-010** | Predição de Oportunidades | Estimativa de quais tipos de editais o aluno terá maior chance no próximo ciclo. |
+| **FAN-011** | Recomendações Estratégicas | Sugestões de atividades que preenchem as lacunas prioritárias da formação. |
+| **FAN-012** | Análise de Aderência Curricular | Monitoramento do progresso rumo à conclusão de todos os requisitos do curso. |
+| **FAN-013** | Análise Temporal de Dedicação | Visualização de como o foco mudou ao longo dos semestres. |
+| **FAN-014** | Representação Dinâmica do Gêmeo | Modelo computacional atualizado continuamente com o perfil do estudante. |
+| **FAN-015** | Modelo de Trajetória | Vetorização das experiências para comparação com trajetórias de sucesso. |
+| **FAN-016** | Modelo de Competências | Nível de maturidade inferido para cada competência cadastrada. |
+| **FAN-017** | Estimativa de Potencial | Estimativa de competitividade acadêmica para processos de bolsas de excelência. |
+
+---
+
+## 8. Funcionalidades Transversais (FT)
+
+Recursos compartilhados por todos os módulos da plataforma.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FT-001** | Sistema de Notificações | Central de notificações no app, push e e-mail com preferências do usuário. |
+| **FT-002** | Busca Global Unificada | Pesquisa rápida de texto completo em memórias, certificados, editais e metas. |
+| **FT-003** | Sistema Global de Tags | Vocabulário controlado e tags livres compartilhadas em todo o sistema. |
+| **FT-004** | Favoritos & Salvos | Marcação rápida de oportunidades, memórias e evidências para consulta futura. |
+| **FT-005** | Compartilhamento | Geração de links externos com controle de visibilidade para orientadores ou recrutadores. |
+| **FT-006** | Exportação Completa de Dados | Exportação de todos os dados do usuário em formatos abertos (JSON, PDF, CSV). |
+| **FT-007** | Importação de Dados | Mecanismo de upload de histórico pregresso de outras plataformas. |
+| **FT-008** | Gerenciador de Integrações | Painel para vincular contas (GitHub, Google, Lattes, Moodle). |
+| **FT-009** | Dashboard Principal | Painel de controle inicial com resumo da semana, avisos e próximos prazos. |
+| **FT-010** | Trilha de Auditoria | Histórico de alterações e auditoria de segurança da conta do estudante. |
+
+---
+
+## 9. Funcionalidades Futuras e Inovações (FTF)
+
+Recursos planejados para versões avançadas da plataforma.
+
+| Código | Funcionalidade | Descrição |
+|---|---|---|
+| **FTF-001** | Sincronização Bidirecional Lattes | Leitura e atualização automática do XML da Plataforma Lattes. |
+| **FTF-002** | Integração Completa SIGAA | Importação nativa contínua de matrículas, notas e turmas. |
+| **FTF-003** | Integração Moodle / AVA | Sincronização de prazos de entregas de trabalhos de disciplinas. |
+| **FTF-004** | Integração Contínua GitHub | Sincronização automática de commits, pull requests e repositórios autorais. |
+| **FTF-005** | Integração LinkedIn | Atualização e importação de experiências profissionais. |
+| **FTF-006** | Assistente Multimodal em Tempo Real | Interação por voz e visão computacional para análise imediata de editais. |
+| **FTF-007** | Planejamento Preditivo | IA que simula cenários futuros (*"Se eu fizer IC agora, como isso impacta meu mestrado?"*). |
+| **FTF-008** | Gêmeo Digital Acadêmico Completo | Simulação avançada de trajetórias baseada em dados estatísticos de milhares de egressos. |

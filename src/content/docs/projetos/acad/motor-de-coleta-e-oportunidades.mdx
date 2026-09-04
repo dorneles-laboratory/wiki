@@ -1,0 +1,117 @@
+---
+title: Motor de Busca e Coleta de Oportunidades
+description: Arquitetura técnica do crawler híbrido, estratégias de coleta, tipologia de oportunidades e pipeline de IA.
+sidebar:
+  order: 11
+---
+
+# 🔍 Motor de Busca e Coleta de Oportunidades
+
+## 1. Objetivo do Motor
+
+A **Ferramenta de Busca e Coleta de Oportunidades** tem como objetivo localizar, extrair, interpretar, normalizar e armazenar automaticamente oportunidades acadêmicas e profissionais publicadas por universidades, agências de fomento, institutos de pesquisa e organizações em âmbito nacional e internacional.
+
+O sistema opera de forma contínua e autônoma, identificando novas publicações, aditivos e encerramento de prazos sem necessidade de intervenção humana manual.
+
+---
+
+## 2. Tipologia de Oportunidades Mapeadas
+
+O motor reconhece e categoriza automaticamente as seguintes modalidades:
+
+* **Bolsas de Estudo:** Apoio financeiro estudantil, bolsas de mérito e bolsas institucionais;
+* **Iniciação Científica (IC):** Bolsas PIBIC, PIBITI, voluntárias e de laboratórios;
+* **Monitorias de Disciplina:** Vagas para auxílio didático a turmas de graduação;
+* **Programas de Extensão:** Projetos de impacto comunitário (PIBEX);
+* **Estágios e Trainees:** Oportunidades curriculares e não-curriculares no mercado;
+* **Intercâmbios & Mobilidade:** Programas de intercâmbio bilateral e bolsas internacionais;
+* **Pós-Graduação:** Seleção de Mestrado acadêmico/profissional, Doutorado e Pós-Doutorado;
+* **Summer/Winter Schools:** Escolas de curta duração em centros de excelência;
+* **Chamadas de Artigos (Call for Papers):** Submissões para revistas científicas e congressos;
+* **Eventos & Conferências:** Simpósios, congressos e encontros científicos;
+* **Competições & Hackathons:** Maratonas de inovação e olimpíadas do conhecimento;
+* **Auxílios Estudantis:** Assistência estudantil, auxílio alimentação, moradia e transporte;
+* **Financiamentos & Editais Gerais:** Fomento a projetos de pesquisa e inovação tecnológica.
+
+---
+
+## 3. Arquitetura Geral de Coleta Híbrida
+
+Devido à grande diversidade de formatos e maturidade tecnológica das universidades (algumas disponibilizam APIs modernas, enquanto outras publicam apenas PDFs escaneados como imagem), o motor adota uma **estratégia híbrida em cascata**:
+
+```text
+Universidades & Agências
+           │
+           ▼
+Descoberta da Fonte (APIs / RSS / Sitemaps / Crawling)
+           │
+           ▼
+Coleta de Documentos (HTML / PDFs / Imagens)
+           │
+           ▼
+Extração de Texto & OCR (Tesseract / Visão Computacional)
+           │
+           ▼
+Interpretação e Estruturação via IA (Gemini / LLMs)
+           │
+           ▼
+Normalização de Dados (Schema Único de Oportunidade)
+           │
+           ▼
+Banco de Dados & Motor de Compatibilidade (Match com Perfil)
+           │
+           ▼
+Notificação Contextual ao Estudante
+```
+
+---
+
+## 4. Estratégias e Prioridades de Coleta
+
+Para otimizar desempenho e minimizar consumo de banda, o motor tenta os métodos na seguinte ordem estrita:
+
+1. **APIs REST/GraphQL:** Método prioritário sempre que a instituição disponibilizar endpoint público ou autenticado. Oferece dados estruturados, alta velocidade e estabilidade.
+2. **Feeds RSS/Atom:** Varredura ágil de canais de notícias e editais de portais universitários (`/rss.xml`, `/feed`), dispensando web scraping pesado.
+3. **Sitemap XML:** Consulta periódica a `sitemap.xml` para detectar novas URLs e alterações recentes de páginas com baixíssimo custo computacional.
+4. **Respeito a `robots.txt`:** Consulta obrigatória para identificar diretórios públicos e regras de acesso de crawlers éticos.
+5. **Scraping HTML Resiliente:** Extração seletiva baseada em heurísticas de busca de termos-chave em português (*editais*, *bolsas*, *monitoria*), inglês (*scholarships*, *grants*, *calls*) e espanhol (*convocatorias*, *becas*).
+6. **Download e Extração de PDFs:** Download assíncrono dos editais em arquivo PDF com extração do fluxo de texto nativo.
+7. **OCR (Reconhecimento Óptico de Caracteres):** Acionado exclusivamente quando o arquivo PDF for composto por imagens escaneadas sem camada de texto.
+
+---
+
+## 5. Pipeline de Extração com Inteligência Artificial
+
+Uma vez extraído o texto bruto do edital, o conteúdo é submetido a um modelo de IA que identifica e extrai os campos estruturados:
+
+```json
+{
+  "institution": "Universidade Federal de Santa Maria",
+  "campus": "Campus Sede",
+  "title": "Edital de Seleção para Iniciação Científica - Laboratório de Sistemas Inteligentes",
+  "category": "RESEARCH_SCHOLARSHIP",
+  "academicLevel": "UNDERGRADUATE",
+  "courses": ["Ciência da Computação", "Sistemas de Informação", "Engenharia de Computação"],
+  "requirements": [
+    "Matrícula ativa a partir do 3º semestre",
+    "Conhecimento em Python e Aprendizado de Máquina",
+    "Disponibilidade de 20h semanais"
+  ],
+  "stipendAmount": 700.00,
+  "currency": "BRL",
+  "openDate": "2026-03-01T00:00:00Z",
+  "deadline": "2026-03-20T23:59:59Z",
+  "officialUrl": "https://ufsm.br/editais/001-2026",
+  "pdfUrl": "https://ufsm.br/editais/001-2026.pdf"
+}
+```
+
+---
+
+## 6. Normalização, Tradução e Atualização Incremental
+
+* **Schema Único de Dados:** Independentemente de o edital vir do Brasil, Alemanha ou Estados Unidos, todos os dados são normalizados para os contratos do `@lib/shared`.
+* **Tradução Multilíngue:** Oportunidades internacionais são indexadas com suporte multilíngue para busca, preservando intacto o texto original no idioma de origem.
+* **Atualização Incremental:** O sistema guarda o hash de páginas e arquivos já processados. Apenas itens com hash alterado ou novas URLs são reanalisados pela IA, economizando recursos de computação.
+* **Controle de Duplicidade:** Verificação multidimensional via URL canônica, código oficial do edital e similaridade de embeddings de título e resumo.
+* **Agendamento Dinâmico:** Fontes com grande fluxo de publicação (ex: reitorias e agências nacionais) são verificadas a cada 30 minutos; páginas departamentais menores são agendadas em janelas de 2 a 12 horas.

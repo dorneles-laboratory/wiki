@@ -1,0 +1,285 @@
+---
+title: Casos de Uso do Sistema
+description: Atores, interações operacionais, fluxos principais e casos de uso futuros do Academic Companion.
+sidebar:
+  order: 8
+---
+
+# 🎯 Casos de Uso do Sistema
+
+## 1. Atores do Sistema
+
+### A01 — Estudante
+* **Descrição:** Ator primário do sistema.
+* **Papel:** Utiliza a plataforma para acompanhar, registrar, planejar e alavancar sua trajetória acadêmica, científica e profissional.
+
+### A02 — Sistemas Externos
+* **Descrição:** Plataformas e APIs de terceiros conectadas ao sistema.
+* **Exemplos:** Moodle, SIGAA, Plataforma Lattes, GitHub, LinkedIn, Google Calendar.
+
+### A03 — Academic Assistant (Agente Inteligente)
+* **Descrição:** Agente conversacional e inteligente integrado ao ecossistema.
+* **Papel:** Atua ativamente fornecendo recomendações, resumos, auxílio em candidaturas e suporte operacional em diversos fluxos.
+
+---
+
+## 2. Visão Geral dos Casos de Uso
+
+```text
+Estudante (A01)
+├── UC-001: Gerenciar Perfil Acadêmico
+├── UC-002: Registrar Memória Acadêmica
+├── UC-003: Registrar Experiência
+├── UC-004: Gerenciar Certificados e Evidências
+├── UC-005: Cadastrar Produção Acadêmica
+├── UC-006: Gerar Portfólio Acadêmico
+├── UC-007: Planejar Semestre Letivo
+├── UC-008: Definir Objetivos de Longo Prazo
+├── UC-009: Explorar Catálogo de Oportunidades
+├── UC-010: Receber Recomendações Personalizadas
+├── UC-011: Consultar Trajetória e Linha do Tempo
+├── UC-012: Consultar Mapa de Competências
+├── UC-013: Conversar com o Academic Assistant
+├── UC-014: Registrar Memória por Áudio / Voz
+├── UC-015: Importar Dados de Plataformas Externas
+├── UC-016: Preparar Documentação para Oportunidades
+├── UC-017: Visualizar Diagnósticos de Analytics
+└── UC-018: Exportar Trajetória e Dossiês
+```
+
+---
+
+## 3. Especificação dos Casos de Uso Primários
+
+### UC-001 — Gerenciar Perfil Acadêmico
+* **Objetivo:** Permitir que o estudante construa e mantenha atualizada sua identidade acadêmica.
+* **Ator Principal:** Estudante.
+* **Pré-condição:** Usuário autenticado.
+* **Fluxo Principal:**
+  1. O estudante acessa a seção de Perfil;
+  2. Informa ou edita seus dados universitários (instituição, campus, curso, matrícula, semestre);
+  3. Atualiza áreas de interesse, objetivos de carreira e idiomas;
+  4. Salva as alterações;
+  5. O sistema valida as entradas e atualiza o contexto de identidade acadêmica.
+* **Resultado:** Perfil acadêmico persistido e propagado para os módulos de recomendação.
+
+---
+
+### UC-002 — Registrar Memória Acadêmica
+* **Objetivo:** Registrar acontecimentos diários, reflexões ou aprendizados vivenciados na formação.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante aciona a criação de uma nova memória;
+  2. Seleciona o formato desejado (texto formatado, upload de imagem, ou gravação de voz);
+  3. Insere o relato e vincula tags de assunto, disciplina ou projeto relacionado;
+  4. Confirma a criação;
+  5. O sistema registra a memória cronologicamente na linha do tempo do usuário.
+* **Resultado:** Nova memória persistida e associada à trajetória.
+
+---
+
+### UC-003 — Registrar Experiência
+* **Objetivo:** Registrar uma atividade acadêmica estruturada (projeto de pesquisa, extensão, estágio, monitoria, evento).
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante clica em "Nova Experiência";
+  2. Define o tipo (Projeto, Estágio, IC, Monitoria, Extensão, Competição);
+  3. Informa período (data de início e previsão de término), instituição, orientador/supervisor e descrição das atividades;
+  4. Associa as competências técnicas e relacionais praticadas;
+  5. Salva o registro;
+  6. O sistema atualiza o agregado de experiências e a linha do tempo.
+* **Resultado:** Experiência formal integrada à trajetória, gerando vínculos para futuras evidências.
+
+---
+
+### UC-004 — Gerenciar Certificados e Evidências
+* **Objetivo:** Fazer upload e validar comprovantes, declarações e certificados acadêmicos.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante realiza o upload do arquivo (PDF ou imagem);
+  2. O sistema executa extração automática de dados preliminares via OCR (instituição, data, carga horária);
+  3. O estudante confere os dados extraídos, seleciona a categoria e vincula à experiência correspondente;
+  4. Confirma o armazenamento;
+  5. O sistema armazena o documento de forma segura e atualiza o total de horas complementares.
+* **Resultado:** Evidência verificável catalogada e pronta para exportação em editais.
+
+---
+
+### UC-005 — Cadastrar Produção Acadêmica
+* **Objetivo:** Catalogar artigos científicos, relatórios técnicos, resumos em anais, patentes e TCCs.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante seleciona o tipo de produção (artigo, pôster, patente, monografia);
+  2. Informa título, coautores, veículo de publicação, DOI, ISSN/ISBN e data;
+  3. Faz upload do documento ou insere o link oficial;
+  4. Confirma o cadastro;
+  5. O sistema valida os campos e indexa a produção no portfólio científico do estudante.
+* **Resultado:** Produção científica registrada com rastreabilidade formal.
+
+---
+
+### UC-006 — Gerar Portfólio Acadêmico
+* **Objetivo:** Gerar uma visão consolidada e compartilhável das experiências e evidências do aluno.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante escolhe o formato do portfólio (Acadêmico/Científico ou Profissional/Mercado);
+  2. Seleciona os projetos, produções e certificados que deseja destacar;
+  3. Define a visibilidade (público via link seguro ou privado);
+  4. O sistema compila o layout responsivo do portfólio e gera o link e PDF correspondentes.
+* **Resultado:** Portfólio gerado para apresentação a avaliadores ou recrutadores.
+
+---
+
+### UC-007 — Planejar Semestre Letivo
+* **Objetivo:** Estruturar disciplinas, compromissos e metas de desempenho para o período letivo.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante seleciona o semestre em questão;
+  2. Insere as disciplinas matriculadas e horários;
+  3. Define metas de notas, frequência e blocos de estudo semanais;
+  4. O sistema cruza as datas com o calendário institucional e gera a agenda semestral.
+* **Resultado:** Plano semestral ativo com checkpoints de acompanhamento.
+
+---
+
+### UC-008 — Definir Objetivos de Longo Prazo
+* **Objetivo:** Cadastrar metas estratégicas de carreira acadêmica ou profissional.
+* **Ator Principal:** Estudante.
+* **Exemplos:** Publicar primeiro artigo internacional, atingir proficiência em inglês, entrar em mestrado.
+* **Fluxo Principal:**
+  1. O estudante cria uma meta com título, prazo esperado e prioridade;
+  2. Define marcos intermediários de progresso;
+  3. Salva a meta;
+  4. O sistema vincula o objetivo às sugestões de oportunidades e alertas do copiloto.
+* **Resultado:** Objetivo estratégico cadastrado orientando a curadoria do sistema.
+
+---
+
+### UC-009 — Explorar Catálogo de Oportunidades
+* **Objetivo:** Localizar editais, bolsas, eventos e vagas abertas no ecossistema universitário.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante abre a central de oportunidades;
+  2. Aplica filtros por categoria (bolsa, IC, extensão, estágio, evento), modalidade ou região;
+  3. Visualiza detalhes do edital, prazos de inscrição, valor do auxílio e requisitos;
+  4. Salva oportunidades de interesse nos Favoritos.
+* **Resultado:** Identificação e acompanhamento de oportunidades ativas.
+
+---
+
+### UC-010 — Receber Recomendações Personalizadas
+* **Objetivo:** Receber curadoria automática de editais compatíveis com a trajetória do aluno.
+* **Atores:** Estudante e Sistema.
+* **Fluxo Principal:**
+  1. O motor `Opportunity Engine` cruza os requisitos dos novos editais com o perfil do estudante;
+  2. O sistema atribui um índice de compatibilidade (*Match Score*);
+  3. As oportunidades de maior pontuação são destacadas no dashboard e enviadas por notificação;
+  4. O estudante clica na notificação e acessa os detalhes da oportunidade sugerida.
+* **Resultado:** Oportunidades relevantes chegam ao estudante sem busca ativa manual.
+
+---
+
+### UC-011 — Consultar Trajetória e Linha do Tempo
+* **Objetivo:** Navegar de forma cronológica e interativa por todas as etapas da formação.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante abre a visualização de Timeline;
+  2. Aplica filtros temporais (por ano, semestre letivo ou evento-chave);
+  3. O sistema renderiza a árvore cronológica unindo disciplinas, projetos, memórias e conquistas;
+  4. O estudante pode expandir qualquer item para ver evidências associadas.
+* **Resultado:** Visão clara e consolidada da evolução acadêmica ao longo do tempo.
+
+---
+
+### UC-012 — Consultar Mapa de Competências
+* **Objetivo:** Compreender as competências consolidadas versus competências em desenvolvimento.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante acessa a aba de Competências;
+  2. O sistema exibe o mapa visual categorizado (técnicas, científicas, comportamentais);
+  3. Cada competência exibe suas fontes de validação (projetos, artigos, certificações);
+  4. O sistema aponta lacunas comuns para a área de formação do estudante.
+* **Resultado:** Diagnóstico de competências acionável.
+
+---
+
+### UC-013 — Conversar com o Academic Assistant
+* **Objetivo:** Interagir com o copiloto de IA com acesso contextual a toda a trajetória do usuário.
+* **Atores:** Estudante e Academic Assistant (A03).
+* **Fluxo Principal:**
+  1. O estudante envia uma pergunta por texto ou voz (ex: *"Qual foi o projeto em que trabalhei com Python no 4º semestre?"*);
+  2. O assistente recupera o contexto na base de memórias e experiências do usuário;
+  3. Sintetiza a resposta de forma precisa e contextualizada;
+  4. Oferece links para as evidências correspondentes ou sugere próximos passos.
+* **Resultado:** Resolução rápida de dúvidas e suporte inteligente imediato.
+
+---
+
+### UC-014 — Registrar Memória por Voz
+* **Objetivo:** Gravar relatos verbais após aulas, reuniões de pesquisa ou eventos com transcrição imediata.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante pressiona o botão de gravação no aplicativo móvel/web;
+  2. Narra sua experiência com linguagem natural;
+  3. Finaliza a gravação;
+  4. O serviço de inteligência transcreve o áudio, resume os pontos centrais e sugere tags automáticas;
+  5. O estudante faz pequenos ajustes se desejar e confirma a gravação.
+* **Resultado:** Registro detalhado com mínimo esforço de digitação.
+
+---
+
+### UC-015 — Importar Dados de Plataformas Externas
+* **Objetivo:** Conectar contas externas para sincronização automática de informações.
+* **Atores:** Estudante e Sistemas Externos (A02).
+* **Fluxo Principal:**
+  1. O estudante acessa a tela de Integrações;
+  2. Seleciona o provedor desejado (ex: GitHub, Lattes, Google Calendar);
+  3. Realiza a autenticação OAuth segura ou upload de arquivo de exportação;
+  4. O sistema importa os registros e realiza o mapeamento para entidades internas;
+  5. O estudante revisa e confirma a incorporação à sua trajetória.
+* **Resultado:** Eliminação de retrabalho de digitação manual.
+
+---
+
+### UC-016 — Preparar Documentação para Oportunidades
+* **Objetivo:** Apoiar a candidatura do estudante a um edital de bolsa, intercâmbio ou pós-graduação.
+* **Atores:** Estudante e Academic Assistant (A03).
+* **Fluxo Principal:**
+  1. O estudante seleciona a oportunidade à qual deseja concorrer;
+  2. O assistente analisa as exigências documentais do edital;
+  3. Cruza os requisitos com o acervo de evidências cadastradas pelo aluno;
+  4. Indica quais documentos já estão prontos e quais estão pendentes;
+  5. Gera um pacote compactado com os comprovantes organizados na ordem exigida pelo edital.
+* **Resultado:** Dossiê de candidatura completo gerado em minutos.
+
+---
+
+### UC-017 — Visualizar Diagnósticos de Analytics
+* **Objetivo:** Obter insights quantitativos e qualitativos sobre o progresso e consistência da trajetória.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante acessa a seção Analytics;
+  2. O sistema exibe gráficos de distribuição de horas, equilíbrio entre pesquisa/ensino/extensão e evolução de competências;
+  3. Apresenta recomendações estratégicas para o semestre seguinte.
+* **Resultado:** Tomada de decisão orientada por dados sobre o futuro formativo.
+
+---
+
+### UC-018 — Exportar Trajetória e Dossiês
+* **Objetivo:** Gerar cópias de segurança e memoriais em formatos abertos.
+* **Ator Principal:** Estudante.
+* **Fluxo Principal:**
+  1. O estudante escolhe o escopo da exportação (todo o histórico ou período específico);
+  2. Seleciona o formato (PDF consolidado com links, arquivo JSON completo ou pasta ZIP de comprovantes);
+  3. Confirma a solicitação e realiza o download.
+* **Resultado:** Arquivo gerado para custódia definitiva do estudante.
+
+---
+
+## 4. Casos de Uso Avançados Futuros
+
+* **UC-F01 — Sincronização Automática com Currículo Lattes:** Sincronização bidirecional via API/XML do CNPq.
+* **UC-F02 — Geração Dinâmica de Currículos Específicos:** IA que redige currículos customizados destacando apenas as experiências relevantes para a vaga pretendida.
+* **UC-F03 — Planejamento Acadêmico Preditivo:** Simulação matemática de semestres ideais para maximizar pontuação acadêmica.
+* **UC-F04 — Predição de Sucesso em Editais:** Estimativa de nota de corte em editais de bolsas de excelência.
+* **UC-F05 — Gêmeo Digital Acadêmico:** Simulação de impacto de escolhas de longo prazo (*"Se eu fizer um intercâmbio de 6 meses no 7º semestre, como isso impacta meu prazo de formatura e minhas chances de mestrado direto?"*).
