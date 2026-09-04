@@ -1,179 +1,188 @@
 ---
-title: Modelo Freemium Solidário & Sustentabilidade
-description: Filosofia do Cardápio Universitário (Stripe), sustentabilidade financeira humilde, cotas de IA e proteção contra custos abusivos.
+title: Economia de Tokens, Valor Livre & Doações
+description: Economia unificada de tokens, cardápio dinâmico com valor livre, margem de segurança de 25% e o Banco Comunitário de Doações.
 sidebar:
   order: 14
 ---
 
-# ☕ Modelo Freemium Solidário & Sustentabilidade
+# 🪙 Economia de Tokens, Valor Livre & Doações
 
 ## 1. A Realidade de uma Plataforma Independente
 
-O **Academic Companion** não é financiado por fundos de capital de risco (*Venture Capital*) nem possui orçamento corporativo ilimitado. Ele é concebido, desenvolvido e mantido de forma independente por um estudante e pesquisador para a comunidade acadêmica.
+O **Academic Companion** é desenvolvido e mantido de forma autônoma e independente para a comunidade acadêmica. Diferente de grandes corporações, a plataforma não possui orçamento infinito para absorver faturas de provedores de nuvem e APIs de Inteligência Artificial.
 
-Manter uma plataforma moderna no ar envolve custos reais fixos e variáveis:
+Para garantir que o projeto seja perene, saudável e confiável, a gestão de custos divide-se em duas frentes:
 
 ```text
 Custos Fixos (Infraestrutura Base):
 ├── Servidor VPS Linux de Hospedagem
-├── Banco de Dados Relacional PostgreSQL Gerenciado
+├── Banco de Dados Relacional PostgreSQL
 ├── Armazenamento de Objetos (MinIO / S3) para Certificados e Mídias
 └── Certificados SSL, DNS e Registro de Domínio
 
-Custos Variáveis Marginais (Uso Intensivo de Computação Externa):
-├── Tokens de Entrada e Saída da Google Gemini API (Chat Conversacional)
-├── Minutos de Áudio Processados para Transcrição (Speech-to-Text)
-└── Processamento Multimodal de Imagens e PDFs Escaneados (OCR / Visão)
+Custos Variáveis Marginais (Computação Externa de Inteligência Artificial):
+├── Chamadas à Google Gemini API (Chat Contextual e RAG)
+├── Processamento de Áudio para Transcrição (Speech-to-Text)
+└── Leitura de Imagens e PDFs Escaneados (Visão Computacional e OCR)
 ```
 
-Enquanto os custos fixos de banco de dados e servidor conseguem atender a milhares de estudantes com valores estáveis, **os custos de chamadas a APIs de Inteligência Artificial crescem linearmente a cada interação**. Sem um modelo de proteção e sustentabilidade financeira, uma única semana de uso descontrolado ou ataques de bots poderia gerar faturas proibitivas, inviabilizando a continuidade do projeto.
+Enquanto a infraestrutura de banco de dados e servidor atende a milhares de estudantes com um custo fixo baixo e estável, **as chamadas de IA geram custos a cada token processado**.
 
 ---
 
-## 2. A Filosofia: Humildade, Transparência e Solidariedade
+## 2. A Filosofia: Acesso Livre, Humildade e Solidariedade
 
-Para resolver essa equação sem desvirtuar o propósito social do produto, o Academic Companion adota uma política clara e inegociável:
+Para viabilizar a plataforma sem recorrer a barreiras excludentes, o Academic Companion adota três preceitos fundamentais:
 
-> **Nenhum estudante será excluído das ferramentas fundamentais de sua trajetória por falta de recursos financeiros.**
-
-### Princípios da Sustentabilidade
-1. **Recursos Estruturais 100% Gratuitos para Sempre:** Perfil acadêmico, diário de memórias em texto, linha do tempo interativa, cadastro de experiências, catálogo de produções científicas, validação de certificados e planejamento semestral de disciplinas **nunca terão paywall**.
-2. **Igualdade de Acesso com Degustação Justa:** O plano gratuito inclui uma cota mensal saudável de IA para que qualquer estudante consiga testar a transcrição de voz e consultar o copiloto em momentos decisivos.
-3. **Cobrança Simbólica e Afetuosa:** Os planos pagos não visam lucro predatório, mas a cobertura real dos custos operacionais dos estudantes que utilizam a IA com alta frequência.
-4. **Valores Acessíveis ao Bolso Estudantil:** Nenhuma modalidade de assinatura ultrapassa o teto máximo de **R$ 9,90 por mês**.
+1. **Recursos Estruturais 100% Gratuitos e Ilimitados:** Cadastro de perfil, diário acadêmico em texto, linha do tempo interativa, catálogo de experiências, portfólio, upload de certificados, calculadora de horas complementares e planejamento semestral de disciplinas **nunca custarão nada e não consomem tokens**.
+2. **Economia Unificada de Tokens:** Em vez de cotas fragmentadas e confusas ("X minutos disso, Y mensagens daquilo"), **toda e qualquer operação que envolva IA é medida em uma única moeda interna: Tokens do Academic Companion (`Tk`)**.
+3. **Liberdade com Margem Justa e Fundo Solidário:** O usuário escolhe livremente quanto quer contribuir a partir de um valor mínimo simbólico. O sistema garante **25% de margem de segurança/lucro para o mantenedor**, e as sobras de tokens não utilizadas no mês são migradas para um **Banco Comunitário de Doações** para estudantes que não têm como pagar.
 
 ---
 
-## 3. A Metáfora do "Cardápio Universitário" (Pague um Lanche)
+## 3. Tabela Unificada de Consumo de Tokens
 
-Em vez de nomenclaturas corporativas frias ("Tier Basic", "Enterprise", "Corporate"), a página de apoio financeiro do Academic Companion apresenta ao usuário um **Cardápio Universitário**, inspirado nos preços reais praticados nas lanchonetes de campus e no Restaurante Universitário (RU):
+Toda ação que demanda poder computacional externo tem seu custo fixado em tokens (`Tk`), calculado proporcionalmente ao custo de inferência do modelo Google Gemini:
+
+| Ação do Usuário | Custo em Tokens | O que é executado por baixo dos panos? |
+|---|---|---|
+| **1 Minuto de Áudio Transcrito** | **10 Tk** | Processamento de áudio via Gemini Audio e pontuação automática. |
+| **1 Pergunta / Mensagem ao Copiloto** | **5 Tk** | RAG com injeção do histórico de memórias e síntese contextual. |
+| **1 Edital em PDF Analisado** | **25 Tk** | Leitura de múltiplas páginas, extração de datas, requisitos e resumo. |
+| **1 Validação OCR de Certificado** | **15 Tk** | Visão computacional para leitura de autenticidade e carga horária. |
+| **1 Diagnóstico Profundo de Trajetória** | **20 Tk** | Análise de lacunas de competências e recomendações estratégicas. |
+| **Diário em Texto, Timeline e Metas** | **0 Tk (Grátis)** | Operações diretas no PostgreSQL sem consumo de IA. |
+
+---
+
+## 4. O Cardápio Dinâmico com Valor Livre & Margem de 25%
+
+O estudante tem **liberdade total para escolher o valor que deseja contribuir via Stripe**, existindo apenas um piso mínimo para absorver a taxa da transação bancária.
+
+### O Piso Mínimo Operacional: "Uma Garrafinha de Água" (~R$ 2,50)
+O menor valor possível de contribuição é o preço de uma água mineral no campus (**R$ 2,50**). Esse piso cobre a taxa fixa do gateway de pagamento (Stripe: ~R$ 0,39 + 3,99%) e garante que cada transação gere saldo positivo de tokens.
+
+### A Metáfora Visual do Cardápio Universitário
+O cardápio funciona como uma referência visual intuitiva e interativa: conforme o estudante ajusta o valor em reais, o sistema simula em tempo real o saldo de tokens e o poder de compra equivalente:
 
 ```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        CARDÁPIO SOLIDÁRIO                              │
-├───────────────────┬───────────────────┬────────────────────────────────┤
-│ Opção de Apoio    │ Valor Mensal      │ O que você está bancando?      │
-├───────────────────┼───────────────────┼────────────────────────────────┤
-│ ☕ Um Cafezinho   │ R$ 2,90 / mês     │ Cobre o armazenamento seguro   │
-│                   │                   │ e o banco de dados da sua conta│
-├───────────────────┼───────────────────┼────────────────────────────────┤
-│ 🥐 Um Pão de      │ R$ 5,90 / mês     │ Cobre os servidores e uma cota │
-│    Queijo/Salgado │                   │ ampla de transcrição e IA      │
-├───────────────────┼───────────────────┼────────────────────────────────┤
-│ 🥪 Um Sanduíche / │ R$ 9,90 / mês     │ Apoio integral: viabiliza o uso│
-│    Almoço do RU   │                   │ intensivo de IA e novos editais│
-└───────────────────┴───────────────────┴────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              CARDÁPIO SOLIDÁRIO DINÂMICO                               │
+├─────────────────────────┬───────────┬──────────┬───────────────────────────────────────┤
+│ Opção / Atalho Visual   │ Valor R$  │ Tokens   │ Poder de Compra Equivalente           │
+├─────────────────────────┼───────────┼──────────┼───────────────────────────────────────┤
+│ 💧 Garrafinha de Água   │ R$ 2,50   │ 150 Tk   │ ~15 min de áudio OU 30 perguntas ao   │
+│    (Piso Mínimo)        │           │          │ copiloto OU 6 editais analisados      │
+├─────────────────────────┼───────────┼──────────┼───────────────────────────────────────┤
+│ ☕ Cafezinho do Campus   │ R$ 5,00   │ 350 Tk   │ ~35 min de áudio OU 70 perguntas OU   │
+│                         │           │ (+16% Tk)│ 14 editais completos                  │
+├─────────────────────────┼───────────┼──────────┼───────────────────────────────────────┤
+│ 🥐 Pão de Queijo/Salgado│ R$ 7,50   │ 570 Tk   │ ~57 min de áudio OU 114 perguntas OU  │
+│                         │           │ (+26% Tk)│ 22 editais completos                  │
+├─────────────────────────┼───────────┼──────────┼───────────────────────────────────────┤
+│ 🥪 Almoço do RU / Lanche│ R$ 10,00  │ 800 Tk   │ ~80 min de áudio OU 160 perguntas OU  │
+│                         │           │ (+33% Tk)│ 32 editais completos                  │
+├─────────────────────────┼───────────┼──────────┼───────────────────────────────────────┤
+│ 🍛 Refeição Especial    │ R$ 20,00  │ 1.800 Tk │ ~180 min de áudio OU 360 perguntas OU │
+│                         │           │ (+50% Tk)│ 72 editais completos                  │
+├─────────────────────────┼───────────┼──────────┼───────────────────────────────────────┤
+│ 🌟 Valor Personalizado  │ Digite R$ │ Dinâmico │ Simulação imediata de tokens e bônus  │
+└─────────────────────────┴───────────┴──────────┴───────────────────────────────────────┘
 ```
 
-O estudante escolhe voluntariamente qual item do cardápio deseja "mandar para o desenvolvedor" a cada mês. Essa abordagem desmistifica a assinatura: o aluno entende que, pelo preço de um simples café no intervalo das aulas, ele mantém seus dados salvos, ganha mais cotas de inteligência e ajuda a manter a plataforma viva para colegas que não podem pagar.
+### Cálculo da Margem de Sustentabilidade (25% Líquido)
+A precificação do token é matematicamente calibrada para que, após deduzidas as taxas do Stripe e os custos diretos da API Gemini, **exatamente 25% do valor permaneça como margem líquida para o mantenedor**. Esse recurso financia a hospedagem, o backup do banco e recompensa o esforço contínuo de engenharia.
 
 ---
 
-## 4. Política de Uso Justo e Cotas Mensais (*Fair Use Policy*)
+## 5. O Banco Comunitário de Doação de Tokens (*Token Pool*)
 
-Todos os planos possuem cotas mensais bem delineadas. As cotas se renovam automaticamente a cada 30 dias:
-
-| Recurso / Módulo | Gratuito (Livre) | ☕ Cafezinho (R$ 2,90) | 🥐 Pão de Queijo (R$ 5,90) | 🥪 Almoço RU (R$ 9,90) |
-|---|---|---|---|---|
-| **Perfil Acadêmico & Trajetória** | Ilimitado | Ilimitado | Ilimitado | Ilimitado |
-| **Diário de Memória (Texto)** | Ilimitado | Ilimitado | Ilimitado | Ilimitado |
-| **Linha do Tempo & Projetos** | Ilimitado | Ilimitado | Ilimitado | Ilimitado |
-| **Upload de Certificados (PDF/PNG)** | Até 50 docs | Até 150 docs | Até 500 docs | Ilimitado |
-| **Transcrição de Voz (Speech-to-Text)** | 15 min / mês | 60 min / mês | 180 min / mês | 400 min / mês |
-| **Mensagens ao Copiloto (IA)** | 20 msgs / mês | 100 msgs / mês | 300 msgs / mês | 800 msgs / mês |
-| **Parsing Automático de Editais** | 3 editais / mês | 10 editais / mês | 25 editais / mês | 60 editais / mês |
-| **Exportação de Dossiês e PDF** | 3 / mês | Ilimitado | Ilimitado | Ilimitado |
-| **Selo de Apoiador no Perfil** | — | ☕ Apoiador Café | 🥐 Apoiador Lanche | 🥪 Mantenedor RU |
-
----
-
-## 5. Salvaguardas Financeiras e *Circuit Breakers*
-
-Para garantir que a plataforma nunca gere prejuízo financeiro pessoal para o mantenedor, a arquitetura implementa proteções automáticas em múltiplas camadas:
+Nem todo estudante tem condições de pagar, mesmo valores acessíveis como R$ 2,50. Por outro lado, muitos apoiadores compram pacotes e não utilizam todos os tokens no mês. O Academic Companion transforma essa sobra em impacto comunitário:
 
 ```mermaid
 graph TD
-    Request([Requisição de IA do Usuário]) --> Auth[Autenticação & Identificação]
-    Auth --> RateLimit[Rate Limit por Minuto: Max 5 req/min]
-    RateLimit --> QuotaCheck{Cota Mensal do Usuário Disponível?}
+    Apoiador[Estudante Apoiador] -->|Adquire Tokens no Cardápio| CarteiraApoiador[Carteira do Apoiador]
+    CarteiraApoiador -->|Usa normalmente durante o mês| ConsumoProprio[Uso Pessoal de IA]
     
-    QuotaCheck -- Não --> UserAlert[Mensagem Amigável: 'Cota do Mês Atingida']
-    QuotaCheck -- Sim --> GlobalBudget{Teto Global do Mês no Limite?}
+    CarteiraApoiador -.->|Tokens não usados ao final do ciclo| FundoDoacoes[(Banco Comunitário de Doações)]
     
-    GlobalBudget -- Sim (Circuit Breaker Ativo) --> GracefulFallback[Fallback Gracioso: Modo Essencial Ativo]
-    GlobalBudget -- Não --> GeminiCall[Execução via Google Gemini API]
-    GeminiCall --> LogUsage[Incremento do Contador de Uso no Banco]
+    EstudanteSemCondicoes[Estudante em Vulnerabilidade] -->|Acessa Canal Solidário| FormInscricao[Solicitação de Apoio]
+    FormInscricao -->|Aprovação pelo Mantenedor| BeneficiarioAprovado[Estudante Bolsista]
+    
+    FundoDoacoes -->|Distribuição Mensal Automática| BeneficiarioAprovado
 ```
 
-### Mecanismos de Proteção:
-1. **Rate Limiting Estrito:** Nenhum usuário (mesmo pagante) pode disparar mais de 5 chamadas de IA por minuto, prevenindo scripts automatizados maliciosos.
-2. **Cache Semântico de Editais:** Quando um edital público (ex: PIBIC da UFSM) é processado pela primeira vez, o resumo estruturado e os requisitos são cacheados no banco de dados. Qualquer outro estudante que consulte o mesmo edital consome **zero tokens de IA**.
-3. **Teto Orçamentário Global (*Circuit Breaker*):** O mantenedor define um orçamento máximo mensal (ex: R$ 100,00 no Google Cloud Console). Caso 95% do teto seja atingido antes do fim do mês, o sistema desativa temporariamente chamadas de IA não essenciais de forma elegante, alertando a comunidade sobre o alto volume do mês, sem interromper as funções de banco de dados e memória textual.
+### Como Funciona o Ciclo Solidário:
+1. **Migração Automática de Sobras:** Ao término do ciclo mensal de 30 dias, os tokens que o apoiador não consumiu **não expiram nem são confiscados**: eles são depositados no **Banco Comunitário de Doações**.
+2. **Reconhecimento ao Apoiador:** O painel do apoiador exibe com orgulho o impacto de sua sobra: *"Neste mês, 120 tokens não utilizados por você foram doados para colegas que precisavam de apoio para buscar bolsas."*
+3. **Canal Aberto de Solicitação Solidária:**
+   * Qualquer estudante que declare vulnerabilidade financeira pode acessar o canal solidário na aba `/settings/support` e submeter uma breve solicitação.
+   * O mantenedor possui uma interface administrativa simples para aprovar o aluno com um clique.
+4. **Rateio Periódico:** O saldo do Banco Comunitário de Doações é distribuído proporcionalmente entre os estudantes aprovados, garantindo acesso democrático e contínuo.
 
 ---
 
-## 6. Integração Técnica com o Stripe
+## 6. Salvaguardas Técnicas e *Circuit Breakers*
 
-A monetização solidária utiliza o **Stripe** como infraestrutura de pagamento segura, internacional e compatível com Pix, Cartão de Crédito e Boleto.
-
-### Fluxo de Assinatura via Stripe Checkout:
-1. **Seleção do Item do Cardápio:** Na página `/settings/support`, o estudante visualiza o cardápio e clica em "Pagar um Cafezinho" (`price_cafezinho_monthly`).
-2. **Redirecionamento Seguro:** O frontend chama `POST /api/billing/checkout-session`, e o backend gera uma sessão oficial do **Stripe Checkout Hosted** com modo `subscription`.
-3. **Pagamento Concluído:** O Stripe processa a cobrança e redireciona o usuário para `/settings/support?status=success`.
-4. **Processamento via Webhook:** O Stripe dispara o evento `checkout.session.completed` e `invoice.payment_succeeded` para o endpoint seguro do backend (`/api/billing/webhook`).
-5. **Ativação Imediata de Cotas:** O backend identifica o `userId` nos metadados da sessão, atualiza o status para `ACTIVE` e expande as cotas mensais de transcrição e copiloto.
-
-### Autoatendimento via Stripe Customer Portal:
-O estudante possui autonomia total para alterar seu valor de apoio ou cancelar a qualquer instante sem burocracia, acessando diretamente o **Stripe Customer Portal** com um clique no painel de configurações.
+Para assegurar que o sistema nunca opere no prejuízo:
+1. **Verificação Prévia de Saldo:** Toda rota de IA consulta o saldo de tokens do usuário no banco antes de encaminhar a requisição para a Gemini API.
+2. **Rate Limiting por Minuto:** Teto de 5 requisições por minuto por usuário, mitigando loops acidentais ou scripts.
+3. **Cache Semântico de Editais Públicos:** Quando um edital já foi analisado por um estudante, ele fica registrado na base compartilhada. Consultas subsequentes a esse mesmo edital consomem **0 Tk**, poupando a carteira dos alunos e os custos de API.
+4. **Teto Orçamentário Global (*Circuit Breaker*):** Alerta automático e contenção graciosa caso a conta do Google Cloud atinja 90% do teto estipulado para o mês.
 
 ---
 
 ## 7. Modelagem de Dados no Prisma ORM
 
-Para gerenciar assinaturas, pagamentos e cotas de uso justo no banco relacional PostgreSQL, o schema do backend incorpora os seguintes modelos:
-
 ```prisma
-enum SubscriptionTier {
-  FREE        // Acesso Livre Universitário (R$ 0)
-  COFFEE      // Cafezinho (R$ 2,90/mês)
-  SNACK       // Pão de Queijo / Salgado (R$ 5,90/mês)
-  MEAL        // Almoço RU (R$ 9,90/mês)
+model UserWallet {
+  id                    String              @id @default(uuid())
+  userId                String              @unique
+  user                  Student             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenBalance          Int                 @default(50) // 50 tokens de boas-vindas
+  isSolidaryBeneficiary Boolean             @default(false)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  transactions          TokenTransaction[]
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELED
-  PAST_DUE
-  INCOMPLETE
+model TokenTransaction {
+  id                    String              @id @default(uuid())
+  walletId              String
+  wallet                UserWallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount                Int                 // Positivo (crédito) ou Negativo (débito)
+  type                  TransactionType
+  description           String
+  actionType            String?             // "AUDIO_TRANSCRIPTION", "ASSISTANT_CHAT", "PARSING_PDF"
+  createdAt             DateTime            @default(now())
 }
 
-model UserSubscription {
-  id                   String             @id @default(uuid())
-  userId               String             @unique
-  user                 Student            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tier                 SubscriptionTier   @default(FREE)
-  status               SubscriptionStatus @default(ACTIVE)
-  stripeCustomerId     String?            @unique
-  stripeSubscriptionId String?            @unique
-  currentPeriodStart   DateTime           @default(now())
-  currentPeriodEnd     DateTime
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+enum TransactionType {
+  STRIPE_PURCHASE
+  AI_USAGE
+  COMMUNITY_DONATION_OUT
+  COMMUNITY_DONATION_IN
+  WELCOME_BONUS
+  ADMIN_GRANT
 }
 
-model MonthlyUsageQuota {
-  id                   String             @id @default(uuid())
-  userId               String
-  user                 Student            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  billingMonth         String             // Formato "YYYY-MM" (ex: "2026-03")
-  audioMinutesUsed     Int                @default(0)
-  assistantMessagesUsed Int               @default(0)
-  parsedDocumentsCount Int                @default(0)
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+model CommunityTokenPool {
+  id                    String              @id @default(uuid())
+  totalDonated          Int                 @default(0)
+  totalDistributed      Int                 @default(0)
+  currentBalance        Int                 @default(0)
+  updatedAt             DateTime            @updatedAt
+}
 
-  @@unique([userId, billingMonth])
+model SolidaryApplication {
+  id                    String              @id @default(uuid())
+  userId                String              @unique
+  user                  Student             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  statement             String
+  status                ApplicationStatus   @default(PENDING)
+  reviewedAt            DateTime?
+  createdAt             DateTime            @default(now())
 }
 ```
 
-Essa estrutura assegura que o sistema permaneça financeiramente saudável, transparente com seus usuários e fiel ao seu compromisso de transformar a trajetória universitária de forma democrática e sustentável.
+Com este modelo, o Academic Companion une **sustentabilidade econômica autônoma, liberdade de apoio, margem justa de 25% para o mantenedor e acolhimento comunitário** para quem mais necessita.
