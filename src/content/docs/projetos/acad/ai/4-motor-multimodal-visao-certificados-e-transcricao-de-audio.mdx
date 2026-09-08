@@ -1,0 +1,109 @@
+---
+title: 4. Motor Multimodal (Visão/Certificados) e Transcrição de Áudio
+---
+Para o Academic Companion, a capacidade de validar certificados de horas complementares (que frequentemente são imagens escaneadas ou fotos de celular) e processar áudio (caso você implemente comandos de voz ou transcrição de aulas) exige um fluxo diferente do RAG textual.
+
+\
+
+
+O objetivo aqui é manter o custo baixo e a latência mínima no seu backend Node.js.
+
+\
+
+
+## 1. Validação de Certificados (Visão Computacional de Baixo Custo)
+
+O processo de OCR tradicional (tentar extrair o texto de uma foto e depois passar para a IA) ficou obsoleto com os modelos multimodais. A melhor abordagem no Node.js é enviar o *buffer* da imagem diretamente para a IA analisar a estrutura visual e os dados de uma vez só.
+
+\
+
+
+**A Ferramenta Ideal:** **Gemini 1.5 Flash**. Ele é imbatível em processamento multimodal de baixo custo e alta velocidade.
+
+\
+
+
+**Como estruturar no Node.js (com Express ou Next.js):**
+
+\
+
+
+1. **Recepção do Arquivo:** Use o middleware `multer` para interceptar o upload do certificado no seu endpoint. Em vez de salvar no disco, mantenha o arquivo em memória (`multer.memoryStorage()`) para processamento rápido.
+
+
+2. **Conversão e Envio:** Converta o buffer do arquivo para uma string base64. Usando o Vercel AI SDK ou o SDK oficial do Google Gen AI (`@google/genai`), você anexa a imagem diretamente no array de mensagens.
+
+
+3. **Forçando a Saída Estruturada (Zod):**
+
+   Este é o pulo do gato. Você não quer que a IA responda "Sim, este certificado parece válido". Você precisa de dados para salvar no PostgreSQL (via Prisma). Você define um *schema* rigoroso usando `zod`:
+
+   \
+
+
+   TypeScript
+
+   ```
+   import { z } from 'zod';
+
+   const CertificadoSchema = z.object({
+     valido: z.boolean(),
+     nome_aluno: z.string(),
+     carga_horaria: z.number(),
+     instituicao_emissora: z.string(),
+     motivo_rejeicao: z.string().optional()
+   });
+
+   ```
+
+   O backend envia a imagem e esse *schema* para o Gemini. A IA devolve um JSON perfeitamente tipado e pronto para ser inserido no banco de dados, ignorando formatações visuais bagunçadas do certificado original.
+
+
+
+## 2. Transcrição de Áudio (Speech-to-Text)
+
+Se o sistema precisar transcrever áudios de usuários (ex: interação por voz com o bot) ou arquivos maiores, modelos de texto não servem. Você precisa do **Whisper** (o modelo de transcrição open-source da OpenAI).
+
+\
+
+
+Rodar o Whisper localmente no Node.js consome muita CPU/GPU e pode travar a sua API. Como a meta é otimizar as cotas gratuitas e de startups, aqui estão as melhores rotas de arquitetura:
+
+\
+
+
+**A Rota de Ultra Velocidade (Groq API):**
+
+\
+
+
+* A Groq fornece acesso ao modelo `whisper-large-v3` rodando em hardware de altíssima performance (LPUs). A transcrição é praticamente instantânea.
+
+
+* Eles possuem um *Free Tier* muito generoso para desenvolvedores, o que é perfeito para o *bootstrapping* do projeto.
+
+
+* **Implementação:** Seu backend Node.js recebe o áudio via `multer`, repassa o *buffer* para o endpoint de áudio da Groq e recebe a string de texto transcrita em milissegundos. Esse texto então segue para o orquestrador (Hub) que desenhamos no Doc 01 para ser processado.
+
+
+
+**A Rota Subsidiada (Azure OpenAI):**
+
+\
+
+
+* Utilizando os créditos do GitHub Student Pack, você pode acessar a API do Whisper hospedada na Microsoft. A latência é um pouco maior que a da Groq, mas você não gasta dinheiro real e mantém tudo dentro do *budget* estudantil.
+
+
+
+## 3. Segurança e Prevenção de Abuso Multimodal
+
+Processar imagens e áudios custa mais tokens do que processar texto. Para evitar que usuários mal-intencionados ou bots de terceiros esgotem a sua cota do AI Studio / Groq enviando lixo, o backend Node.js precisa de duas barreiras:
+
+\
+
+
+* **Validação de Assinatura (Magic Bytes):** Não confie na extensão `.png` ou `.pdf` do arquivo. Use bibliotecas como `file-type` no Node para ler os primeiros bytes do buffer e garantir que o upload é genuinamente uma imagem ou áudio antes de enviar para a IA.
+
+
+* **Limitação de Tamanho Rígida:** Corte arquivos de áudio muito longos ou imagens em altíssima resolução (4K) antes do envio. Redimensionar imagens usando o `sharp` no Node.js para uma resolução aceitável (ex: max 1024x1024) reduz drasticamente o peso do envio e o consumo de tokens na IA, sem perder a qualidade necessária para a leitura do certificado.
