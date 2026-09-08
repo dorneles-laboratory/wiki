@@ -1,0 +1,59 @@
+---
+title: 1. O Hub Orquestrador Multi-Modelos
+---
+O coração da arquitetura de IA do Academic Companion consiste em desacoplar a regra de negócio dos provedores de inferência por meio de um **AI Gateway Centralizado**. Em vez do backend chamar a API do Gemini ou da OpenAI diretamente, ele consome uma interface unificada que gerencia limites de taxa (*rate limits*), cotas gratuitas e transição transparente para o faturamento sob demanda (*pay-as-you-go*).
+
+\
+
+
+```
+[Requisição do Backend] 
+           │
+           ▼
+┌──────────────────────────────────────────────┐
+│        AI Gateway / Hub Orquestrador         │
+│  (Padronização OpenAI-compatible / LiteLLM)  │
+└──────┬──────────────┬──────────────┬─────────┘
+       │ (1º Teto)    │ (2º Teto)    │ (Fallback Pago)
+       ▼              ▼              ▼
+┌──────────────┐┌──────────────┐┌────────────────┐
+│GitHub Models ││ Gemini Free  ││ Gemini Pay-Go  │
+│ (Llama/Phi)  ││ (AI Studio)  ││ (Cobre o resto)│
+└──────────────┘└──────────────┘└────────────────┘
+
+```
+
+## 1. Topologia de Roteamento em Cascata (Fallback)
+
+Para extrair o valor máximo das cotas gratuitas e garantir disponibilidade contínua sem que o usuário final receba erros de limite excedido (HTTP 429), o orquestrador opera em quatro camadas de execução:
+
+\
+
+
+* **Nível 1 (Cota Zero-Cost Rápida):** Requisições simples de chat ou tarefas textuais básicas são direcionadas primariamente para o **GitHub Models** ou provedores de altíssima velocidade como o **Groq** (usando modelos como Llama 3.3 ou Mistral).
+
+
+* **Nível 2 (Créditos Subsidiados):** Esgotado o limite de requisições por minuto do nível 1, a fila redireciona para o **Azure OpenAI** utilizando os créditos do GitHub Student Pack.
+
+
+* **Nível 3 (Google AI Studio Free Tier):** Chamadas que exigem maior raciocínio ou contexto textual amplo são enviadas para o **Gemini 1.5 Flash** na cota gratuita de 15 RPM.
+
+
+* **Nível 4 (Rede de Segurança Pay-as-you-go):** Quando qualquer upstream retornar erro `429 Too Many Requests` ou `Resource Exhausted`, o gateway intercepta a falha e despacha a chamada imediatamente para o **Gemini com cartão vinculado**, garantindo 100% de uptime gastando apenas frações de centavos.
+
+
+
+## 2. Padronização da Camada de Integração
+
+Integrar SDKs proprietários diferentes para cada provedor torna a manutenção inviável. A solução é adotar uma especificação unificada:
+
+\
+
+
+* **Padrão OpenAI-Compatible:** Praticamente todas as plataformas (LiteLLM, Azure, Groq, GitHub Models e até o Gemini via adapter) aceitam o formato de payload de chat completions da OpenAI.
+
+
+* **LiteLLM Core:** Utilizar uma instância leve do LiteLLM (como proxy ou biblioteca) permite configurar roteamento dinâmico, rotação de chaves de API, controle de tentativas (*retries*) e orçamento diário (*budget caps*) através de um único arquivo de configuração.
+
+
+* **Respostas Estruturadas Garantidas:** O orquestrador injeta esquemas estritos (compatíveis com Zod no Node.js ou DTOs no Java) para assegurar que, independentemente do modelo que processou o texto no fallback, a resposta respeite o mesmo formato JSON.
