@@ -1,0 +1,110 @@
+---
+title: 3. Estratégias de Redução de Tokens e Caching Semântico
+---
+A maior armadilha financeira ao escalar uma plataforma educacional com IA é pagar para o modelo "pensar" na mesma resposta várias vezes. Em uma universidade, centenas de alunos vão fazer essencialmente a mesma pergunta sobre o mesmo edital ou oportunidade.
+
+\
+
+
+Para que a operação do Academic Companion seja financeiramente sustentável e se mantenha dentro das cotas gratuitas e de baixo custo, precisamos blindar as requisições antes que elas cheguem às APIs (Gemini ou OpenAI).
+
+\
+
+
+Aqui estão as três táticas de defesa e otimização.
+
+\
+
+
+## 1. O Escudo Principal: Caching Semântico
+
+O cache tradicional (como um Redis padrão) só funciona se a string for exatamente igual. Se o Aluno A perguntar *"Qual o prazo de inscrição?"* e o Aluno B perguntar *"Até quando posso me inscrever?"*, o cache tradicional não reconhece a semelhança e a sua plataforma paga por duas requisições à IA.
+
+\
+
+
+O **Cache Semântico** resolve isso comparando o *significado* da pergunta.
+
+\
+
+
+**Como funciona na prática:**
+
+\
+
+
+1. O Aluno A faz a pergunta.
+
+
+2. O sistema gera o embedding (vetor) dessa pergunta.
+
+
+3. Antes de ir para o banco buscar os fragmentos do RAG ou chamar o LLM, o backend faz uma busca rápida em uma tabela dedicada de `semantic_cache` no PostgreSQL (ou em um Redis turbinado com busca vetorial).
+
+
+4. Se o vetor da nova pergunta tiver uma similaridade acima de 95% com uma pergunta já respondida, o sistema retorna a resposta salva instantaneamente. Custo de LLM = 0. Tempo de resposta = \< 50ms.
+
+
+5. Se não houver similaridade (um *Cache Miss*), o fluxo normal segue e a nova resposta é salva no cache para os próximos alunos.
+
+
+
+## 2. A Arma Secreta para Documentos Gigantes: Context Caching
+
+Mesmo usando a técnica de RAG (Documento 02), existem casos onde o bot precisa analisar o documento como um todo, cruzando regras complexas de diferentes páginas que o *chunking* fragmentou. Nesses cenários, a API do Gemini oferece uma funcionalidade nativa de **Context Caching** (Cache de Contexto).
+
+\
+
+
+Em vez de enviar o edital de 40 páginas a cada requisição e queimar sua cota de Tokens por Minuto (TPM):
+
+\
+
+
+* Você envia o PDF para a API do Google **uma única vez** e diz: "Guarde isso no cache por 30 dias" (o tempo que o edital ficar aberto).
+
+
+* A API devolve um identificador (ID) desse cache.
+
+
+* Nas próximas perguntas dos alunos, o seu bot envia apenas a pergunta curta e o ID do cache.
+
+
+* **O impacto:** O processamento da IA fica quase instantâneo e o custo faturado dos tokens de entrada despenca drasticamente, pois o modelo não precisa reler o documento inteiro.
+
+
+
+## 3. Compressão de Saída e System Prompts Rigorosos
+
+Modelos de linguagem são programados para serem "educados" e verborrágicos. Responder *"Olá! Tudo bem? De acordo com a minha análise do documento fornecido..."* gasta tokens de saída desnecessários.
+
+\
+
+
+**Técnicas de contenção:**
+
+\
+
+
+* **Zero-shot Formatting:** No prompt de sistema, instrua o orquestrador com regras absolutas: *"Responda diretamente. Não inclua saudações, introduções ou justificativas. Seja estritamente conciso."*
+
+
+* **Uso de Schemas (Structured Outputs):** Tanto no ecossistema Node.js (usando Zod) quanto no Spring Boot, force a IA a responder em JSON estrito.
+
+  Se o bot precisa apenas validar se o aluno é elegível, não peça um texto. Peça um JSON: `{"elegivel": true, "motivo": "cumpre os requisitos de renda"}`. Isso corta o desperdício de tokens na raiz e facilita a integração dos dados na interface da plataforma.
+
+
+
+## 4. Roteamento de Janela de Contexto (Context Window Routing)
+
+Esta é uma técnica avançada para o Orquestrador (Hub) que definimos no Doc 01.
+
+O backend calcula o tamanho do prompt *antes* de enviar para a IA.
+
+\
+
+
+* Se a pergunta + os fragmentos recuperados do banco somarem menos de 8.000 tokens, a requisição é roteada para os modelos gratuitos e ultrarrápidos do GitHub Models (Llama 3, Phi).
+* Se o contexto ultrapassar esse limite, o roteador desvia automaticamente para o Gemini 1.5 Flash, que possui uma janela massiva. Assim, você preserva a cota do Gemini apenas para as tarefas que realmente exigem muito fôlego.
+
+Se a estratégia de economia e cache estiver clara, o próximo passo é a validação de documentos visuais (que é fundamental para a análise de currículos e portfólio acadêmico).
