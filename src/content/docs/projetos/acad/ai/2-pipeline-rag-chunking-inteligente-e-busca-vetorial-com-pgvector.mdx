@@ -3,117 +3,55 @@ title: 2. Pipeline RAG, Chunking Inteligente e Busca Vetorial com `pgvector`
 ---
 Para que o Academic Companion consiga ler um edital de 50 páginas e responder com precisão cirúrgica sem estourar o limite de tokens, a aplicação não pode enviar o documento inteiro para a IA. É aqui que entra o **RAG (Retrieval-Augmented Generation)**.
 
-\
-
-
 O RAG inverte a lógica: em vez de a IA ler tudo, o seu banco de dados faz o trabalho pesado de encontrar as três ou quatro regras relevantes do edital, e a IA atua apenas como uma "intérprete" final desses trechos.
 
-\
-
-
 Veja como estruturar isso no backend, aproveitando o ecossistema do PostgreSQL.
-
-\
-
 
 ## 1. O Desafio do Chunking (Fragmentação de Texto)
 
 Quando o bot extrai o texto do edital, esse bloco gigante precisa ser fatiado (*chunked*). Se você cortar o texto de forma bruta (ex: a cada 1000 caracteres), correrá o risco de cortar uma frase no meio, separando a pergunta da resposta.
 
-\
-
-
 **A Solução: Chunking Semântico com Overlap**
 
 Em Node.js (usando bibliotecas como LangChain.js ou LlamaIndex.js) ou no Spring Boot (com Spring AI), você implementa um *Recursive Character Text Splitter*.
 
-\
-
-
 * **Tamanho do Chunk:** Cerca de 500 a 1000 tokens (tamanho ideal para manter o contexto sem diluir o significado).
-
-
 * **Overlap (Sobreposição):** Você configura um *overlap* de 10% a 20%. Isso significa que o final do Chunk 1 se repete no início do Chunk 2. Isso impede que regras ou artigos do edital percam o sentido caso o corte aconteça no meio da frase.
-
-
 * **Injeção de Metadados:** Antes de vetorizar, cada chunk deve receber um "carimbo". Exemplo: `[Edital PIBIC 2026 - Pág 4] {texto do chunk}`. Isso ajuda a IA a citar a fonte corretamente na resposta final.
-
-
 
 ## 2. Geração de Embeddings (O Custo Zero Oculto)
 
 Um *embedding* é a tradução de um pedaço de texto para um vetor (uma lista de números, ex: `[0.12, -0.45, 0.89...]`). Textos com significados semelhantes terão vetores próximos matematicamente.
 
-\
-
-
 Para economizar os tokens da sua conta Google ou Azure, a geração de embeddings **não precisa ser paga**:
 
-\
-
-
 * **Embeddings Locais (Custo Zero):** Você pode rodar modelos de embedding diretamente no seu backend usando bibliotecas como `Transformers.js` (no ecossistema Node/TypeScript) ou ONNX (no ecossistema Java). Modelos pequenos e eficientes, como o `BGE-m3` ou `all-MiniLM-L6-v2`, geram embeddings de altíssima qualidade consumindo apenas um pouco de RAM do servidor, sem fazer requisições externas.
-
-
 * **Embeddings via API:** Se preferir delegar, o `text-embedding-004` do Gemini ou o modelo do Azure são extremamente baratos, mas consumiriam sua cota. Para bootstrapping, a via local é a mais indicada.
-
-
 
 ## 3. Armazenamento Vetorial: PostgreSQL + `pgvector`
 
 Como você já lida com arquiteturas relacionais, não é necessário adicionar um banco de dados novo (como Pinecone ou Weaviate) e complicar a infraestrutura. A extensão `pgvector` permite armazenar vetores diretamente no PostgreSQL.
 
-\
-
-
 **Estrutura no ORM (Prisma ou Sequelize):**
 
 A tabela de chunks do edital ficaria parecida com isso:
 
-\
-
-
 * `id` (UUID)
-
-
 * `edital_id` (Chave Estrangeira para a tabela de Editais)
-
-
 * `content` (O texto real do chunk)
-
-
 * `embedding` (Coluna do tipo `vector(768)` ou `vector(1536)`, dependendo do modelo)
-
-
 * `metadata` (JSONB com página, data, etc.)
 
-
-
 **Indexação Crucial:** Para que a busca não fique lenta quando a plataforma tiver milhares de chunks, é mandatório criar um índice **HNSW** (*Hierarchical Navigable Small World*) na coluna do vetor. Ele permite buscas ultrarrápidas, calculando a similaridade de cosseno em milissegundos.
-
-\
-
 
 ## 4. O Segredo da Precisão: Busca Híbrida (Hybrid Search)
 
 Um erro comum em plataformas educacionais com IA é depender **apenas** da busca vetorial (semântica). A busca vetorial é ótima para conceitos (ex: "auxílio financeiro" acha "bolsa de manutenção"), mas é péssima para termos exatos (ex: siglas como "Edital PROGRAD 042/2026").
 
-\
-
-
 A arquitetura de ponta exige uma **Busca Híbrida**:
 
-\
-
-
 1. **Busca Vetorial (`pgvector`):** Encontra o sentido da pergunta.
-
-
 2. **Busca Full-Text (FTS nativo do Postgres / BM25):** Encontra as palavras-chave exatas.
-
-
 3. **Reranking:** Um algoritmo simples junta os resultados das duas buscas, remove os duplicados e manda os 4 fragmentos mais relevantes (com maior pontuação combinada) para o orquestrador (Hub) que construímos no Doc 01.
-
-
 
 Só então, o modelo final (Gemini Flash ou Azure) lê a pergunta do usuário, lê esses 4 fragmentos, e gera a resposta: *"De acordo com a página 4 do edital, a carga horária exigida é..."*
