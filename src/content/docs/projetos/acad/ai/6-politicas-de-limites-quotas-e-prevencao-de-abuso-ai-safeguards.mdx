@@ -3,9 +3,6 @@ title: 6. Políticas de Limites, Quotas e Prevenção de Abuso (AI Safeguards)
 ---
 Este documento define a arquitetura de proteção do Academic Companion contra o esgotamento financeiro e estrutural da infraestrutura de IA. A implementação destas regras no backend em Node.js garantirá que o sistema se mantenha saudável, escalável e imune a abusos ou ataques de negação de serviço (DDoS) voltados ao consumo de tokens.
 
-\
-
-
 ## **1. Limites de Ingestão e Multimodalidade (Uploads)**
 
 O processamento de arquivos é o maior vetor de custo. As seguintes regras devem ser aplicadas no middleware (ex: Multer) antes que o payload alcance o orquestrador de IA:
@@ -16,9 +13,6 @@ O processamento de arquivos é o maior vetor de custo. As seguintes regras devem
 | Documentos Textuais (PDF/DOCX) | Máximo 10 Páginas (ou 500kb) | Arquivos maiores vão para uma fila de processamento assíncrono (BullMQ) para extração via RAG, e não para o chat ao vivo. |
 | Áudio (Whisper/Transcrição)    | Máximo 3 Minutos             | Corte automático do buffer no backend. Áudios longos são rejeitados imediatamente com código HTTP 413.                    |
 
-\
-
-
 ## **2. Limites da Janela de Contexto (Tokens por Requisição)**
 
 Para evitar que um usuário mal-intencionado copie e cole um livro inteiro no chat para esgotar a cota diária do provedor, estabelece-se um limite estrito de tokens de entrada:
@@ -26,9 +20,6 @@ Para evitar que um usuário mal-intencionado copie e cole um livro inteiro no ch
 * **Chat Geral (Interações Rápidas):** Limite de entrada truncado em 2.000 tokens (aprox. 1.500 palavras). O backend usará a biblioteca tiktoken (ou similar) para estimar os tokens. Se exceder, o prompt é cortado ou rejeitado antes da requisição.
 * **Análise de Editais (RAG):** O número máximo de fragmentos (chunks) injetados do PostgreSQL (pgvector) no contexto da IA será restrito a 5 fragmentos por pergunta (aprox. 4.000 tokens no total).
 * **Limite de Saída (Max Tokens):** Todas as requisições devem incluir o parâmetro max\_tokens configurado para, no máximo, 500 a 800 tokens, impedindo que a IA gere respostas infinitas ou em *loop*.
-
-\
-
 
 ## **3. Quotas Temporais por Usuário (Rate Limiting)**
 
@@ -40,9 +31,6 @@ O consumo da IA será rastreado por usuário autenticado (ou por IP) utilizando 
 | A cada 5 Horas (Sessão) | 50 Interações   | Acomoda o ciclo de estudo intensivo do aluno. Ao atingir o limite, a interface avisa que a IA precisa "descansar", fomentando pausas. |
 | A cada Semana (Ciclo)   | 250 Interações  | Garante a sustentabilidade de longo prazo do nível gratuito. Ao estourar, o usuário deve aguardar a renovação semanal.                |
 
-\
-
-
 ## **4. Degradação Graciosa (Graceful Degradation)**
 
 O que acontece quando o sistema como um todo atinge os limites da infraestrutura global (mesmo que o usuário não tenha estourado sua cota pessoal)? O orquestrador aplica a degradação graciosa:
@@ -50,9 +38,6 @@ O que acontece quando o sistema como um todo atinge os limites da infraestrutura
 1. **Redução de Modelos:** O sistema realiza o fallback automático para modelos menores e mais rápidos para sustentar a demanda de chat.
 2. **Desativação de Recursos Multimídia:** Em momentos de alta carga, a leitura de imagens e geração de embeddings pesados são temporariamente pausadas. O botão de upload na interface fica cinza (disabled).
 3. **Respostas Estáticas e Filas:** O sistema prioriza 100% o cache semântico. Tarefas novas são enfileiradas no BullMQ e processadas em background quando a rede estabiliza.
-
-\
-
 
 ## **5. Segurança e Prevenção de Abuso da Regra de Negócio**
 
