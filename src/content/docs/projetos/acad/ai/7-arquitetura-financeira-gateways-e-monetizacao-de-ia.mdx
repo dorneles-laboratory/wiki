@@ -1,0 +1,84 @@
+---
+title: 7. Arquitetura Financeira, Gateways e Monetização de IA
+---
+Este documento define a estratégia de monetização e a arquitetura do módulo de pagamentos do Academic Companion. O foco central é viabilizar a venda de pacotes de créditos de IA com valores extremamente baixos (microtransações) mantendo atrito zero na interface do usuário e preservando a margem de lucro da operação.
+
+\
+
+
+## 1. Estratégia de Microtransações e Escolha do Gateway
+
+Para um modelo de negócios que exige a venda contínua de pacotes de R$ 6,00, R$ 10,00 e R$ 15,00, a escolha do provedor de pagamentos dita a sobrevivência financeira do software.
+
+\
+
+
+* **O Problema das Taxas Fixas:** Gateways como o Asaas cobram tarifas fixas (ex: R$ 1,99 por recebimento). Em um ticket de R$ 6,00, essa taxa consome 33% do faturamento, tornando a operação insustentável.
+
+
+* **O Bloqueio de Acesso:** A Stripe possui excelentes ferramentas e taxas percentuais, mas restringe o uso do Pix no Brasil a um sistema de convites e longas análises de *compliance*, o que trava o lançamento imediato.
+
+
+* **A Solução de Gateway Percentual:** A infraestrutura utilizará provedores com foco em Pix e taxas estritamente percentuais, como o **Mercado Pago** (ou alternativas como a Efi). Com uma taxa média de 0,99%, a margem de lucro é protegida independentemente de quão baixo seja o valor da recarga.
+
+
+
+**Projeção de Margem (Exemplo com Mercado Pago a 0,99%):**
+
+\
+
+
+| **Pacote de IA**  | **Valor Pago pelo Aluno** | **Taxa do Gateway** | **Saldo Líquido (Receita)** |
+| ----------------- | ------------------------- | ------------------- | --------------------------- |
+| **Básico**        | R$ 6,00                   | R$ 0,05             | **R$ 5,95**                 |
+| **Intermediário** | R$ 10,00                  | R$ 0,09             | **R$ 9,91**                 |
+| **Avançado**      | R$ 15,00                  | R$ 0,14             | **R$ 14,86**                |
+
+## 2. Motor de Créditos (Wallet) e UX de Baixo Atrito
+
+O processamento financeiro externo (Pix) ocorre exclusivamente para a recarga de saldo. Todo o consumo da IA é gerido internamente pelo sistema.
+
+\
+
+
+* **Faturamento Interno:** O backend Node.js intercepta a pergunta do aluno, envia para a IA e debita o custo exato em tokens diretamente no saldo do usuário no banco de dados. Não há chamadas de faturamento para o gateway durante o uso.
+
+
+* **Atrito Zero (Sem Redirecionamentos):** Quando os créditos acabam, a API retorna um código `402 Payment Required`. O frontend exibe um modal nativo e limpo (estilizado via `.module.css`) oferecendo os pacotes.
+
+
+* **Geração Instantânea:** O usuário seleciona o pacote, e o backend devolve imediatamente o Pix Copia e Cola e o QR Code na mesma tela.
+
+
+
+## 3. Arquitetura Desacoplada no Backend (Node.js)
+
+O módulo de pagamentos será construído utilizando o padrão de projeto *Facade* (ou *Strategy*). Isso garante que o código não fique engessado em um único provedor.
+
+\
+
+
+1. **Interface de Pagamento:** O Express.js chama uma interface genérica (ex: `PaymentService.generatePix()`), que por baixo dos panos aciona o SDK do Mercado Pago. Se amanhã a Stripe liberar o Pix, basta trocar a classe injetada.
+
+
+2. **Processamento via Webhook:** Após o pagamento, o gateway envia um evento (`POST`) para a rota segura de webhooks do sistema. O servidor Node.js valida a assinatura criptográfica e credita os tokens no banco.
+
+
+3. **Liberação em Tempo Real:** Assim que o webhook confirma o pagamento, o servidor dispara um evento via WebSocket para o cliente. A interface desbloqueia o chat automaticamente em 2 a 3 segundos, permitindo que o aluno continue o estudo imediatamente.
+
+
+
+## 4. Estrutura de Banco de Dados (Prisma + PostgreSQL)
+
+Para garantir rastreabilidade financeira e auditoria de consumo sem sobrecarregar as consultas, os dados são separados em três entidades distintas no `schema.prisma`:
+
+\
+
+
+* **`Wallet` (Carteira):** Relacionada ao usuário (`user_id`). Contém uma coluna `balance` (Inteiro) que armazena a quantidade atual de tokens disponíveis.
+
+
+* **`Transaction` (Histórico Financeiro):** Registra exclusivamente as movimentações em Reais (R$). Armazena o `transaction_id` do provedor, valor em centavos, método (Pix), status e o pacote adquirido.
+
+
+* **`UsageLog` (Auditoria de IA):** Registra o custo das requisições ao longo do tempo. Armazena os tokens de entrada, tokens de saída, modelo utilizado (ex: Gemini Flash, Azure) e o `timestamp`. Esta tabela permite gerar gráficos de consumo para o painel do usuário e prever custos de infraestrutura.
