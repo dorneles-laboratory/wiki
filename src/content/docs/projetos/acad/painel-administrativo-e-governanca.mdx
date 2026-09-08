@@ -1,0 +1,198 @@
+---
+title: Painel Administrativo e Governança
+description: Arquitetura, módulos operacionais, governança RBAC e monitoramento institucional do Academic Companion.
+sidebar:
+  order: 18
+---
+
+# 🛡️ Painel Administrativo e Governança (`acad.admin`)
+
+O **Painel Administrativo do Academic Companion** é uma aplicação web dedicada (servida na porta `5181` em desenvolvimento e porta `81` em produção), desacoplada da interface discente para garantir segurança operacional, isolamento de privilégios e alta fidelidade visual construída exclusivamente com **CSS Modules**.
+
+---
+
+## 🏛️ Arquitetura e Acesso
+
+- **Aplicação Dedicada:** `apps/admin` (SPA React 19 + Vite 7).
+- **Portas:** `5181` (Dev) / `81` (Produção Nginx).
+- **Autenticação:** Cookies HTTP-Only (`access_token`, `refresh_token`) associados estritamente à role `ADMIN`.
+- **Guarda de Rotas:** `<AdminProtectedRoute />` com verificação de privilégios e redirecionamento declarativo.
+
+---
+
+## 🧭 Módulos Operacionais
+
+### 1. Dashboard e Visão Geral
+- **KPIs em Tempo Real:** Usuários totais e ativos, editais abertos, volume de memórias e vivências, economia de tokens e fundo solidário.
+- **Alertas do Sistema:** Painel em destaque com alertas críticos, avisos de gargalos e notificações de integridade operacional.
+- **Atividades Recentes:** Trilha de auditoria das últimas ações executadas na plataforma.
+- **Últimos Cadastros:** Monitoramento imediato de novos discentes e pesquisadores registrados.
+
+### 2. Gestão de Usuários e Acessos (RBAC & Moderação)
+- **Tabela Completa com Paginação:** Busca inteligente por nome, e-mail, curso ou `@username`, combinada com filtros por papel e status de conta.
+- **Controle RBAC Granular:** Alternância e definição assistida de perfis de acesso (`STUDENT`, `ADVISOR`, `ADMIN`) com descrições detalhadas de permissões.
+- **Ações de Moderação:**
+  - Ativação e bloqueio imediato de contas.
+  - Concessão manual de tokens de apoio institucional / bolsas acadêmicas.
+  - Redefinição de credenciais temporárias para suporte.
+  - **Personificação (Impersonation):** Geração de sessão segura para validação discente e suporte técnico sem conhecimento da senha do usuário.
+  - Exclusão definitiva de contas com confirmação de segurança.
+
+### 3. Configurações Globais & Operação
+- **Parâmetros do Sistema:** Ajuste de limites de upload, percentuais de doação ao fundo solidário e regras de negócio.
+- **Feature Flags Dinâmicas:** Switches em tempo real com controle de percentual de rollout para liberação gradual de recursos.
+- **Comunicado Global (Broadcast):** Disparo de notificações em massa para a central de todos os estudantes ativos.
+
+### 4. Suporte & Central de Chamados (Ouvidoria & Sandbox)
+- **Métricas de Atendimento em Tempo Real:** Total de chamados, chamados abertos aguardando triagem, em atendimento, taxa de resolução e tempo médio de resposta.
+- **Integração de Ponta a Ponta com o Discente:**
+  - O estudante abre solicitações diretamente pelo portal discente (`/settings?tab=suporte`), definindo assunto, categoria, urgência e descrição.
+  - Recebe protocolo rastreável e notificações automáticas a cada mudança de status e parecer emitido.
+- **Central de Notificações do Administrador no Topbar (`AdminNotificationDropdown`):**
+  - Sino interativo no cabeçalho com badge em tempo real de contagem de pendências críticas e chamados em aberto.
+  - Painel popover segmentado por abas ("Todos", "Chamados", "Alertas do Sistema") com visualização de gravações pendentes, severidade de alertas (`CRITICAL`, `WARNING`, `INFO`) e links rápidos para a Central de Suporte e Gestão de Comunicados.
+- **Diagnóstico Sandbox com Gravação de Tela/Aba & Auditoria de Logs:**
+  - O discente inicia o Sandbox para replicar inconsistências ativamente pela Central de Ajuda.
+  - Suporte nativo completo à seleção flexível de **Aba do Navegador (Chrome Tab)**, Janela do Aplicativo ou Tela Inteira, sem restrições que impeçam o compartilhamento.
+  - Durante o processo, uma borda indicativa na tela sinaliza a gravação ativa, enquanto o sistema audita logs do console (`log`, `warn`, `error`), cliques do mouse e rotas percorridas.
+  - O vídeo WebM da tela e o payload de logs são enviados para o storage MinIO e vinculados ao chamado de suporte (`isSandbox: true`).
+- **Gestão Administrativa & Reprodução:**
+  - Filtros inteligentes e badge visual `[🎥 Sandbox Gravado]` na lista de chamados.
+  - **Modal de Atendimento Otimizado e Responsivo:** Cabeçalho e rodapé fixos com corpo rolável (`max-height: 90vh; overflow-y: auto;`), impedindo que conteúdos extensos, vídeos de alta resolução ou terminais de logs extensos extrapolem o viewport ou travem a tela.
+  - **Player de Vídeo Embutido:** O administrador assiste à gravação da tela ou da aba diretamente no modal de atendimento com link direto para abertura em nova aba.
+  - **Terminal de Auditoria do Navegador:** O administrador inspeciona os logs do console, cliques e informações de viewport/dispositivo.
+  - **Exclusão Segura de Chamados:** Exclusão definitiva de chamados protegida por confirmação de senha do administrador (`AdminPasswordModal`).
+
+### 5. Finanças, Custos & DRE em Tempo Real (Zero Mocks)
+- **Persistência 100% no PostgreSQL (`financial_entries`):** Todo o fluxo de caixa, receitas brutas, despesas operacionais e margem de lucro provém exclusivamente de registros reais no banco de dados.
+- **Lançamentos Manuais:** Criação de novos débitos, custos operacionais ou receitas via modal dedicado com categorização (`COMPUTACAO`, `INFRAESTRUTURA`, `SERVICOS`, `PESSOAL`, `RECEITA_SAAS`).
+- **Sincronização Automatizada de Custos Computacionais:** Botão de sincronização que calcula os custos apurados com base no uso real do sistema:
+  - Tokens consumidos via Google Gemini API (Interactions e Multimodal).
+  - Minutos processados via Whisper Transcription (memórias em áudio).
+  - Storage utilizado no MinIO S3 (documentos, evidências e avatares).
+  - Custos rateados de instâncias e banco PostgreSQL.
+- **Exclusão de Lançamentos:** Exclusão de itens do livro-caixa protegida por autenticação por senha do administrador.
+
+### 6. Gestão de Oportunidades & Editais Capturados por IA
+- **Curadoria Completa dos Dados da IA:** O administrador pode inspecionar e alterar qualquer campo extraído pelo web scraper e modelos Gemini: título, instituição de fomento, descrição detalhada, requisitos, remuneração/bolsa, links oficiais para download do edital, datas limite e status (`OPEN`, `CLOSED`, `ARCHIVED`).
+- **Acesso Direto ao Edital Oficial:** Botão de abertura e checagem do link externo original.
+- **Exclusão Definitiva de Oportunidades:** Exclusão segura no banco com cancelamento em cascata de candidaturas vinculadas, validada via `AdminPasswordModal`.
+
+### 7. Gestão do Academic Toolkit & Catálogo Inteligente
+- **Catálogo 100% no Banco de Dados (`toolkit_tools`):** Zero mocks ou constantes em código. Todas as soluções inteligentes disponíveis ou em desenvolvimento são lidas e persistidas diretamente no PostgreSQL.
+- **Papéis Claros de Uso:**
+  - A fixação no acesso rápido (`pinned`) é de livre escolha de cada discente em seu portal para personalização pessoal.
+  - O administrador gerencia status de disponibilidade (`AVAILABLE` vs `COMING_SOON`), marcação de novidade (`isNew`), ativação (`isActive`), nome, categoria, rota (`href`) e descrição.
+- **Estilo Visual e Ações Diretas:** Botões aprimorados e estilizados para alternância entre "Liberar Disponível" (verde-esmeralda) e "Mudar para Em Breve" (âmbar).
+### 8. Diretório de Fontes & Governança de Robôs Mineradores
+- **Catálogo Institucional Centralizado (`academic_sources`):** Cadastro e monitoramento de portais universitários, agências de fomento (CNPq, CAPES, FAPERGS) e fundações parceiras.
+- **Painel em Abas Operacionais:**
+  - **Aba 1 — Fontes Monitoradas & Robôs:**
+    - Visualização tabular com status em tempo real, frequência de scraping (horas), data/hora da última execução do bot e volume de editais/bolsas capturados.
+    - **Execução Imediata de Mineração ("Minerar Agora"):** Disparo manual de bots para varredura imediata de um portal sem consumo de tokens do administrador.
+    - **Histórico e Telemetria de Robôs (`CrawlLog`):** Inspeção de logs de cada ciclo do crawler (status, novos itens encontrados, tempo de resposta em ms, erros de rede e autor do disparo).
+    - **Ações CRUD:** Cadastro de novos portais, edição de metadados/intervalos, alternância de status ativo/pausado e exclusão segura.
+  - **Aba 2 — Moderação de Indicações Comunitárias (`source_submissions`):**
+    - Fluxo de moderação onde o administrador aceita ou rejeita as fontes sugeridas pelos discentes através do portal do aluno.
+    - **Aprovação Assistida:** Ao aprovar uma indicação, o sistema cadastra automaticamente o portal no diretório oficial, credita **+20 tokens de IA** na carteira do aluno sob a transação `COMMUNITY_REWARD` e emite uma notificação em tempo real informando o sucesso da validação.
+    - **Recusa com Parecer Técnico:** Ao recusar (por exemplo, link inválido ou fora do escopo acadêmico), o administrador envia uma justificativa fundamentada e o aluno é notificado com transparência.
+
+### 9. Economia de Tokens & Inteligência de IA (`/tokens`)
+- **Gestão Contábil de Tokens:**
+  - **Tokens em Circulação Real:** Soma exclusiva de saldos de discentes (`role !== 'ADMIN'`). A carteira administrativa não infla o indicador contábil.
+  - **Bypass com Registro de Consumo para Administradores:** O admin pode executar qualquer funcionalidade consumidora de IA ou robôs mineradores sem bloqueio por falta de saldo, mas suas ações são auditadas e registradas como `[ADMIN]` no histórico.
+- **Breakdown de Bonificações e Concessões:**
+  - Tokens concedidos no cadastro de boas-vindas (`WELCOME_BONUS`).
+  - Tokens atribuídos por indicações de amigos/colegas (`REFERRAL_REWARD`).
+  - Recompensas comunitárias e concessões manuais (`COMMUNITY_REWARD`, `ADMIN_GRANT`).
+- **Unit Economics & Margem de IA:**
+  - Custo médio apurado por token computacional (modelo Google Gemini Flash).
+  - Custo total das bonificações concedidas.
+  - Consumo financeiro de IA gerado exclusivamente pela administração.
+  - Faturamento com pacotes avulsos e margem líquida dos tokens.
+- **Auditoria Detalhada de Transações:**
+  - Tabela paginada com filtro por papel (`TODOS`, `DISCENTES`, `ADMINISTRADORES`), tipo de transação e busca textual por nome de discente ou e-mail.
+
+### 10. Configurações Globais, Operação & Feature Flags (`/configuracoes`)
+- **Central Operacional Dinâmica (Zero Mocks):**
+  - Todas as configurações (`system_settings`) e feature flags (`feature_flags`) são persistidas no PostgreSQL e regem o comportamento em tempo real de toda a plataforma.
+  - **Broadcast Removido:** O envio de comunicados em massa foi completamente desvinculado e centralizado na página exclusiva `/notificacoes`.
+- **Governança de Acesso e Manutenção:**
+  - **Controle de Novos Cadastros (`ALLOW_REGISTRATION`):** Quando desativado, o formulário de registro de novos alunos no portal público é bloqueado imediatamente pelo `AuthService`, permitindo apenas e-mails autorizados da gestão (`fernando.dorneles@ecomp.ufsm.br`).
+  - **Modo de Manutenção (`MAINTENANCE_MODE`):** Interceptação global de requisições HTTP via `maintenanceMiddleware` com retorno `503 Service Unavailable` e exibição de mensagem personalizada configurada pelo administrador. Administradores e chamadas de autenticação/saúde permanecem liberados.
+  - **Status Público em Tempo Real (`GET /api/system/status`):** Endpoint público de telemetria consumido pelos frontends para inspecionar disponibilidade, modo de manutenção e flags ativas.
+- **Economia e Parâmetros de Recursos:**
+  - **Bônus Inicial de Boas-Vindas (`WELCOME_BONUS_TOKENS`):** Crédito automático de tokens concedido na criação de novas carteiras.
+  - **Bônus de Indicação (`REFERRAL_BONUS_TOKENS`):** Recompensa atribuída quando um novo estudante se cadastra via link de indicação.
+  - **Limite Máximo de Upload (`MAX_UPLOAD_SIZE_MB`):** Validação física do tamanho de anexos PDF/imagens no endpoint seguro de upload (`/api/upload`).
+  - **Custos Computacionais de IA:** Custos unitários de entrada/saída de tokens do Google Gemini e minuto de transcrição Whisper.
+- **Feature Flags & Rollout Gradual:**
+  - Alternância instantânea de funcionalidades modulares (`AI_ASSISTANT`, `AUDIO_TRANSCRIPTION`, `OPPORTUNITY_RADAR`, `LATTES_RADAR`, `SOLIDARY_FUND`, `PUBLIC_PORTFOLIO`, `PAID_SUBSCRIPTIONS`).
+  - Percentual configurável de rollout (0% a 100%) para lançamentos graduais de novos recursos.
+- **Gestão Customizada e Restauração:**
+  - Criação e exclusão de novas chaves e parâmetros operacionais customizados.
+  - Botão de restauração das configurações e flags recomendadas do sistema.
+
+---
+
+## 🛠️ Governança de Manutenção Programada & Janelas Operacionais
+
+O Academic Companion possui um motor rigoroso de manutenção preventiva e emergencial:
+
+1. **Bypass Administrativo Absoluto:**
+   - Quando o modo de manutenção é ativado pelo Superadmin, todos os endpoints públicos e rotas discentes são imediatamente bloqueados com status HTTP `503 (Service Unavailable)`.
+   - **Administradores NÃO são bloqueados:** o middleware de manutenção valida a assinatura criptográfica do JWT e permite navegação irrestrita para que a equipe valide as alterações e a estabilidade da plataforma.
+   - Discentes e público externo são automaticamente interceptados e direcionados para a página dedicada `/manutencao`, exibindo motivo detalhado, janela operacional prevista e botão de verificação de status.
+2. **Agendamento de Janelas de Manutenção:**
+   - No painel administrativo (`/configuracoes`), é possível programar janelas futuras com data/hora de início e término.
+   - **Avisos Automáticos aos Discentes:** Com a opção de notificação ativa, o sistema emite avisos in-app (tipo `INCIDENT`) e banners de contagem regressiva no topo do portal do discente alertando sobre o período de indisponibilidade.
+   - **Auto-ativação Programada:** Ao atingir o horário definido, o sistema comuta automaticamente para manutenção e restaura a operação ao término.
+
+---
+
+## 🏅 Sistema de Insígnias (Badges) & Mérito Acadêmico (`/insignias`)
+
+A tela de insígnias descentraliza o reconhecimento acadêmico através de gamificação auditável:
+
+- **Catálogo do Sistema:** Cadastro e visualização de insígnias categorizadas (`ACADEMIC`, `COMMUNITY`, `ENGAGEMENT`, `TECHNICAL`, `HONORARY`) com atribuição de pontos de experiência (XP) e critérios objetivos.
+- **Concessão Manual por Mérito:** Permite que a gestão conceda insígnias personalizadas a estudantes específicos (ex: campeões de hackathons, destaques em iniciação científica, monitores exemplares), exigindo justificativa formal obrigatória.
+- **Notificação e Destaque:** O discente agraciado recebe notificação comemorativa in-app e pode fixar suas insígnias favoritas em seu perfil público.
+- **Auditoria & Revogação:** Histórico completo de concessões com identificação do administrador responsável, justificativa e botão de revogação imediata.
+
+---
+
+## 🧭 Navegação Hierárquica do Painel (Sidebar)
+
+A barra lateral do painel administrativo organiza os fluxos operacionais em blocos temáticos com recuo visual (`subItem`):
+
+1. **Visão Geral:** `/` (Painel Geral)
+2. **Diretórios & Oportunidades:**
+   - `/editais` (Editais & Vagas)
+   - `/fontes` (Diretório de Fontes)
+   - `/toolkit` (Academic Toolkit)
+3. **Finanças & Economia:**
+   - `/financas` (DRE & Finanças)
+   - `/tokens` (Tokens & Economia IA)
+   - `/simulador` (Simulador de Escala)
+   - `/planos` (Planos de Assinatura)
+4. **Comunidade & Atendimento:**
+   - `/usuarios` (Gestão de Usuários)
+   - `/insignias` (Insígnias & Mérito Acadêmico)
+   - `/suporte` (Suporte & Chamados)
+   - `/notificacoes` (Notificações & Avisos)
+5. **Infraestrutura & Sistema:**
+   - `/sistema` (Saúde & Auditoria — com links dinâmicos para Swagger OpenAPI e MinIO Console)
+   - `/configuracoes` (Configurações Globais & Janelas de Manutenção)
+   - Atalho para o Portal do Discente (`acad.dorneles.dev`)
+
+---
+
+## 🔐 Ambientes e Acesso
+
+- **Produção Oficial (HTTPS):** [https://admin-acad.dorneles.dev](https://admin-acad.dorneles.dev)
+- **Portal Discente Oficial (HTTPS):** [https://acad.dorneles.dev](https://acad.dorneles.dev)
+- **API Backend Oficial (HTTPS):** [https://api-acad.dorneles.dev](https://api-acad.dorneles.dev)
+- **MinIO S3 Console (HTTPS):** [https://console-acad.dorneles.dev](https://console-acad.dorneles.dev)
+- **Documentação OpenAPI:** [https://api-acad.dorneles.dev/api-docs](https://api-acad.dorneles.dev/api-docs)
+- **E-mail Administrativo:** `admin.dorneles@acad.com`
+

@@ -1,0 +1,114 @@
+---
+title: Endpoints e Serviços da Plataforma (API v1)
+description: Especificação técnica dos serviços RESTful, contratos Zod, autenticação por cookies HTTP-Only e integração do Academic Companion.
+sidebar:
+  order: 11
+---
+
+# 🔌 Endpoints e Serviços da Plataforma (API v1)
+
+Este documento descreve a arquitetura de serviços HTTP, contratos OpenAPI declarativos e fluxos de integração implementados no backend do **Academic Companion**.
+
+---
+
+## 🛡️ Padrão de Autenticação e Segurança
+
+- **Tokens JWT:**
+  - `accessToken`: Validade de 24h, assinado com HMAC-SHA256 contendo `sub: userId`.
+  - `refreshToken`: Validade de 7 dias, persistido e auditado na base relacional PostgreSQL.
+- **Cookies HTTP-Only:**
+  - Ambos os tokens trafegam exclusivamente via Cookies seguros (`HttpOnly`, `SameSite: Lax` em dev e `SameSite: None` + `Secure` em produção).
+  - Previne ataques de XSS e extração de credenciais via JavaScript de terceiros.
+- **Boas-Vindas Automáticas:**
+  - No cadastro (`POST /api/auth/register`), o estudante já recebe automaticamente os cookies autenticados, seu perfil inicial (`StudentProfile`) e sua carteira (`UserWallet`) provisionada com **50 tokens gratuitos**.
+
+---
+
+## 📡 Módulos Centrais e Endpoints
+
+### 1. Autenticação e Perfil (`/api/auth`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Cadastro do estudante (nome, email, senha, curso, universidade) | Pública |
+| `POST` | `/api/auth/login` | Login com credenciais e emissão de cookies | Pública |
+| `POST` | `/api/auth/refresh` | Renovação do `accessToken` através do cookie `refreshToken` | Cookie |
+| `POST` | `/api/auth/logout` | Revogação dos cookies de autenticação | Pública |
+| `GET` | `/api/auth/me` | Retorna dados completos do estudante, perfil e carteira | Autenticada |
+
+### 2. Oportunidades & Bolsas (`/api/opportunities`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `GET` | `/api/opportunities/public-radar` | Radar Universitário Aberto para a Landing Page (sem login) | Pública |
+| `GET` | `/api/opportunities` | Listagem com filtros de pesquisa, categoria e paginação | Pública / Opcional |
+| `GET` | `/api/opportunities/:id` | Detalhes completos de edital ou bolsa | Pública |
+| `GET` | `/api/opportunities/applications/me` | Candidaturas ativas do estudante (alimenta o Kanban) | Autenticada |
+| `POST` | `/api/opportunities/apply` | Registro de nova candidatura com status inicial | Autenticada |
+| `PATCH` | `/api/opportunities/applications/:id/status` | Mudança de coluna no Kanban de candidaturas | Autenticada |
+
+### 3. Vivências & Projetos (`/api/experiences`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `GET` | `/api/experiences` | Lista projetos, ICs, estágios, monitorias e extensões | Autenticada |
+| `GET` | `/api/experiences/:id` | Detalhes de uma vivência prática específica | Autenticada |
+| `POST` | `/api/experiences` | Cadastro de nova atividade prática e competências | Autenticada |
+| `PUT` | `/api/experiences/:id` | Atualização de dados, carga horária e orientação | Autenticada |
+| `DELETE` | `/api/experiences/:id` | Remoção de vivência prática | Autenticada |
+
+### 4. Diário & Memórias Acadêmicas (`/api/memories`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `GET` | `/api/memories` | Histórico cronológico de reflexões e notas de estudo | Autenticada |
+| `GET` | `/api/memories/:id` | Detalhes de anotação ou transcrição de áudio | Autenticada |
+| `POST` | `/api/memories` | Registro de aprendizado, insight, reflexão ou conquista | Autenticada |
+| `PUT` | `/api/memories/:id` | Edição de conteúdo ou tags temáticas | Autenticada |
+| `DELETE` | `/api/memories/:id` | Exclusão de registro | Autenticada |
+
+### 5. Carteira de Tokens & Apoio Solidário (`/api/wallet`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `GET` | `/api/wallet` | Saldo disponível de tokens e status de apoio solidário | Autenticada |
+| `GET` | `/api/wallet/transactions` | Extrato detalhado de débitos e créditos de tokens | Autenticada |
+| `POST` | `/api/wallet/simulate` | Simulação instantânea de poder de compra (mín. R$ 2,50) | Autenticada |
+| `POST` | `/api/wallet/checkout` | Sessão de pagamento de recarga voluntária | Autenticada |
+
+### 6. Notificações do Sistema (`/api/notifications`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `GET` | `/api/notifications` | Lista as notificações reais e contador de não lidas (`unreadCount`) | Autenticada |
+| `PATCH` | `/api/notifications/read` | Marca notificações como lidas (específicas ou todas) | Autenticada |
+| `DELETE` | `/api/notifications/:id` | Exclusão de notificação individual | Autenticada |
+| `POST` | `/api/notifications/bulk-delete` | Exclusão em lote de notificações selecionadas | Autenticada |
+
+### 7. Dashboard & Personalização de Layout (`/api/dashboard`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `GET` | `/api/dashboard/stats` | Estatísticas agregadas do sistema e métricas da semana | Autenticada |
+| `GET` | `/api/dashboard/map` | Dados geoespaciais 3D dos prédios da UFSM para o mapa interativo | Autenticada |
+| `GET` | `/api/dashboard/layout` | Configuração personalizada de widgets e posições do discente | Autenticada |
+| `PUT` | `/api/dashboard/layout` | Salva e persiste o layout customizado no PostgreSQL | Autenticada |
+| `POST` | `/api/dashboard/layout/reset` | Restaura o layout padrão de fábrica no banco | Autenticada |
+
+---
+
+## 📦 Padrão de Erros RFC 7807
+
+Todas as respostas de erro HTTP (400, 401, 403, 404, 409, 500) seguem rigorosamente a RFC 7807:
+
+```json
+{
+  "type": "/errors/validation-error",
+  "title": "Erro de validação nos dados enviados.",
+  "status": 400,
+  "detail": "A senha deve conter no mínimo 8 caracteres.",
+  "errors": {
+    "password": ["A senha deve conter no mínimo 8 caracteres."]
+  }
+}
+```

@@ -115,3 +115,64 @@ Uma vez extraído o texto bruto do edital, o conteúdo é submetido a um modelo 
 * **Atualização Incremental:** O sistema guarda o hash de páginas e arquivos já processados. Apenas itens com hash alterado ou novas URLs são reanalisados pela IA, economizando recursos de computação.
 * **Controle de Duplicidade:** Verificação multidimensional via URL canônica, código oficial do edital e similaridade de embeddings de título e resumo.
 * **Agendamento Dinâmico:** Fontes com grande fluxo de publicação (ex: reitorias e agências nacionais) são verificadas a cada 30 minutos; páginas departamentais menores são agendadas em janelas de 2 a 12 horas.
+
+---
+
+## 7. Diretório Oficial de Fontes Acadêmicas (`/diretorio-fontes`)
+
+O **Diretório de Fontes** é o catálogo centralizado e homologado de portais de editais, universidades e agências de fomento:
+
+* **Mapeamento Curado:** Cadastro inicial de fontes como CNPq, CAPES, FAPESP, FAPERGS, Santander Open Academy, DAAD, Fulbright e portais universitários oficiais.
+* **Indicação Comunitária (`SourceSubmission`):** Estudantes e pesquisadores podem sugerir novos portais para a rede. A equipe avalia e homologa os robôs.
+* **Varredura Sob Demanda com Bot:** O discente pode solicitar que os robôs do Academic Companion acessem imediatamente uma fonte específica para minerar oportunidades recentes.
+
+---
+
+## 8. Governança Computacional: Lotes de 3 Editais e Débito Justo de Tokens
+
+Devido ao alto custo de infraestrutura de nuvem, scraping com headless browsers, OCR e análise semântica por LLMs, o sistema aplica um modelo de computação sustentável e transparente:
+
+* **Exibição Estrita em Lotes de 3 Editais:** No *Scholarship Finder* e na varredura por bots, as oportunidades são apresentadas em lotes de **3 por vez** (`pageSize = 3`).
+* **Débito Amigável de 1 Token por Edital (3 Tokens por Lote):** Cada lote de 3 editais minerados ou carregados consome exatamente **3 tokens** (`AI_USAGE`) da carteira do estudante (`user_wallets`).
+* **Integração com Bônus e Convites:** Estudantes sem saldo recebem orientações imediatas para recarga ou para convidar colegas (+20 tokens tanto para o indicador quanto para o indicado).
+
+---
+
+## 9. Especificação Técnica do `AcademicCrawlerBot` & Telemetria
+
+O robô de coleta (`apps/backend/src/modules/crawler/`) é projetado com princípios de alta disponibilidade e rastreabilidade:
+
+### 9.1. Headers Éticos & Anti-Bloqueio
+O robô se identifica transparentemente em todas as requisições HTTP:
+```http
+User-Agent: AcademicCompanionBot/1.0 (+https://acad.ufsm.br/bot; bot@acad.ufsm.br)
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7
+Cache-Control: no-cache
+```
+
+### 9.2. Extração Semântica e Normalização (`SemanticCrawlerParser`)
+* **Âncoras & Links:** Extração seletiva de tags `<a>` vinculadas a editais, chamadas e PDFs.
+* **Detecção Léxica:** Reconhecimento contextual de bolsas (`PIBIC`, `PIBITI`, `PIBEX`, `Monitoria`, `Mobilidade`).
+* **Valores Monetários:** Captura de padrões como `R$ 700,00/mês`, aplicando valores canônicos caso não explicitados no resumo.
+* **Limite Estrito:** Corte determinístico de até 3 editais por lote de processamento.
+
+### 9.3. Telemetria e Auditoria (`CrawlLog`)
+Cada disparo do robô gera um registro imutável em `crawl_logs`:
+* **`durationMs`:** Tempo total de ida e volta da requisição em milissegundos.
+* **`httpStatus`:** Código de resposta HTTP (200, 301, 403, 500).
+* **`itemsFound`:** Contagem de links de editais detectados.
+* **`executedBy`:** Identificador do usuário solicitante ou `SYSTEM`.
+* **Endpoint de Telemetria:** `GET /api/sources/:id/logs` para auditoria do histórico de execuções.
+
+### 9.4. Governança Segura no Painel Administrativo (`AdminPasswordModal`)
+Para proteger o ecossistema de fontes e evitar operações acidentais ou não autorizadas, a interface administrativa (`apps/admin/src/pages/sources/Sources.tsx`) exige obrigatoriamente a confirmação por senha do administrador (`POST /api/admin/verify-password`) antes de efetivar qualquer ação crítica:
+* **Cadastro e Edição:** Validação da senha antes de persistir alterações cadastrais ou adicionar novas fontes ao catálogo.
+* **Alternância de Status:** Pausa ou reativação do monitoramento automático sob confirmação com senha.
+* **Disparo do Robô Minerador ("Minerar Agora"):** Exige autenticação de senha antes de acionar o worker de coleta.
+* **Moderação de Indicações Comunitárias:**
+  - **Aprovação:** Confirmação por senha antes de promover a fonte para o catálogo oficial e creditar +20 tokens de IA na carteira do discente.
+  - **Recusa:** Confirmação por senha com envio de parecer técnico orientador ao discente.
+* **Exclusão Definitiva:** Confirmação com senha em modal de estilo destrutivo (`variant="destructive"`).
+
+

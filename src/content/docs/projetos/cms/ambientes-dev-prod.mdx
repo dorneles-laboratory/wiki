@@ -13,7 +13,7 @@ O **CMS Murais Digitais** foi arquitetado com **paridade total de ambiente**: o 
 
 | Ambiente | Branch Git | Arquivos de Ambiente | Modo de Execução | Portas Padrão |
 |---|---|---|---|---|
-| **Desenvolvimento** | `dev` | `.env.development`, `.env.test` | Hot-Reload (Vite dev server + TSX Backend + Volumes montados) | Backend: `5006`<br/>Frontend: `5179`<br/>DB: `5445`<br/>MinIO: `9000/9001` |
+| **Desenvolvimento** | `dev` | `.env.development`, `.env.test` | Hot-Reload (Vite dev server + TSX Backend + Volumes montados) | Backend: `5007`<br/>Frontend: `5179`<br/>DB: `5445`<br/>MinIO: `9000/9001` |
 | **Produção (VPS)** | `main` | `.env.production` | Otimizado (Nginx SPA + Backend JS compilado + Cloudflare Tunnel) | Frontend: `80` / `443`<br/>Backend: Interno na rede Docker |
 
 ---
@@ -36,8 +36,8 @@ make dev-upd
 
 # 4. Acessar os serviços:
 # Frontend:   http://localhost:5179
-# Backend:    http://localhost:5006/api
-# Swagger UI: http://localhost:5006/api-docs
+# Backend:    http://localhost:5007/api
+# Swagger UI: http://localhost:5007/api-docs
 # MinIO:      http://localhost:9001
 # Jaeger:     http://localhost:16692
 ```

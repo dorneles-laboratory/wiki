@@ -1,0 +1,241 @@
+---
+title: Academic Toolkit & Scholarship Finder
+description: Especificação técnica da vitrine de ferramentas do Toolkit e da Central de Oportunidades & Bolsas.
+sidebar:
+  order: 12
+---
+
+# 🧰 Academic Toolkit & Scholarship Finder
+
+O **Academic Toolkit** é o ecossistema central de ferramentas e aceleradores de formação do Academic Companion. Ele foi projetado para agregar soluções especializadas que resolvem dores burocráticas e acadêmicas de estudantes e pesquisadores, desde a descoberta de editais e bolsas até a documentação de produção científica.
+
+---
+
+## 🏗️ Arquitetura e Componentes do Toolkit (`/toolkit`)
+
+A interface do Toolkit é implementada em **React 19** utilizando **CSS Modules (`.module.css`)** e tokens de cores padronizados em `src/styles/global.css`:
+
+1. **`AiRecommendation` (`components/toolkit/ai-recommendation/`)**:
+   - Sugestão contextual gerada com base nos dados reais do estudante (`StudentProfile`: curso, semestre e interesses declarados).
+   - Recomenda ferramentas específicas com base nos desafios atuais da formação (ex: transição para Iniciação Científica ou preparação para o mercado de trabalho).
+2. **`QuickAccess` (`components/toolkit/quick-access/`)**:
+   - Barra superior com atalhos de ferramentas fixadas (`pinned: true`) para agilidade no dia a dia.
+3. **`ToolkitCatalog` (`components/toolkit/catalog/`)**:
+   - Catálogo com pesquisa textual (título, tagline e descrição) e seletor de categorias com códigos de cores.
+   - Categorias suportadas:
+     - 💼 **Currículo e Carreira** (Resume Builder, Lattes Assistant, LinkedIn Builder, Portfólio)
+     - 🔬 **Pesquisa e Produção Científica** (Publication Assistant, Research Finder, Event Discovery)
+     - 📅 **Planejamento Acadêmico** (Roadmap Planner, Hub de Disciplinas)
+     - 🎯 **Oportunidades** (Scholarship Finder)
+     - 📄 **Documentação** (Acervo de Evidências & Certificados)
+     - 🧠 **Inteligência Acadêmica** (Arena Acadêmica, Laboratório de Ideias)
+4. **`ToolCard` (`components/toolkit/card/`) & Navegação Direta**:
+   - **Zero Tela Intermediária:** Quando uma ferramenta está ativa (`status: AVAILABLE`), clicar no botão "Abrir" ou na rota interna leva o usuário **imediatamente para a ferramenta** (`/toolkit/scholarship-finder`, `/toolkit/lattes`, `/toolkit/linkedin`, etc.), sem passos intermediários.
+   - Ferramentas ainda em desenvolvimento (`COMING_SOON`) exibem aviso amigável com bloqueio de acesso e botão de registro de interesse comunitário.
+
+---
+
+## 🎓 Ferramenta Scholarship Finder (`/toolkit/scholarship-finder`)
+
+O **Scholarship Finder** é a ferramenta inteligente de descoberta e curadoria de bolsas e editais:
+- **`ScholarshipHeader`:** Título oficial, botão de retorno rápido ao Toolkit e sincronização dinâmica de recomendações.
+- **`SearchProfileCard`:** Dados do estudante (curso, semestre, áreas de interesse) obtidos dinamicamente de `useStudentProfile()`.
+- **`ScholarshipStats`:** 4 métricas agregadas de oportunidades encontradas, altamente compatíveis, inscrições ativas e aprovações.
+- **Três Modos de Navegação por Abas:**
+  1. ⭐ **Recomendados:** Exibe oportunidades com índice de compatibilidade superior ou igual a 80%.
+  2. 🌐 **Explorar Todos:** Barra lateral com acordeom de filtros combinados (Curso, Estado, Instituição, Tipo, Valor, Modalidade, Nível Acadêmico, Prazo), campo de busca rápida e ordenação ("Melhor Match", "Mais Recentes", "Prazo mais próximo", "Maior Valor", "Ordem Alfabética").
+  3. 📋 **Minhas Inscrições:** Quadro Kanban com 3 colunas interativas ("Preparando Documentação", "Em Análise", "Aprovado"), sincronizado em tempo real com o botão "Me inscrevi / Inscrito" dos cards.
+- **Resumo Inteligente com IA (`AiSummaryModal`):** Permite analisar os editais em segundos com síntese executiva, benefícios, critérios de elegibilidade e recomendações para aumentar a nota na avaliação.
+
+## 🎯 Central de Oportunidades & Bolsas (`/opportunities`)
+
+A Central de Oportunidades reúne editais públicos e internos capturados pelo coletor do backend, com interface dividida em duas abas:
+
+### 1. Vitrine de Editais
+- **`SearchProfileCard`:** Exibe a identidade acadêmica do estudante usada no cálculo algorítmico de afinidade (Match Score).
+- **`ScholarshipStats`:** Métricas agregadas de editais abertos, remuneração média de bolsas e afinidade.
+- **`ScholarshipFilters`:** Filtragem por texto livre, categoria (IC, Monitoria, Extensão, Estágio, Intercâmbio, Hackathon), nível acadêmico e modalidade.
+- **`OpportunityCard`:** Card rico exibindo valor em destaque, benefícios em badges verdes suaves, requisitos mínimos, contagem regressiva de encerramento de inscrições e botão de candidatura rápida.
+
+### 2. Quadro Kanban de Candidaturas
+Permite ao estudante gerenciar todas as suas submissões em 4 etapas lineares:
+- 📝 **Em Preparação (`DRAFT`):** Documentos sendo reunidos ou carta de motivação em rascunho.
+- 📨 **Inscrição Enviada (`SUBMITTED`):** Formulário submetido à comissão avaliadora.
+- ⏳ **Em Avaliação (`REVIEW`):** Aguardando resultado preliminar ou recursos.
+- 🎉 **Aprovado (`ACCEPTED`):** Bolsa ou vaga conquistada, alimentando automaticamente a entidade `Experience`.
+
+---
+
+## 💼 LinkedIn Impact Builder (`/toolkit/linkedin`)
+
+O **LinkedIn Impact Builder** auxilia o estudante e pesquisador a transformar suas conquistas acadêmicas, artigos aceitos, aprovações de bolsas e entregas técnicas em publicações profissionais de alto alcance na rede, com integração nativa com a API oficial do LinkedIn e suporte a publicação direta no feed.
+
+### 🔌 Integração com a API do LinkedIn (OAuth 2.0 & UGC Posts API)
+A plataforma implementa um fluxo completo e seguro de integração com o ecossistema do LinkedIn:
+- **Fluxo OAuth 2.0:**
+  - `GET /api/integrations/linkedin/auth-url`: Gera a URL de autorização oficial (`https://www.linkedin.com/oauth/v2/authorization`) com os escopos `openid`, `profile`, `email` e `w_member_social`.
+  - Redirecionamento e Callback: O discente autentica no LinkedIn e retorna para a rota `/toolkit/linkedin/callback`, onde o backend (`POST /api/integrations/linkedin/callback`) troca o `authorization_code` pelo Access Token (e Refresh Token de longa duração), buscando o perfil do usuário e salvando a conta vinculada.
+  - **Fallback Dev Automático:** Em ambiente de desenvolvimento local, sem chaves de produção configuradas, o sistema oferece um fluxo emulado seguro (`mock_dev_linkedin_auth_code`) para testes de ponta a ponta.
+- **Vinculação Manual Flexível:** Estudantes que não desejam conceder permissões de escrita podem simplesmente vincular a URL de seu perfil público (`https://linkedin.com/in/...`), permitindo copiar o conteúdo gerado e abrir o compartilhamento do navegador em 1 clique.
+- **Persistência no Banco de Dados (`IntegrationAccount`):**
+  - Modelo relacional no PostgreSQL com `userId`, `provider = LINKEDIN`, `providerAccountId`, `accessToken`, `expiresAt`, `displayName`, `avatarUrl` e `profileUrl`.
+- **Publicação Direta no Feed (`POST /api/integrations/linkedin/share`):**
+  - Utiliza a API oficial de UGC Posts (`https://api.linkedin.com/v2/ugcPosts`) com visibilidade pública (`w_member_social`), permitindo postar imediatamente a partir do Academic Companion sem sair do app.
+
+### 🎨 Funcionalidades & Arquitetura da Interface (100% CSS Modules)
+1. **Gerador de Publicações Contextualizado (`PostGenerator.tsx`):**
+   - **Origem dos Dados Dinâmica:** Permite selecionar dados reais do discente:
+     - 🎓 **Vivências Práticas:** Puxa projetos, estágios, monitorias e ICs cadastradas (`useExperiences()`).
+     - 📖 **Diário & Memórias:** Puxa anotações e reflexões diárias recentes (`useMemories()`).
+     - ✍️ **Tema Livre / Manual:** Campo de texto livre para qualquer tema de destaque.
+   - **Seleção de Tom de Voz Aprofundada:**
+     - **🔬 Técnico & Engenharia:** Foco em arquitetura, testes, complexidade computacional, banco de dados e stack.
+     - **🚀 Storytelling & Superação:** Foco na jornada, desafios contornados, perseverança e gratidão ao time/orientador.
+     - **💼 Executivo & Negócios:** Foco em ROI acadêmico, impacto prático, métricas de resultado e liderança.
+   - **Preview Fiel no Feed do LinkedIn:** Simula perfeitamente o card do feed com avatar, headline institucional, texto formatado com hashtags estratégicas, placeholder de anexo e barra de interações (Gostei, Comentar, Compartilhar, Enviar).
+   - **Publicação Híbrida Inteligente:** Se o usuário estiver autenticado via OAuth com permissão `w_member_social`, o botão publica diretamente via API; caso contrário, copia o texto formatado para a área de transferência e abre o LinkedIn para postagem com um clique.
+
+2. **Otimizador de Perfil (Headline & ATS Syncer) (`ProfileOptimizer.tsx`):**
+   - **Headlines Categorizadas:** Títulos focados em Inovação & Pesquisa, Prontidão para o Mercado ou Liderança Técnica.
+   - **Pitch / Seção "Sobre" com IA:** Gera automaticamente a biografia profissional do LinkedIn integrando curso, semestre, universidade e vivências práticas cadastradas.
+   - **Skill Syncer (Otimização para ATS):** Traduz termos do vocabulário acadêmico para as palavras-chave mais buscadas por algoritmos de triagem de currículos e recrutadores (ex: *Iniciação Científica → Pesquisa Aplicada & Metodologia Ágil*).
+
+3. **Radar de Conteúdo (`ContentRadar.tsx`):**
+   - **4 Métricas em Tempo Real:** Conquistas Mapeadas, Ideias Prontas, Posts Publicados e Índice de Presença.
+   - **Detecção de Oportunidades de Postagem:** Algoritmo que examina as experiências ativas e concluídas do estudante e sugere tópicos prontas com botão "Usar esta ideia".
+   - **Histórico Expansível:** Lista de publicações realizadas e salvas pelo estudante.
+
+---
+
+## 🎖️ Lattes Assistant & Radar de Indicações (`/toolkit/lattes`)
+
+O **Lattes Assistant** resolve o gargalo histórico do preenchimento e manutenção do Currículo Lattes oficial (CNPq), auditando lacunas e preparando dados antes da submissão.
+
+### Funcionalidades & Arquitetura
+1. **Radar de Indicações Lattes (`RadarTab`):**
+   - Header com monitoramento em tempo real de indicações pendentes e efeito visual de pulso.
+   - Cards de estatísticas agregadas (Pendentes, Preparadas, Confirmadas, Ignoradas).
+   - **SuggestionCard:**
+     - Pontuação percentual de confiança (`ConfidenceBadge`) por algoritmo de proximidade.
+     - Contexto explicativo gerado por IA identificando a aderência da vivência à seção do Lattes.
+     - Tags das origens detectadas (Memória Acadêmica, Competências, Carteira de Evidências, etc.).
+     - Grid com campos detectados (Período, Instituição, Categoria sugerida, Status).
+     - Detalhes expansíveis com lista de campos presentes, campos ausentes a complementar e prévia de texto formatado para copiar e colar na Plataforma Lattes.
+     - Fluxo de status: transição entre *Pendente*, *Preparada*, *Confirmada* e *Ignorada*.
+   - **Itens Arquivados:** Modal dedicado para consulta e restauração de indicações arquivadas de volta ao feed principal.
+
+2. **Preparação do Currículo (`PreparationTab`):**
+   - Agrupamento visual das seções oficiais da Plataforma Lattes:
+     - Atuação Profissional (Estágios, Empregos)
+     - Pesquisa e Desenvolvimento (Iniciação Científica, Laboratórios)
+     - Prêmios e Títulos (Competições, Hackathons)
+     - Ensino & Monitoria (Monitorias voluntárias ou remuneradas)
+     - Extensão Universitária (Projetos com a comunidade e escolas)
+     - Formação Complementar (Cursos livres, certificados e eventos)
+   - Contadores de registros reais e barras de progresso percentual por seção.
+   - Badges de alerta informando quantas indicações pendentes aguardam no Radar para cada seção.
+
+---
+
+## 🧭 Layout Global: AppHeader & AppSidebar
+
+A navegação da plataforma foi construída em arquitetura de painel responsivo, garantindo ergonomia para longas sessões de estudo:
+
+### 1. AppHeader (`src/components/layout/app-header/`)
+- **Trigger Retrátil & Breadcrumb Dinâmico:** Expansão/colapso da barra lateral e migalhas de pão atualizadas em tempo real a partir da rota ativa.
+- **Barra de Pesquisa Unificada:** Campo de busca rápida ("Buscar na sua jornada...") com atalho para catálogo e ferramentas.
+- **Botão de Notificações:** Acesso instantâneo com badge contador de alertas não lidos, direcionando para `/notificacoes`.
+- **Saldo de Tokens Acadêmicos:** Indicador pill estilizado em OKLCH exibindo os tokens disponíveis para uso no copiloto e ferramentas.
+- **Menu do Usuário:** Avatar com iniciais, dados cadastrais e menu suspenso para Perfil, Notificações, Carteira e Logout seguro.
+
+### 2. AppSidebar (`src/components/layout/app-sidebar/`)
+- **Cabeçalho de Identidade:** Logotipo oficial em destaque e seletor com o curso de graduação do estudante (`StudentProfile`).
+- **Minha Jornada:** Rotas nucleares da vida acadêmica (Painel Geral, Linha do Tempo, Hub de Projetos, Memória, Competências, Toolkit, Oportunidades e Assistente).
+- **Ferramentas Fixadas:** Atalhos rápidos com ícone de pin para os utilitários mais usados no dia a dia (Resume Builder, Lattes Assistant, LinkedIn Impact Builder).
+- **Conta e Avisos:** Acesso direto à Central de Notificações e Configurações.
+- **Rodapé Ergonômico:** Alternador inline de tema (Claro / Escuro / Sistema) e menu rápido da conta.
+
+---
+
+## 🔔 Central de Notificações (`/notificacoes`)
+
+A Central de Notificações consolida eventos temporais, acadêmicos e do sistema em uma interface organizada:
+- **Abas de Filtro:** Visualização por *Todas* (com contador total), *Não Lidas* (badge em destaque) e *Lidas*.
+- **Ações em Lote:** Seleção múltipla via checkboxes com ações de marcar como lido ou exclusão coletiva.
+- **Tipologia Visual Semântica (Tokens OKLCH):**
+  - 🚨 **Incidentes & Prazos Críticos:** `--destructive` (AlertTriangle)
+  - 💬 **Menções & Comentários:** `--chart-1` (AtSign) e `--chart-2` (MessageSquare)
+  - ⏳ **Tarefas & Vencimentos:** `--chart-3` (Clock)
+  - 🔄 **Revisões & Atualizações:** `--chart-5` (GitPullRequest)
+  - ⭐ **Sistema & Recompensas:** `--primary` (Star)
+- **Redirecionamento Contextual:** Cada notificação contém vínculo direto para o módulo correspondente (ex: edital salvo, indicação no Lattes ou sprint de estudos).
+
+---
+
+## ⚙️ Painel de Configurações da Conta (`/settings`)
+
+Central unificada de preferências estruturada em 5 abas modulares:
+1. 👤 **Perfil (`ProfileForm`):** Informações cadastrais institucionais (curso, campus, matrícula, semestre e objetivos acadêmicos).
+2. 🛡️ **Segurança (`SecurityForm`):** Alteração de senha criptografada via Argon2 e configurações de autenticação em duas etapas.
+3. 🔔 **Notificações (`NotificationsForm`):** Configuração granular por canal (E-mail, Push e In-app) para tarefas, menções, atualizações de projetos e segurança, além da frequência do resumo por e-mail (Tempo real, Diário, Semanal ou Desativado).
+4. 👁️ **Privacidade (`PrivacyForm`):** Controle de visibilidade do perfil (Público, Equipe ou Privado), exibição de e-mail e status de mentoria, exportação de dados em JSON (LGPD) e exclusão de conta.
+5. 🎨 **Aparência (`AppearanceForm`):** Seleção de tema visual (Claro, Escuro ou Sincronizado com o Sistema Operacional).
+
+---
+
+## 📊 Card Semestre Atual (`SemesterSummary`)
+
+Localizado no topo do Painel Geral (`/`), o card do Semestre Atual apresenta o panorama instantâneo do ciclo letivo do estudante:
+- **Identificação do Semestre:** Ano e semestre civil sincronizados com o período curricular do discente (ex: `2026.1 · 5º Período`), com badge de status *Em andamento* dotada de indicador verde pulsante.
+- **Barra de Progresso Temporal:** Cálculo automático das semanas decorridas vs. semanas totais do semestre letivo (ex: `Semana 10 de 16 · 6 semanas restantes` e percentual `62%`).
+- **Métricas Nucleares da Trajetória:**
+  - 📚 **Disciplinas em Andamento:** Carga de disciplinas ativas vinculadas à formação do discente.
+  - 🏆 **Registros no Semestre:** Consolidação em tempo real do total de vivências práticas e anotações do diário acadêmico cadastradas.
+  - 🔥 **Sequência de Registros (Streak):** Acompanhamento de dias consecutivos de registros acadêmicos ativos para estimular a consistência diária.
+- **Estilização Exclusiva:** Construído 100% em CSS Modules com gradiente sutil e tokens de cores semânticas OKLCH (`--chart-1`, `--chart-2`, `--chart-3`, `--success`, `--primary`).
+
+---
+
+## 🎛️ Personalização de Layout com Persistência em Banco de Dados
+
+O Painel Geral (`/`) conta com um motor completo de personalização declarativa de interface, permitindo que cada estudante configure a disposição de blocos conforme sua rotina de estudos e prioridades:
+
+### 1. Modelo de Persistência no PostgreSQL (`DashboardLayout`)
+- **Tabela Relacional:** `dashboard_layouts`, com chave estrangeira `userId` vinculada a `users(id)` com política `ON DELETE CASCADE`.
+- **Payload Estruturado:** Campo `layout` (JSON) que armazena a lista de widgets com suas configurações:
+  - `id`: identificador do cartão (ex: `greeting-banner`, `semester-summary`, `metrics-grid`, `opportunities`, `recent-memories`, `experiences`).
+  - `visible`: booleano indicando se o widget está ativo no painel.
+  - `colSpan`: largura responsiva em grade de 12 colunas (ex: 12 para 100% de largura, 6 para 50%).
+  - `order`: índice ordinal de posicionamento na grade.
+
+### 2. Endpoints RESTful no Backend (`/api/dashboard/layout`)
+- **`GET /api/dashboard/layout`:** Recupera a disposição de widgets salva para o usuário autenticado (ou retorna a ordenação padrão se ainda não personalizado).
+- **`PUT /api/dashboard/layout`:** Atualiza e persiste o novo layout via `upsert` no Prisma com validação estrita via schema Zod (`updateDashboardLayoutSchema`).
+- **`POST /api/dashboard/layout/reset`:** Remove a customização do usuário, restaurando a disposição inicial original do sistema.
+
+### 3. Recursos da Interface Reativa
+- **Cabeçalho Unificado e Saudação Oficial (`headerSection`):**
+  - Integra na mesma linha a saudação do discente (*"Olá, [Nome]"*) e o subtítulo institucional (*"Este é o seu centro de comando. Acompanhe e construa sua trajetória acadêmica."*) ao lado da barra de ferramentas do dashboard (`DashboardToolbar`), idêntico à arquitetura de referência.
+- **Barra de Ferramentas (`DashboardToolbar`):**
+  - **Botão *Personalizar Layout / Concluir Edição*:** Agora estilizado com borda sólida nítida (`border: 1px solid var(--border)`), fundo elevado e sombra semântica, integrando-se harmonicamente sem parecer solto na tela. Ao concluir a edição, fecha automaticamente qualquer painel flutuante ativo.
+  - **Botão *Widgets*:** Exibe contador de widgets ocultos e abre a gaveta lateral.
+  - **Botão *Restaurar Padrão*:** Volta imediatamente à configuração padrão da plataforma.
+- **Cartões Editáveis (`DashboardWidgetCard`):**
+  - **Redimensionamento Interativo Fluido em Tempo Real:**
+    - *Borda Direita:* Alça vertical com atualização imediata a cada frame (`onLiveResize`), variando de 3 a 12 colunas (25% a 100%).
+    - *Borda Inferior:* Alça horizontal para ajuste suave de altura em pixels.
+    - *Canto Inferior Direito:* Alça diagonal para redimensionamento bivariado simultâneo.
+    - *Zero Lag:* Desativação automática de transições CSS (`transition: none !important`) durante o arrasto.
+  - **Detecção de Limites com Contorno Vermelho e Alerta Toast:**
+    - Ao atingir o limite mínimo (3 colunas / 140px) ou máximo (12 colunas / 800px), o contorno do cartão pulsa em vermelho (`var(--destructive)` via `.widgetCardWrapperLimitReached`).
+    - Exibe badge flutuante de dimensões em vermelho com ícone de alerta e emite notificação toast via Sonner com ID persistente antispam.
+  - **Omissão Inteligente e Responsividade de Conteúdo:**
+    - Quando o cartão é redimensionado para tamanhos menores (`colSpan <= 6` ou `colSpan <= 4`), elementos secundários (parágrafos longos, descrições detalhadas e métricas terciárias) são omitidos automaticamente para preservar a legibilidade.
+  - **Janela Flutuante Arrastável de Configuração (`WidgetConfigModal`):**
+    - Painel elevado sem backdrop escuro bloqueante, permitindo continuar editando outros cartões.
+    - Arrastável livremente pela barra superior (`GripHorizontal`) para qualquer quadrante da tela com restrição de viewport.
+    - Sincronização em tempo real ao alternar entre cartões e fechamento automático ao concluir a edição.
+- **Estilização Exclusiva:** Construído 100% em CSS Modules e tokens OKLCH, sem qualquer dependência de Tailwind CSS.
+
+
+
