@@ -95,6 +95,29 @@ Este documento descreve a arquitetura de serviços HTTP, contratos OpenAPI decla
 | `PUT` | `/api/dashboard/layout` | Salva e persiste o layout customizado no PostgreSQL | Autenticada |
 | `POST` | `/api/dashboard/layout/reset` | Restaura o layout padrão de fábrica no banco | Autenticada |
 
+### 8. Copiloto Acadêmico & Chat IA (`/api/assistant`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `POST` | `/api/assistant/chat` | Envia mensagem ao Copiloto IA (Gemini 2.5 Flash) com contexto da trajetória | Autenticada |
+| `GET` | `/api/assistant/conversations` | Lista todas as conversas e tópicos arquivados do estudante | Autenticada |
+| `POST` | `/api/assistant/conversations` | Cria uma nova thread de mentoria ou tópico conversacional | Autenticada |
+| `GET` | `/api/assistant/conversations/:id` | Recupera histórico completo de balões e respostas de uma conversa | Autenticada |
+| `DELETE` | `/api/assistant/conversations/:id` | Exclui conversa e mensagens associadas | Autenticada |
+
+### 9. Resumo Cognitivo de Editais (`/api/opportunities`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `POST` | `/api/opportunities/:id/summarize` | Extrai resumo executivo, critérios e dicas com Gemini (salva em `ai_summary`) | Autenticada |
+
+### 10. LinkedIn Impact Builder & IA de Carreira (`/api/integrations/linkedin`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `POST` | `/api/integrations/linkedin/generate-post` | Gera publicação profissional em 3 tons (Técnico, Storytelling, Executivo) | Autenticada |
+| `POST` | `/api/integrations/linkedin/optimize-profile` | Gera Headline magnética, Pitch "Sobre" e recomendações de palavras-chave | Autenticada |
+
 ---
 
 ## 📦 Padrão de Erros RFC 7807

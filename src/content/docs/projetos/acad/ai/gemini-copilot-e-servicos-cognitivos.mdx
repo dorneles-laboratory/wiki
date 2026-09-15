@@ -1,0 +1,83 @@
+---
+title: Copiloto Acadêmico e Serviços Cognitivos (Google Gemini)
+description: Arquitetura técnica da integração real com Google Gemini 2.5 Flash, injeção de contexto de trajetória, extração estruturada de editais e telemetria de tokens.
+sidebar:
+  order: 8
+---
+
+# 🤖 Copiloto Acadêmico & Serviços Cognitivos (Google Gemini)
+
+O **Academic Companion (`acad`)** integra o modelo fundacional **Google Gemini 2.5 Flash** através do SDK oficial `@google/genai`. Todos os serviços cognitivos substituem integralmente dados estáticos ou mocks por inteligência artificial em tempo real, mantendo rigoroso controle de governança, persistência relacional no PostgreSQL e débito de tokens da carteira do estudante.
+
+---
+
+## 🏗️ Arquitetura do Hub Cognitivo
+
+```
+[ Frontend Discente (React 19 / Vite) ]
+        │ (React Query Hooks)
+        ▼
+[ Backend Express 5 REST API ]
+        │ (safeParse Zod Schema)
+        ├── 1. WalletService.debitTokens() ──► Debita 3 a 5 tokens na carteira
+        ├── 2. Trajectory Context Builder  ──► Consulta Prisma (Perfil, Vivências, Memórias)
+        ├── 3. GeminiService Singleton     ──► Invocação @google/genai (gemini-2.5-flash)
+        └── 4. PostgreSQL Relacional       ──► Persistência em Conversation, Message, Opportunity
+```
+
+### 1. Modelo Fundacional Adotado
+- **Modelo:** `gemini-2.5-flash` (ou configurável via `GEMINI_MODEL`).
+- **SDK:** `@google/genai` (versão moderna do SDK oficial Google Gen AI para Node.js / ESM).
+- **Fallback e Resiliência:** Quando a chave `GEMINI_API_KEY` não está presente ou atinge cotas, o backend responde com código RFC 7807 apropriado (503 Service Unavailable ou 502 Bad Gateway), impedindo travamentos ou dados inconsistentes.
+
+---
+
+## 🎯 Serviços Cognitivos Implementados
+
+### 1. Copiloto Acadêmico (`/api/assistant`)
+O Copiloto não é um chatbot genérico: ele atua como um **mentor de trajetória acadêmica de elite**, focado em estudantes de universidades brasileiras.
+
+- **Injeção de Contexto Dinâmico (Zero Hallucination Prompt):**
+  A cada mensagem, o `AssistantService` injeta no `systemInstruction`:
+  - Nome do aluno, universidade, curso, semestre e matrícula;
+  - Metas acadêmicas declaradas;
+  - Links para Lattes e LinkedIn;
+  - As 5 vivências práticas mais recentes (Projetos, IC, Monitorias, Estágios, Extensão);
+  - Os 5 últimos registros do diário e memórias reflexivas.
+- **Histórico Multi-Turn:** As últimas 20 mensagens da thread são mapeadas para a estrutura `{ role: 'user' | 'model', parts: [{ text }] }`.
+- **Persistência de Mensagens:** Mensagens do estudante (`USER`) e respostas do copiloto (`ASSISTANT`) são persistidas no PostgreSQL (`Conversation` e `Message`).
+- **Custo:** **5 tokens** por consulta.
+
+### 2. Resumo Cognitivo de Editais (`/api/opportunities/:id/summarize`)
+Extrai automaticamente um dossiê executivo de qualquer edital de bolsa, intercâmbio ou vaga:
+- Resumo executivo em 2 a 3 frases;
+- Benefícios e remuneração destacados;
+- Critérios de elegibilidade em tópicos;
+- Prazos críticos e etapas de seleção;
+- Dicas estratégicas personalizadas para maximizar a chance de aprovação;
+- Estimativa de aderência ao perfil do estudante.
+- **Persistência em Cache:** O resultado é salvo na coluna `ai_summary` da tabela `opportunities`, evitando chamadas repetidas ao Gemini para o mesmo edital.
+- **Custo:** **3 tokens** por extração.
+
+### 3. LinkedIn Impact Builder (`/api/integrations/linkedin`)
+Capacita o estudante a transformar produções científicas e vivências universitárias em autoridade profissional:
+- **Gerador de Publicações:**
+  - Gera posts estruturados em 3 tons distintos: **Técnico**, **Storytelling** e **Executivo**;
+  - Inclui ganchos de abertura magnéticos, contextualização acadêmica, hashtags estratégicas e chamadas para ação (CTA).
+- **Otimizador de Perfil:**
+  - Produz uma Headline impactante de alta conversão;
+  - Escreve um resumo biográfico "Sobre" pronto para cópia;
+  - Sugere palavras-chave essenciais para algoritmos de busca de recrutadores e orientadores de pós-graduação.
+- **Custo:** **3 tokens** por geração.
+
+---
+
+## 💳 Economia de Tokens & Transparência
+
+Toda operação de IA gera um registro imutável em `TokenTransaction` no banco de dados com:
+- `type: AI_USAGE`
+- `amount: -N` (débito de saldo)
+- `description: Consulta Copiloto Acadêmico (IA Gemini)` / `Resumo Cognitivo de Edital` / etc.
+- `createdAt: TIMESTAMP`
+
+O saldo é debitado atomicamente via transação Prisma, garantindo consistência estrita mesmo sob concorrência.
