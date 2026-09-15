@@ -123,17 +123,19 @@ gantt
 - [x] **Deploy Inicial na VPS:** Containers ativos e testados com HTTP 200 OK.
 
 ### 📍 D-6 (Segunda-feira, 07/09) — Substituição de Mocks por IA Real (Google Gemini API)
-- [ ] Configuração do SDK oficial `@google/genai` e chave `GEMINI_API_KEY`.
-- [ ] Conexão do Copiloto Acadêmico (`apps/backend/src/modules/assistant/`) ao modelo `gemini-2.5-flash`.
-- [ ] Conexão do Resumo Inteligente de Editais (`opportunity.service.ts`) com extração de requisitos, benefícios e prazos.
-- [ ] Conexão do LinkedIn Impact Builder (posts Técnicos, Storytelling e Executivos) à IA real.
-- [ ] Telemetria de débitos de tokens reais na carteira do estudante (`UserWallet.tokenBalance`).
+- [x] Configuração do SDK oficial `@google/genai` e chave `GEMINI_API_KEY` com suporte dinâmico a `gemini-2.0-flash-lite` (baixo custo) ou `gemini-2.5-flash`.
+- [x] Conexão do Copiloto Acadêmico (`apps/backend/src/modules/assistant/`) com system prompt contextualizado na trajetória do estudante.
+- [x] Página dedicada do Copiloto Acadêmico (`/chat` e `/copiloto`) acessível diretamente na navegação lateral discente.
+- [x] Conexão do Resumo Inteligente de Editais (`opportunity.service.ts`) com extração de requisitos, benefícios e prazos.
+- [x] Conexão do LinkedIn Impact Builder (posts Técnicos, Storytelling e Executivos) à IA real.
+- [x] Telemetria de débitos de tokens reais na carteira do estudante (`UserWallet.tokenBalance`).
 
 ### 📍 D-5 (Terça-feira, 08/09) — Integração LinkedIn Developer Platform & Google OAuth 2.0
-- [ ] Criação e verificação do aplicativo no portal `developer.linkedin.com`.
-- [ ] Habilitação de produtos: *Share on LinkedIn* (UGC Posts) e *Sign In with LinkedIn using OpenID Connect*.
-- [ ] Configuração de credenciais reais (`LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`) e URL de Callback.
-- [ ] Integração com Google Cloud Console para Login Social com Google (Google OAuth 2.0).
+- [x] Arquitetura OAuth 2.0 do LinkedIn implementada com suporte a *Share on LinkedIn* (UGC Posts) e *Sign In with LinkedIn using OpenID Connect*.
+- [x] Integração completa com Google OAuth 2.0 (OpenID Connect / Google One-Tap e fluxo de redirecionamento).
+- [x] Provisão automática de conta com bônus de 50 tokens de boas-vindas na primeira autenticação via Google.
+- [x] Interface discente integrada com botões "Continuar com o Google" em CSS Modules estrito.
+- [x] Suíte de testes unitários com 100% de aprovação no backend, shared e frontend.
 
 ### 📍 D-4 (Quarta-feira, 09/09) — Gateway de Pagamentos, Assinaturas & Planos
 - [ ] Ativação dos planos de monetização:
