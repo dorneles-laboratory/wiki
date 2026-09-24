@@ -13,7 +13,7 @@ O modelo de rede do ARES é **store-carry-forward**: um nó recebe uma mensagem,
 
 1. **Persistir** a mensagem de forma que ela sobreviva a um desligamento abrupto (bateria acabando, queda, reinício por erro de firmware).
 2. **Organizar por prioridade**, para que mensagens P0 (emergência) nunca sejam descartadas antes de P4 (telemetria comum) quando o espaço acabar.
-3. **Controlar o ciclo de vida** de cada mensagem: pendente → em trânsito → confirmada/expirada, sem duplicar nem perder silenciosamente (isso é o RS-04 e RS-09 do documento de requisitos).
+3. **Controlar o ciclo de vida** de cada mensagem: pendente → em trânsito → confirmada/expirada, sem duplicar nem perder silenciosamente.
 
 É importante frisar: o storage não decide *para onde* mandar a mensagem (isso é papel do roteamento/rádio) nem *quando* há uma janela de contato (isso é o rádio avisando). O storage é a peça que garante que, entre um evento e outro, o dado não se perde e não corrompe.
 
@@ -65,8 +65,6 @@ Existe uma porta de SQLite para ESP32 rodando sobre SPIFFS ou SD (`esp32_arduino
 
 É uma biblioteca derivada, feita especificamente para esse cenário: gravação append-only de registros em formato de banco SQLite, mas com footprint mínimo — funciona com **apenas 2 KB de RAM livre** (foi originalmente testada em Arduino Uno) \[4]. Ainda assim gera um arquivo `.db` compatível com o formato SQLite padrão — ou seja, dá para abrir esse arquivo depois num computador normal com qualquer ferramenta SQLite para auditoria (isso conecta diretamente com RF-ND-05 e RF-NG-09 do documento de requisitos, que exigem registro auditável). Suporta recuperação após falha de energia e busca binária por timestamp em tempo logarítmico, o que é mais rápido que varrer um arquivo de texto simples \[4].
 
-**Recomendação do relatório:** usar a Opção C (Sqlite µLogger) como padrão para todos os nós, por equilibrar robustez, compatibilidade de formato e baixo consumo de RAM — evitando o overhead desnecessário da Opção B, sem abrir mão da estrutura e auditabilidade que a Opção A não oferece de forma nativa.
-
 ---
 
 ## 5. Estrutura da fila de prioridade
@@ -91,8 +89,6 @@ LIMIT 1;
 ---
 
 ## 6. Ciclo de vida de uma mensagem no storage
-
-Reaproveitando os estados que já apareceram no seu material (RF-NU-05):
 
 ```
 [chegou via rádio] → PENDENTE
@@ -168,13 +164,13 @@ void loop() {
 
 ## Referências
 
-\[1] Sqlite3 Arduino library for ESP32 (siara-cc/esp32\_arduino\_sqlite3\_lib). GitHub. https\://github.com/siara-cc/esp32\_arduino\_sqlite3\_lib
+\[1] Sqlite3 Arduino library for ESP32 (siara-cc/esp32\_arduino\_sqlite3\_lib). GitHub. [https://github.com/siara-cc/esp32\_arduino\_sqlite3\_lib](https://github.com/siara-cc/esp32_arduino_sqlite3_lib)
 
-\[2] SQLite Write-Ahead Logging. Documentação oficial do SQLite. https\://sqlite.org/wal.html
+\[2] SQLite Write-Ahead Logging. Documentação oficial do SQLite. [https://sqlite.org/wal.html](https://sqlite.org/wal.html)
 
-\[3] siara-cc/esp32\_arduino\_sqlite3\_lib — nota do próprio mantenedor recomendando o Sqlite µLogger para logging de dados de sensor por ser mais rápido e eficiente em memória. GitHub. https\://github.com/siara-cc/esp32\_arduino\_sqlite3\_lib
+\[3] siara-cc/esp32\_arduino\_sqlite3\_lib — nota do próprio mantenedor recomendando o Sqlite µLogger para logging de dados de sensor por ser mais rápido e eficiente em memória. GitHub. [https://github.com/siara-cc/esp32\_arduino\_sqlite3\_lib](https://github.com/siara-cc/esp32_arduino_sqlite3_lib)
 
-\[4] Sqlite µLogger for Arduino (siara-cc/sqlite\_micro\_logger\_arduino). GitHub. https\://github.com/siara-cc/sqlite\_micro\_logger\_arduino
+\[4] Sqlite µLogger for Arduino (siara-cc/sqlite\_micro\_logger\_arduino). GitHub. [https://github.com/siara-cc/sqlite\_micro\_logger\_arduino](https://github.com/siara-cc/sqlite_micro_logger_arduino)
 
 **Documentos internos do projeto usados como base:** Especificação de Requisitos ARES (Seção 3 — RF-NU; Seção 8.2 — dimensionamento de buffer); Documentação do POC-01 "Operação First Breath"; Post-mortem do incidente ESP-NOW/HTTP de 24/08/2026.
 
