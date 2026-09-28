@@ -1,0 +1,72 @@
+---
+title: Empacotamento Multiplataforma (TVs)
+description: Esteira de geração de aplicativos nativos para Android TV, Samsung Smart TV (Tizen) e LG Smart TV (webOS).
+---
+
+# 📺 Empacotamento Multiplataforma para Smart TVs
+
+Para viabilizar a implantação dos **Murais Digitais (CMS)** em displays comerciais e Smart TVs sem depender do navegador nativo do sistema operacional, o projeto conta com uma esteira de empacotamento em `apps/packagers/` para **Android TV**, **Samsung Tizen** e **LG webOS**.
+
+---
+
+## 🏗️ Estrutura no Monorepo
+
+```
+apps/packagers/
+├── android/          ← Capacitor 7 (Android TV com suporte a Leanback Launcher)
+│   ├── capacitor.config.ts  ← Aponta para ../../frontend/dist
+│   ├── package.json
+│   └── android/      ← Projeto nativo Android Studio / Gradle
+├── tizen/            ← Samsung Smart TV (Tizen Web Application)
+│   ├── config.xml    ← Manifesto do Tizen Studio com permissões de tela cheia e rede
+│   └── staging/      ← Diretório de montagem gerado na compilação
+└── webos/            ← LG Smart TV (webOS Web App)
+    ├── appinfo.json  ← Manifesto do webOS SDK (ares-package)
+    └── staging/      ← Diretório de montagem gerado na compilação
+```
+
+---
+
+## 🤖 1. Android TV (Capacitor)
+
+O empacotador Android TV utiliza o **Capacitor 7** para encapsular a aplicação web em uma WebView otimizada com suporte a controle remoto:
+
+- **Manifesto Android TV:** Declarado em `android/app/src/main/AndroidManifest.xml` com a categoria `LEANBACK_LAUNCHER` e permissões `INTERNET` e `WAKE_LOCK`.
+- **Configuração:** `capacitor.config.ts` consome diretamente o build de `apps/frontend/dist`.
+- **Comando:**
+  ```bash
+  make pack-android
+  ```
+  O comando compila o frontend (`npm run build`) e sincroniza os assets com o projeto nativo (`npx cap sync android`).
+
+---
+
+## 🔵 2. Samsung Smart TV (Tizen)
+
+O empacotador Tizen gera pacotes `.wgt` para o sistema operacional das Smart TVs Samsung:
+
+- **Manifesto:** `apps/packagers/tizen/config.xml` configurado com privilégios de internet, display contínuo e tela cheia (`use.fullscreen`).
+- **Processo:**
+  1. Cria o diretório limpo de `staging`.
+  2. Copia o build de `apps/frontend/dist/` e o `config.xml`.
+  3. Executa a ferramenta `tizen package -t wgt` quando o Tizen CLI estiver instalado no host.
+- **Comando:**
+  ```bash
+  make pack-tizen
+  ```
+
+---
+
+## 🔴 3. LG Smart TV (webOS)
+
+O empacotador LG gera pacotes `.ipk` para Smart TVs e displays rodando webOS:
+
+- **Manifesto:** `apps/packagers/webos/appinfo.json` configurado com resolução Full HD (1920x1080), fundo preto e tipo `web`.
+- **Processo:**
+  1. Cria o diretório de `staging`.
+  2. Copia os arquivos de `apps/frontend/dist/` e o `appinfo.json`.
+  3. Executa o comando `ares-package` do webOS SDK quando instalado.
+- **Comando:**
+  ```bash
+  make pack-webos
+  ```
