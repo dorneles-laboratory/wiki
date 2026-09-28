@@ -8,13 +8,14 @@ description: Detalhes da arquitetura Polyrepo, pacotes compartilhados, backend R
 O **CMS Murais Digitais** adota uma arquitetura de **Monorepo por Acoplamento via Git Submodules**, onde o repositório raiz orquestra os repositórios independentes dos serviços da aplicação.
 
 ```
-csm/                              ← Raiz orquestradora (dorneles-laboratory/csm)
+cms/                              ← Raiz orquestradora (dorneles-laboratory/cms)
 ├── apps/
-│   ├── backend/                  ← Submódulo: csm.backend (Express 5 + Prisma 7 + PostgreSQL)
-│   ├── frontend/                 ← Submódulo: csm.frontend (React 19 + Vite 7 + CSS Modules)
+│   ├── backend/                  ← Submódulo: cms.backend (Express 5 + Prisma 7 + PostgreSQL)
+│   ├── frontend/                 ← Submódulo: cms.frontend (Painel Admin - React 19 + CSS Modules)
+│   ├── player/                   ← Submódulo: cms.player (Player Kiosk Isolado - React 19 + CSS Modules)
 │   └── wiki/                     ← Submódulo: wiki (Astro Starlight)
 ├── packages/
-│   └── shared/                   ← Submódulo: csm.shared (Contratos Zod + OpenAPI Registry)
+│   └── shared/                   ← Submódulo: cms.shared (Contratos Zod + OpenAPI Registry)
 ├── docs/                         ← Documentação arquitetural
 ├── Makefile                      ← Orquestrador central de comandos
 └── GEMINI.md                     ← Diretrizes contextuais para agentes de IA
@@ -61,18 +62,30 @@ O backend é construído sobre **Node.js com Express 5** e segue os princípios 
 
 ---
 
-## 🖥️ 3. Frontend Reativo & Player Kiosk (`apps/frontend`)
+## 🖥️ 3. Frontend Administrativo (`apps/frontend`)
 
-Interface construída com **React 19 + Vite 7**:
+Interface administrativa construída com **React 19 + Vite 7** (porta `5179` em desenvolvimento, porta `80` em produção):
 
 - **Regra de Ouro da UI (CSS Modules Exclusivo):** Proibição total de Tailwind CSS ou classes utilitárias não modulares. Todo componente possui seu arquivo `<Componente>.module.css` consumindo os tokens semânticos declarados em `src/styles/global.css`.
 - **Gerenciamento de Estado do Servidor:** **TanStack React Query** gerencia cache, invalidação e sincronização com a API REST. **Não há dados mockados ou estáticos.**
-- **Player Kiosk (`/player`):** Aplicação executada em tela cheia na TV com transição dinâmica de imagens, vídeos e comunicados em texto com tempo configurável por item da playlist.
+- **Gestão Completa de Recursos:** CRUD de Centros, Prédios, Telas, Usuários, Mídias com Live Preview e montagem visual de Playlists.
 - **Formulários:** **React Hook Form** integrado com **@hookform/resolvers/zod** consumindo os contratos do `@lib/shared`.
 
 ---
 
-## 🗄️ 4. Modelo de Dados Relacional (Prisma Schema)
+## 📺 4. Player Kiosk Dedicado (`apps/player`)
+
+Aplicação SPA ultra-leve em **React 19 + Vite 7** criada exclusivamente para dispositivos embarcados, Smart TVs e displays 24/7 (porta `5180` em desenvolvimento, porta `8080` em produção):
+
+- **Bundle Ultra-Reduzido:** ~520 kB de JS (redução de 80% em relação ao painel admin) para carregamento instantâneo em navegadores com hardware limitado.
+- **Screen Wake Lock API (`useWakeLock`):** Mantém o display sempre ativo, rearmando o bloqueio caso a aba recupere foco via evento `visibilitychange`.
+- **Prevenção de Memory Leaks:** React Query com `gcTime: 0` (zero acúmulo de cache histórico), polling de 60s e destruição agressiva de elementos `<video>` no cleanup do React (`pause`, `removeAttribute('src')`, `load()`).
+- **Hard Reload Automático:** Recarregamento limpo do navegador a cada 20 voltas completas da playlist para mitigar a fragmentação de heap do motor V8.
+- **Fluxo de Pareamento Nativo:** Rotas `/load`, `/pairing` (handshake via PIN de 6 caracteres e QR Code) e `/player` integradas diretamente com a API.
+
+---
+
+## 🗄️ 5. Modelo de Dados Relacional (Prisma Schema)
 
 ```
 Center (Centro Universitário)

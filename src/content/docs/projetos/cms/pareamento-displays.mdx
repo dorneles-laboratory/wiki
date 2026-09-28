@@ -69,3 +69,15 @@ O operador credenciado (com papel `SUPER_ADMIN` ou `CENTER_ADMIN` do centro corr
 - O backend associa a tela ao prédio, altera o status da requisição para `APPROVED` e emite um **token JWT persistente de tela (`screenToken`)**.
 - A TV detecta a aprovação, grava o `screenToken` com segurança no navegador e transiciona automaticamente para a rota `/player`.
 - O player inicia a execução da playlist do prédio (`GET /kiosk/playlist`) em tela cheia.
+
+---
+
+## 🛡️ Resiliência do Player Kiosk em Operação 24/7
+
+Para assegurar funcionamento contínuo e ininterrupto nas TVs institucionais sem intervenção humana, o Player Kiosk implementa quatro mecanismos de proteção contra degradação de memória e desligamento de tela:
+
+1. **Screen Wake Lock API (`useWakeLock`):** Mantém o display permanentemente ativo através de `navigator.wakeLock.request('screen')`, com reativação automática via listener de `visibilitychange` caso o navegador recupere o foco.
+2. **Gerenciamento de Cache React Query (`gcTime: 0`):** A busca periódica de grade (`GET /kiosk/playlist`) não armazena histórico de requisições anteriores na memória RAM (`gcTime: 0`), com polling calibrado para 1 minuto (`refetchInterval: 60000`) e `refetchOnWindowFocus: false`.
+3. **Destruição Rigorosa de Buffers de Vídeo:** Ao desmontar ou alternar elementos `<video>`, o componente executa `.pause()`, `.removeAttribute('src')` e `.load()`, forçando o Garbage Collector da engine V8 a desalocar imediatamente os buffers de decodificação de mídia.
+4. **Hard Reload Preventivo por Ciclos:** O player monitora as voltas completas da playlist ativa. Ao atingir **20 ciclos completos**, dispara automaticamente um `window.location.reload()` para eliminar fragmentação residual de memória do navegador.
+

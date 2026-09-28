@@ -1,0 +1,88 @@
+---
+title: Player Kiosk SPA Dedicado
+description: Arquitetura, desacoplamento e técnicas de resiliência 24/7 (Memory Leak e Screen Wake Lock) do Player Kiosk de TV.
+---
+
+# 📺 Player Kiosk SPA Dedicado (`apps/player`)
+
+Para otimizar o desempenho, reduzir drasticamente a pegada de memória RAM e eliminar pontos de falha em Smart TVs e displays universitários, o **Player Kiosk** foi desacoplado do Painel Administrativo (`apps/frontend`) e transformado em uma **Single Page Application (SPA) autônoma e ultra-leve** (`apps/player`).
+
+---
+
+## 🎯 Por que Desacoplar o Player do Admin?
+
+Em ambientes de produção com operação **24 horas por dia, 7 dias por semana (24/7)**, Smart TVs e dispositivos embarcados (Raspberry Pi, Android TV boxes, mini PCs) possuem limitações severas de hardware:
+
+1. **Hardware Restrito:** Navegadores de Smart TVs frequentemente dispõem de 512 MB a 1 GB de RAM compartilhada.
+2. **Dependências Desnecessárias:** O painel administrativo carrega bibliotecas pesadas de mapas (`maplibre-gl`), gráficos analíticos (`recharts`), modais e formulários extensos.
+3. **Isolamento de Falhas:** O ciclo de vida de uma TV institucional não deve ser afetado por atualizações ou estados da interface administrativa.
+
+### Comparativo de Bundle (Vite Build)
+
+| Métrica | Painel Admin (`apps/frontend`) | Player Dedicado (`apps/player`) | Redução |
+|---|---|---|---|
+| **JavaScript (Minificado)** | `2,505 kB` (728 kB gzip) | **`526 kB`** (163 kB gzip) | **-79.0%** |
+| **CSS (Minificado)** | `249 kB` (40 kB gzip) | **`18 kB`** (4.7 kB gzip) | **-92.7%** |
+| **Porta de Dev** | `5179` | `5180` | Isolada |
+| **Porta de Produção** | `80` | `8080` | Nginx Dedicado |
+
+---
+
+## 🛡️ Técnicas de Resiliência 24/7
+
+### 1. Screen Wake Lock API (`useWakeLock`)
+Evita que o sistema operacional da TV ou display entre em modo de economia de energia, descanso de tela ou standby:
+- Solicita `navigator.wakeLock.request('screen')` na montagem do componente.
+- Registra listener no evento `document.addEventListener('visibilitychange', ...)`: se a aba for ocultada e depois restaurada, o Wake Lock é rearmado automaticamente.
+- Implementa liberação graciosa (`wakeLockSentinel.release()`) na desmontagem e suporte a navegadores legados sem suporte nativo à API.
+
+### 2. Otimização de Cache no React Query
+O acúmulo contínuo de respostas HTTP no cache em memória é a causa número um de *silent memory leaks* em SPAs que operam continuamente:
+- `gcTime: 0`: As respostas da playlist não são retidas na memória RAM após a renderização.
+- `refetchInterval: 60000`: Sincronização periódica a cada 60 segundos com o backend (`GET /kiosk/playlist`).
+- `refetchOnWindowFocus: false`: Evita refetches desnecessários causados por oscilações de foco do SO do display.
+
+### 3. Destruição Ativa de Elementos de Vídeo
+O motor V8 e os decodificadores de hardware frequentemente retêm buffers de vídeo na GPU/RAM mesmo após a remoção da tag `<video>` do DOM:
+- Na transição entre itens ou desmontagem do componente de vídeo, o cleanup aplica rigorosamente:
+  ```typescript
+  videoElement.pause();
+  videoElement.removeAttribute('src');
+  videoElement.load(); // Força o Garbage Collector a descartar o decodificador de vídeo
+  ```
+
+### 4. Hard Reload Preventivo por Ciclos
+Mesmo com destruição de buffers, navegadores Chromium operando 24/7 sofrem com fragmentação do heap de memória:
+- Um contador local monitora a reprodução da playlist.
+- A cada **20 ciclos completos** da grade de conteúdo, o player aciona um recarregamento completo:
+  ```typescript
+  window.location.reload();
+  ```
+- O reload limpa 100% da memória do processo do navegador sem interrupção perceptível para os espectadores.
+
+---
+
+## 🔀 Coexistência com o Sistema Completo
+
+O desacoplamento foi projetado com **retrocompatibilidade total**:
+
+- **Acesso pelo Painel Completo (`apps/frontend`):** Todas as rotas de carregamento (`/load`), pareamento (`/pairing`) e player (`/player`) continuam disponíveis na porta `5179`.
+- **Acesso pelo Player Isolado (`apps/player`):** O novo pacote opera de forma 100% independente na porta `5180` (dev) ou `8080` (prod) consumindo os contratos do `@lib/shared` e endpoints do `apps/backend`.
+
+---
+
+## 🛠️ Comandos Operacionais
+
+```bash
+# Executar a suíte de testes do player (Vitest)
+make test
+
+# Iniciar o servidor Vite de desenvolvimento do player
+make player-dev
+
+# Compilar o bundle de produção
+make player-build
+
+# Acompanhar logs do container Docker do player
+make logs-player
+```
