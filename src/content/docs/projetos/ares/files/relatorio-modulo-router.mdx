@@ -1,0 +1,156 @@
+---
+title: Relatório do Nó Router
+---
+# Nó Router do projeto ARES
+
+Síntese técnica para definição do nó — 25 de setembro de 2026.
+
+O Router decide para qual nó vizinho encaminhar cada mensagem na rede ARES. Sua função é manter a comunicação entre nós terrestres, drones e gateways, adaptando o caminho às falhas e preservando mensagens durante desconexões.
+
+Esta proposta reúne o que o nó deve conter, suas funcionalidades, os componentes necessários e as definições a concluir no levantamento de duas semanas.
+
+## 1. Papel na rede
+
+Os diferentes papéis possuem as seguintes responsabilidades:
+
+* **Router:** seleciona caminhos e decide o próximo salto das mensagens.
+* **Relay:** retransmite mensagens.
+* **Storage:** preserva os dados.
+* **Gateway:** conecta a rede aos sistemas externos.
+
+Esses papéis podem coexistir no mesmo equipamento. Recomenda-se persistência mínima no próprio Router, para que ele consiga guardar mensagens mesmo sem acesso a um Storage remoto.
+
+O Router pode ser fixo ou embarcado em drone.
+
+## 2. Funcionalidades principais
+
+### Descoberta e rotas
+
+Identificar vizinhos, manter suas informações atualizadas e escolher o próximo salto conforme destino, qualidade do enlace, energia e capacidade disponível.
+
+### Adaptação a falhas
+
+Detectar perda de enlaces, procurar caminhos alternativos e aguardar novos contatos quando não houver rota.
+
+### Prioridade e controle
+
+Priorizar mensagens P0, limitar retransmissões, evitar duplicatas e impedir circulação indefinida por meio de limite de saltos.
+
+### Persistência e confirmação
+
+Guardar mensagens aceitas em memória não volátil e recuperá-las após reinicialização. Confirmar custódia somente depois de persistir os dados.
+
+### Segurança e diagnóstico
+
+Validar mensagens e registrar bateria, filas, encaminhamentos, falhas, expirações e rejeições.
+
+## 3. Componentes necessários
+
+| Componente            | Função e necessidade                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------- |
+| Microcontrolador      | Executar o firmware e gerenciar os recursos. ESP32-S3 é a proposta inicial.                         |
+| Rádio e antena        | Comunicar-se com os vizinhos. ESP-NOW na POC; LoRa com módulo externo é alternativa a avaliar.      |
+| Memória não volátil   | Preservar mensagens. Flash, flash externa ou microSD conforme capacidade e testes.                  |
+| Alimentação e bateria | Fonte regulada, bateria protegida, recarga e medição de energia para operação em campo.             |
+| Interface e proteção  | USB/UART para manutenção; invólucro e fixação adequados ao ambiente.                                |
+| Itens condicionais    | Painel solar para instalação fixa; GNSS para mobilidade; RTC ou segundo rádio conforme necessidade. |
+
+## 4. Software e funcionamento
+
+O firmware deve conter os seguintes módulos:
+
+* Comunicação por rádio.
+* Descoberta de vizinhos.
+* Roteamento.
+* Filas de prioridade P0–P4.
+* Armazenamento persistente.
+* Autenticação.
+* Gerenciamento de energia.
+* Diagnóstico.
+
+As principais estruturas são a **tabela de vizinhança**, a **tabela de rotas** e o **índice de mensagens pendentes**.
+
+ESP-IDF com FreeRTOS é uma opção para a plataforma ESP32-S3.
+
+### Fluxo de processamento
+
+1. Receber e validar a mensagem.
+2. Verificar duplicatas e capacidade disponível.
+3. Persistir os dados.
+4. Confirmar custódia.
+5. Selecionar o próximo salto.
+6. Transmitir.
+
+Sem rota, o Router deve manter a mensagem e aguardar contato.
+
+**Sucesso de transmissão pelo rádio, custódia pelo vizinho e entrega ao destino são confirmações distintas.**
+
+### Informações do pacote
+
+O pacote deve identificar:
+
+* Versão do protocolo.
+* Origem e destino.
+* Identificador da mensagem.
+* Prioridade.
+* Validade temporal.
+* Limite de saltos.
+
+Expiração por tempo e quantidade de saltos precisam ser campos separados. O tamanho final deve respeitar os limites do rádio e incluir os dados de autenticação.
+
+## 5. Implementação inicial recomendada
+
+Aproveitar o **ESP32-S3 e o ESP-NOW** usados na POC First Breath para validar encaminhamento, prioridades e persistência.
+
+ESP-NOW não fornece automaticamente todo o roteamento do ARES. Avaliar posteriormente:
+
+* **ESP32-S3 com SX1262:** alternativa com rádio LoRa externo.
+* **STM32WL55:** alternativa com rádio sub-GHz integrado.
+
+A escolha final depende de alcance, consumo, capacidade e latência medidos.
+
+### Alimentação e autonomia
+
+O Router precisa permanecer disponível para receber mensagens; portanto, sua autonomia não pode ser calculada apenas com o consumo em sono profundo.
+
+Dimensionar bateria e eventual painel solar a partir da carga média e dos picos reais. Na versão aérea, calcular a energia da propulsão separadamente.
+
+## 6. Definições a concluir nas duas semanas
+
+| Definição              | Resultado esperado                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| Escopo e interfaces    | Papel fixo ou móvel; relação com Relay, Storage e Gateway; rádio e formato de mensagens.    |
+| Hardware               | Placa, memória, antena, alimentação e lista de materiais com quantidades e custos cotados.  |
+| Regras de operação     | Escolha de rota, prioridades, confirmações, expiração e comportamento sem enlace ou espaço. |
+| Critérios de validação | Entrega, latência, recuperação de falhas, preservação após reinício e consumo energético.   |
+
+### Primeira semana
+
+Fechar requisitos, interfaces e comparação de componentes.
+
+### Segunda semana
+
+Realizar os ensaios possíveis e consolidar as decisões.
+
+Três nós permitem testar encaminhamento; quatro permitem uma rota alternativa. Testar também:
+
+* Desconexão.
+* Reinicialização.
+* Duplicatas.
+* Prioridade.
+* Saturação.
+
+### Ponto de alinhamento
+
+Separar a meta de **500 ms para uma malha conectada** da entrega assíncrona por drones que transportam mensagens.
+
+As escolhas acima são recomendações para avaliação da equipe. Alcance, autonomia e desempenho ainda exigem validação.
+
+## Fontes principais
+
+* [ARES — Planejamento da arquitetura e papéis dos nós](https://wiki.dorneles.dev/projetos/ares/fases/etapa-1-concepcao-arquitetura-e-planejamento-teorico-ares/)
+* [ARES — Especificação de requisitos do sistema](https://wiki.dorneles.dev/projetos/ares/files/requisitos-rede-de-resiliencia/)
+* [Espressif — ESP-NOW no ESP32-S3](https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/network/esp_now.html)
+* [Semtech — SX1262](https://www.semtech.com/products/wireless-rf/lora-connect/sx1262)
+* [STMicroelectronics — STM32WL55CC](https://www.st.com/en/microcontrollers-microprocessors/stm32wl55cc.html)
+* [IETF — RFC 9171 Bundle Protocol Version 7](https://www.rfc-editor.org/rfc/rfc9171.html)
