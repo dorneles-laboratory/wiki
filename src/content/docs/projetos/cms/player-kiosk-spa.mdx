@@ -23,7 +23,7 @@ Em ambientes de produção com operação **24 horas por dia, 7 dias por semana 
 |---|---|---|---|
 | **JavaScript (Minificado)** | `2,505 kB` (728 kB gzip) | **`526 kB`** (163 kB gzip) | **-79.0%** |
 | **CSS (Minificado)** | `249 kB` (40 kB gzip) | **`18 kB`** (4.7 kB gzip) | **-92.7%** |
-| **Porta de Dev** | `5179` | `5180` | Isolada |
+| **Porta de Dev** | `5179` | `5187` | Isolada |
 | **Porta de Produção** | `80` | `8080` | Nginx Dedicado |
 
 ---
@@ -67,7 +67,7 @@ Mesmo com destruição de buffers, navegadores Chromium operando 24/7 sofrem com
 O desacoplamento foi projetado com **retrocompatibilidade total**:
 
 - **Acesso pelo Painel Completo (`apps/frontend`):** Todas as rotas de carregamento (`/load`), pareamento (`/pairing`) e player (`/player`) continuam disponíveis na porta `5179`.
-- **Acesso pelo Player Isolado (`apps/player`):** O novo pacote opera de forma 100% independente na porta `5180` (dev) ou `8080` (prod) consumindo os contratos do `@lib/shared` e endpoints do `apps/backend`.
+- **Acesso pelo Player Isolado (`apps/player`):** O novo pacote opera de forma 100% independente na porta `5187` (dev) ou `8080` (prod) consumindo os contratos do `@lib/shared` e endpoints do `apps/backend`.
 
 ---
 
