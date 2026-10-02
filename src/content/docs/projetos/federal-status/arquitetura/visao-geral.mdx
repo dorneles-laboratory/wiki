@@ -1,0 +1,23 @@
+---
+title: Visão Geral da Arquitetura
+description: Arquitetura do FederalStatus, monorepo por acoplamento e separação de responsabilidades.
+---
+
+# FederalStatus — Plataforma de Monitoramento Público
+
+O **FederalStatus** é uma plataforma de monitoramento contínuo e público da disponibilidade e saúde dos serviços digitais das Universidades Federais Brasileiras.
+
+## Estrutura do Repositório
+
+O projeto utiliza a arquitetura de **Monorepo por Acoplamento via Git Submodules**:
+
+- `packages/shared`: Contratos de dados canônicos, schemas Zod, tipos TypeScript estritos e definições OpenAPI.
+- `apps/backend`: API RESTful construída em Node.js com Express 5, Prisma ORM, PostgreSQL, autenticação JWT/Argon2, rate limiting e observabilidade OpenTelemetry/Pino.
+- `apps/frontend`: Single Page Application (SPA) reativa com React 19, Vite 7, TanStack Query, Zustand, CSS Modules e Vitest.
+- `apps/wiki`: Portal de documentação viva construído sobre Astro Starlight.
+
+## Fluxo de Dados
+
+1. **Dashboard Público:** Acessa endpoints agregados (`/api/dashboard/public`, `/api/universities`, `/api/university-services`, `/api/university-incidents`) com cache otimizado via React Query.
+2. **Painel NOC (Admin):** Autenticado via cookies `httpOnly`, gerenciando serviços, incidentes, certificados SSL, equipe técnica e configurações institucionais.
+3. **Motor Sintético:** Executa checagens periódicas de latência, uptime e status HTTP, persistindo métricas diárias em `UniversityServiceMetric`.

@@ -1,0 +1,30 @@
+---
+title: Controle de Acesso Baseado em Papéis (RBAC)
+description: Matriz de permissões, papéis do sistema e implementação de segurança frontend e backend.
+---
+
+# Controle de Acesso Baseado em Papéis (RBAC)
+
+O FederalStatus implementa um modelo RBAC tripartite baseado no enum `TeamMemberPermission` do `@lib/shared`.
+
+## Matriz de Papéis e Permissões
+
+| Papel (`Role`) | Nome Funcional | Escopo de Acesso | Permissões |
+|---|---|---|---|
+| `ADMIN` | `OWNER_TI` | Administrador Geral da Universidade | Controle total: gerencia equipe, configurações institucionais, uploads de logo, serviços e incidentes. |
+| `MANAGER` | `OPERATOR_SRE` | Gerente Técnico / Operador NOC | Gestão operacional: cadastra, edita e exclui serviços, registra incidentes e posta atualizações na timeline. |
+| `VIEWER` | `AUDITOR_READONLY` | Auditor / Observador | Somente leitura: visualiza telemetria, relatórios SLA e status sem permissão de mutação. |
+
+## Implementação Técnica
+
+### Backend
+Middleware `ensureRole(['ADMIN', 'MANAGER'])` posicionado após `ensureAuthenticated`:
+- Valida o token JWT no cookie.
+- Carrega o perfil do usuário no banco PostgreSQL.
+- Retorna RFC 7807 (`403 Forbidden`) caso o usuário não possua o papel requerido.
+
+### Frontend
+Hook `usePermission()` integrando o estado do `useAuthStore` e `useUser()`:
+- `isAdmin`: Habilita menus e ações restritas a administradores (Gestão de Equipe, Configurações Institucionais).
+- `canManage`: Habilita botões de criação, edição e exclusão de serviços e incidentes.
+- `VIEWER`: Acessa o painel administrativo em modo estrito de leitura.

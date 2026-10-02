@@ -1,0 +1,43 @@
+---
+title: Catálogo de Rotas RESTful
+description: Referência completa dos endpoints da API FederalStatus e seus contratos de autorização.
+---
+
+# Catálogo de Rotas RESTful
+
+Documentação viva dos endpoints disponibilizados pela API do FederalStatus. A especificação interativa Swagger está disponível em `/api-docs`.
+
+## 1. Módulo Público (`/api/dashboard/public`)
+- `GET /api/dashboard/public`: Consolida resumo nacional, histórico de uptime 6m, incidentes ativos e indicadores por região.
+
+## 2. Módulo Universidades (`/api/universities`)
+- `GET /api/universities`: Lista todas as universidades públicas e dados consolidados.
+- `GET /api/universities/:id`: Detalha uma universidade pelo seu identificador ou sigla.
+- `POST /api/universities`: Cadastra nova universidade (Requer `ADMIN`).
+- `PUT /api/universities/:id`: Atualiza dados cadastrais (Requer `ADMIN`).
+
+## 3. Módulo de Serviços Monitorados (`/api/university-services`)
+- `GET /api/university-services`: Catálogo público de serviços (filtro opcional por `?universityId=`).
+- `GET /api/university-services/:id`: Detalha serviço monitorado.
+- `POST /api/university-services`: Cadastra serviço monitorado (Requer `ADMIN` ou `MANAGER`).
+- `PATCH /api/university-services/:id`: Atualiza dados ou status de serviço (Requer `ADMIN` ou `MANAGER`).
+- `DELETE /api/university-services/:id`: Remove serviço monitorado (Requer `ADMIN` ou `MANAGER`).
+
+## 4. Módulo de Incidentes (`/api/university-incidents`)
+- `GET /api/university-incidents`: Lista incidentes registrados (filtro opcional por universidade).
+- `GET /api/university-incidents/:id`: Detalha incidente com histórico completo de atualizações.
+- `POST /api/university-incidents`: Abre novo incidente no NOC (Requer `ADMIN` ou `MANAGER`).
+- `POST /api/university-incidents/:id/updates`: Publica atualização na linha do tempo (Requer `ADMIN` ou `MANAGER`).
+- `PATCH /api/university-incidents/:id`: Altera status ou severidade (Requer `ADMIN` ou `MANAGER`).
+
+## 5. Módulo de Convites Institucionais (`/api/university-invites`)
+- `GET /api/university-invites`: Lista convites pendentes da instituição (Requer `ADMIN`).
+- `POST /api/university-invites`: Gera token e link de convite para novo operador (Requer `ADMIN`).
+- `GET /api/university-invites/validate`: Validação pública de token para onboarding.
+- `DELETE /api/university-invites/:id`: Revoga convite pendente (Requer `ADMIN`).
+
+## 6. Módulo de Equipe Técnica (`/api/team-members`)
+- `GET /api/team-members`: Lista membros da equipe NOC (Requer autenticação).
+- `POST /api/team-members`: Adiciona operador direto (Requer `ADMIN`).
+- `PATCH /api/team-members/:id`: Altera papel ou dados de contato (Requer `ADMIN`).
+- `DELETE /api/team-members/:id`: Remove operador do NOC (Requer `ADMIN`).

@@ -1,0 +1,22 @@
+---
+title: Guia do Motor de Monitoramento Sintético
+description: Funcionamento, ciclo de vida e persistência de telemetria do scheduler de checagem sintética.
+---
+
+# Motor de Monitoramento Sintético
+
+O FederalStatus possui um scheduler autônomo integrado ao backend (`monitoring.scheduler.ts`) para aferição em tempo real da saúde dos serviços cadastrados pelas universidades.
+
+## Funcionamento do Ciclo
+
+1. **Agendamento Recorrente:** O motor executa checagens periódicas (padrão a cada 5 minutos, configurável por serviço).
+2. **Requisição HTTP / Probe:**
+   - Envia requisição `GET` com timeout e User-Agent identificador (`FederalStatus-Synthetic-Monitor/1.0`).
+   - Mede o tempo de resposta em milissegundos (`latencyMs`).
+3. **Classificação de Status:**
+   - **`ONLINE`:** Status HTTP `2xx` / `3xx` com latência abaixo de 2.500ms.
+   - **`UNSTABLE`:** Status HTTP `4xx` ou latência superior a 2.500ms.
+   - **`OFFLINE`:** Status HTTP `5xx`, timeout ou erro de resolução DNS/rede.
+4. **Persistência de Telemetria:**
+   - Atualiza `status`, `latencyMs` e `lastChecked` na tabela `UniversityService`.
+   - Agrega métricas diárias na tabela `UniversityServiceMetric`, calculando a média móvel de latência e uptime percentual.
