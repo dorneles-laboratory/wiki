@@ -1,0 +1,164 @@
+---
+title: Comunidade, Hub de Disciplinas & Minha Universidade
+description: Documentação arquitetural e técnica do Construa Comigo, Hub de Disciplinas e Minha Universidade (Mapa do Campus).
+sidebar:
+  order: 13
+---
+
+# 🌐 Comunidade, Hub de Disciplinas & Minha Universidade
+
+Este documento registra a implementação de ponta a ponta dos módulos de **Comunidade (Construa Comigo)**, **Hub de Disciplinas (Grade Curricular)** e **Minha Universidade (Mapa Interativo do Campus)** no ecossistema do Academic Companion (`acad`).
+
+---
+
+## 🏗️ 1. Construa Comigo — Comunidade do Produto (`/construa-comigo`)
+
+O **Construa Comigo** é o espaço social e participativo onde estudantes, pesquisadores e desenvolvedores colaboram para moldar as próximas funcionalidades da plataforma.
+
+### 📐 Arquitetura & Contratos (`packages/shared`)
+- **Módulo:** `src/modules/community/`
+  - `community.enums.ts`: `PostTag` (`IDEIA`, `BUG`, `PROJETO`, `VOTACAO`), `PostStatus` (`APPROVED`, `PENDING`, `REJECTED`), `FeedTab` (`recentes`, `populares`, `seguindo`).
+  - `community.schemas.ts`: Schemas declarativos registrados no OpenAPI registry (`communityPostSchema`, `createPostSchema`, `createCommentSchema`, `communityFeedResponseSchema`, `communityItemSchema`).
+  - `community.types.ts`: Tipos TypeScript inferidos (`CommunityPost`, `CommunityFeedResponse`, `CreatePostInput`, etc.).
+
+### 🗄️ Modelo de Dados (Prisma Schema)
+- `Community`: id, name, slug, description, icon, memberCount.
+- `CommunityPost`: id, title, body, imageUrl, tag, status, authorId, communityId, likesCount, commentsCount.
+- `PostLike`: id, postId, userId (relação 1:N com chave única `[postId, userId]`).
+- `PostComment`: id, postId, authorId, body, createdAt.
+
+### 🔑 Endpoints RESTful (`apps/backend`)
+| Método | Endpoint | Autenticação | Descrição |
+|---|---|---|---|
+| `GET` | `/api/community/posts` | Opcional | Retorna o feed paginado/filtrado com publicações, comunidades e ranking |
+| `POST` | `/api/community/posts` | Obrigatória | Cria uma nova proposta, relato de bug ou projeto |
+| `POST` | `/api/community/posts/:id/like` | Obrigatória | Alterna curtida (like toggle) em uma publicação |
+| `GET` | `/api/community/posts/:id/comments` | Livre | Lista comentários de uma publicação |
+| `POST` | `/api/community/posts/:id/comments` | Obrigatória | Adiciona comentário em uma publicação |
+
+### 🎨 Frontend (`apps/frontend/src/pages/community/ConstruaComigo.tsx`)
+- Estilização **100% via CSS Modules** (`ConstruaComigo.module.css`).
+- **Story Highlights:** Grid superior de destaques clicáveis (Projetos em alta, Vida no campus, Dicas de estudo, Pesquisa & extensão).
+- **Quick Composer Card:** Card de entrada rápida para postagens com atalhos para Imagem, Ideia e Bug.
+- **Filtro Preventivo Síncrono:** Validação instantânea no backend antes de persistir a publicação. Se violar palavras ofensivas ou links suspeitos, o usuário recebe um toast descritivo com erro `422`.
+- **Feedback Visual de Processamento Estilo Instagram:** Quando uma publicação é enviada com sucesso, ela entra no feed com status `PENDING`. Um banner animado com efeito pulse informa: *"Em análise pela moderação — visível apenas para você"*, garantindo transparência ao autor sem expor conteúdo ainda não homologado para o público geral.
+- **Canal de Denúncias Reativas:** Cada card de publicação possui um botão de alerta que abre o diálogo de denúncia, permitindo que qualquer membro relate violações com motivos estruturados (`SPAM`, `HATE_SPEECH`, `HARASSMENT`, `FALSE_INFORMATION`, `OFFENSIVE_MEDIA`, `OTHER`) e justificativa opcional, enviando a denúncia para a fila de moderação humana no painel admin.
+- **Feed com Abas:** Recentes, Populares e Seguindo com chips dinâmicos de filtro por tag e comunidade.
+- **PostCard:** Visualização completa com autor, avatar, tempo relativo (`agora`, `2 h`, `ontem`, `há 3 dias`), corpo, imagem opcional, botões de curtir, comentar, compartilhar, denunciar e salvar nos favoritos.
+- **Modais:** Diálogos dedicados para "Criar publicação", "Reportar um bug" e "Denunciar publicação".
+
+---
+
+## 📋 2. Hub de Disciplinas — Grade Curricular (`/toolkit/hub-disciplinas`)
+
+O **Hub de Disciplinas** organiza a trajetória curricular do discente por períodos letivos, permitindo acompanhar o cumprimento de carga horária e planejar a formatura.
+
+### 📐 Arquitetura & Contratos (`packages/shared`)
+- **Módulo:** `src/modules/discipline/`
+  - `discipline.enums.ts`: `DisciplineStatus` (`CONCLUIDA`, `MATRICULADA`, `PENDENTE`, `OPTATIVA`).
+  - `discipline.schemas.ts`: Schemas OpenAPI para `disciplineSchema`, `createDisciplineSchema`, `updateDisciplineSchema`, `disciplineStatsSchema`, `importDisciplinesSchema`.
+  - `discipline.types.ts`: Tipos TypeScript DTO exportados.
+
+### 🗄️ Modelo de Dados (Prisma Schema)
+- Modelo `StudentDiscipline` atualizado com:
+  - `code`: Código acadêmico (ex: `INF101`, `MAT102`).
+  - `name`: Nome da matéria.
+  - `term`: Período da grade (ex: `1º período`, `2º período`, `Optativas`).
+  - `workload`: Carga horária em horas (ex: 60h, 90h).
+  - `credits`: Número de créditos acadêmicos.
+  - `status`: `CONCLUIDA`, `MATRICULADA`, `PENDENTE`, `OPTATIVA`.
+  - `area`: Área do conhecimento ou núcleo formativo.
+  - `grade`: Nota final obtida (0 a 10).
+  - `professor`: Docente responsável.
+
+### 🔑 Endpoints RESTful (`apps/backend`)
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/api/disciplines` | Lista as disciplinas da grade curricular do estudante logado |
+| `GET` | `/api/disciplines/stats` | Retorna total de horas cumpridas, porcentagem de conclusão e contadores por status |
+| `POST` | `/api/disciplines` | Cadastro manual de nova disciplina |
+| `PATCH` | `/api/disciplines/:id` | Atualização de status, nota ou dados cadastrais |
+| `DELETE` | `/api/disciplines/:id` | Remoção de disciplina da grade |
+| `POST` | `/api/disciplines/import` | Importação em lote de disciplinas extraídas de histórico escolar |
+
+### 🎨 Frontend (`apps/frontend/src/pages/toolkit/hub-disciplinas/HubDisciplinas.tsx`)
+- **4 Cards de KPIs:** Concluídas, Matriculadas, Pendentes e Total de Horas cumpridas com barra de progresso do curso.
+- **Barra de Filtros & Busca:** Busca instantânea por código, nome ou área temática, com botões de filtro rápido por status.
+- **Quadro Kanban Semestral:** Colunas organizadas de 1º a 8º período mais coluna de disciplinas Optativas.
+- **DisciplineCard:** Cartão colorido de acordo com o status (Verde esmeralda para concluídas, azul para matriculadas, roxo para optativas e borda sutil para pendentes), exibindo código monospace, carga horária e média final.
+- **Importador de Histórico (PDF/Texto):** Permite colar o texto copiado de um histórico escolar ou comprovante em PDF. Um analisador com regex identifica automaticamente códigos de disciplina, nomes, cargas horárias e status, exibindo uma tabela de pré-visualização antes da confirmação.
+
+---
+
+## 🗺️ 3. Minha Universidade — Mapa do Campus (`/minha-universidade`)
+
+O módulo **Minha Universidade** oferece navegação espacial e georreferenciada pelo campus universitário, auxiliando na localização de prédios, centros de ensino, salas de aula e restaurantes universitários. Trata-se de uma base de dados compartilhada, pública (aberta sem necessidade de login) e 100% persistida no PostgreSQL, auditada por moderadores e administradores.
+
+### 📐 Arquitetura & Escolha Tecnológica
+- **MapLibre GL (versão 6.7.x):** Renderização vetorial rápida e aberta, com suporte a perspectiva 3D (*pitch* e *bearing*).
+- **Ancoragem Rígida de Marcadores:** Os pinos no mapa possuem coordenadas travadas através de uma casca intermediária isolada (`.markerWrapper`), evitando que transições CSS e animações de hover causem flutuação ou atraso no posicionamento durante o pan/zoom do usuário.
+- **Suporte Multi-Instituição e Multi-Campi:** Seletor dinâmico no cabeçalho permitindo alternar entre universidades catalogadas (UFSM, UFRGS, USP, UNICAMP, etc.) e seus respectivos campi (Camobi, Centro, Butantã, Barão Geraldo, etc.), com limites geográficos restritivos (*maxBounds*) e voo de câmera suave (*flyTo*).
+
+### 📐 Contratos (`packages/shared`)
+- **Módulo:** `src/modules/campus/`
+  - `campus.enums.ts`: `PlaceType` (`Centro`, `Serviço`, `Convivência`, `Administrativo`, `Saúde`, `Esporte`), `CampusPlaceStatus` (`APPROVED`, `PENDING`, `REJECTED`).
+  - `campus.schemas.ts`: Schemas OpenAPI para `campusPlaceSchema`, `createCampusPlaceSchema`, `updateCampusPlaceSchema`, `reviewCampusPlaceSchema`, `campusStatsSchema`, `universityCampusSchema`.
+  - `campus.types.ts`: Tipos TypeScript DTO inferidos (`CampusPlaceDTO`, `CreateCampusPlaceInput`, `ReviewCampusPlaceInput`, etc.).
+
+### 🗄️ Modelo de Dados (Prisma Schema)
+- Modelo `CampusPlace`:
+  - `name`, `slug`, `type`, `description`, `building`
+  - `university`, `campus` (chaves de catalogação institucional)
+  - `status` (`APPROVED`, `PENDING`, `REJECTED`)
+  - `submittedBy`, `auditFeedback`
+  - `latitude`, `longitude` (coordenadas geográficas decimais precisas)
+  - `address`, `openingHours`, `contact`, `color`, `icon`
+- **Zero Mocks:** A contagem de prédios, centros e a métrica de estudantes da comunidade no campus são calculadas dinamicamente via agregações SQL sobre as tabelas `campus_places` e `student_profiles` (ex: "2 mil+" discentes reais cadastrados no campus).
+
+### 🔑 Endpoints RESTful (`apps/backend`)
+| Método | Endpoint | Autenticação | Descrição |
+|---|---|---|---|
+| `GET` | `/api/university/universities` | Pública | Retorna catálogo de universidades com campi, centros e limites geográficos |
+| `GET` | `/api/university/places` | Pública | Lista os locais aprovados com filtros por universidade, campus, busca e tipo |
+| `GET` | `/api/university/places/:identifier` | Pública | Detalhes de um local específico por ID ou slug |
+| `GET` | `/api/university/stats` | Pública | Estatísticas reais do campus (prédios, centros, locais e comunidade) |
+| `POST` | `/api/university/places` | Pública / Discente | Submete sugestão de novo local (status inicial `PENDING` para moderação) |
+| `GET` | `/api/university/admin/places` | Obrigatória (`ADMIN`) | Lista todos os locais para auditoria com filtros de status e busca |
+| `PATCH` | `/api/university/admin/places/:id/review` | Obrigatória (`ADMIN`) | Aprova ou rejeita com justificativa técnica e feedback |
+| `PATCH` | `/api/university/admin/places/:id` | Obrigatória (`ADMIN`) | Atualiza metadados e coordenadas de um local existente |
+| `DELETE` | `/api/university/admin/places/:id` | Obrigatória (`ADMIN`) | Exclusão definitiva de um local mapeado |
+
+### 🎨 Frontend Discente & Landing Page
+- **Portal Discente (`apps/frontend/src/pages/my-university/MyUniversity.tsx`):**
+  - Seletor de universidade e campus sincronizado com o perfil acadêmico do usuário logado.
+  - Cards de KPIs reais sem fallbacks fictícios.
+  - Busca instantânea e filtragem por tipo de espaço.
+  - Card de detalhes com rotas ("Como chegar" via Google Maps) e cópia rápida de coordenadas.
+  - Modal "Sugerir local" que envia a submissão com aviso de moderação preventiva.
+- **Motor de Auditoria IA & Geo-Fencing (`CampusPlaceAuditor`):**
+  - Validação determinística de coordenadas geográficas via **Bounding Box do Campus** (ex: UFSM Camobi entre latitudes `[-29.7250, -29.7050]` e longitudes `[-53.7290, -53.7020]`).
+  - Análise semântica assistida pelo Cortex IA sobre nome, categoria e descrição do local para detectar incongruências, spam ou brincadeiras.
+  - Geração automática de score de confiança (0-100) e alertas apresentados no **Dossiê da IA (`AiDossier`)** para homologação do administrador no painel.
+- **Showcase Público na Landing Page (`apps/frontend/src/pages/welcome/Welcome.tsx`):**
+  - Componente `PublicScholarshipPreview.tsx` com alternador entre *Bolsas & Editais*, *Eventos Acadêmicos* e *Minha Universidade*.
+  - Visualização interativa com mapa MapLibre 3D, seletor de instituições e banner destacando a base aberta colaborativa.
+
+---
+
+## 🧪 Cobertura de Testes (Vitest)
+
+Todos os fluxos possuem testes unitários e de integração implementados:
+1. `apps/frontend/tests/pages/ConstruaComigo.spec.tsx` (4 testes: feed, tags, like toggle, composer)
+2. `apps/frontend/tests/pages/HubDisciplinas.spec.tsx` (4 testes: métricas, grade em colunas, modais)
+3. `apps/frontend/tests/pages/MyUniversity.spec.tsx` (3 testes: seletores institucionais, estatísticas do banco, listagem e modal)
+4. `apps/frontend/tests/pages/Assistant.spec.tsx` (8 testes: layout Gemini, sidebar retrátil com pin e hover)
+5. `apps/admin/tests/pages/CampusAudit.spec.tsx` (3 testes: KPIs de moderação, aprovação/rejeição e exclusão segura)
+
+Para rodar as suítes:
+```bash
+# Frontend Discente
+cd apps/frontend && npx vitest run tests/pages/MyUniversity.spec.tsx tests/pages/Assistant.spec.tsx
+
+# Painel Administrador
+cd apps/admin && npx vitest run tests/pages/CampusAudit.spec.tsx
+```

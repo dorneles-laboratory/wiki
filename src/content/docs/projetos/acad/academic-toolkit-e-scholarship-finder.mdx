@@ -31,7 +31,10 @@ A interface do Toolkit é implementada em **React 19** utilizando **CSS Modules 
      - 🧠 **Inteligência Acadêmica** (Arena Acadêmica, Laboratório de Ideias)
 4. **`ToolCard` (`components/toolkit/card/`) & Navegação Direta**:
    - **Zero Tela Intermediária:** Quando uma ferramenta está ativa (`status: AVAILABLE`), clicar no botão "Abrir" ou na rota interna leva o usuário **imediatamente para a ferramenta** (`/toolkit/scholarship-finder`, `/toolkit/lattes`, `/toolkit/linkedin`, etc.), sem passos intermediários.
-   - Ferramentas ainda em desenvolvimento (`COMING_SOON`) exibem aviso amigável com bloqueio de acesso e botão de registro de interesse comunitário.
+   - Ferramentas ainda em desenvolvimento ou propostas de ideação (`COMING_SOON`) exibem aviso amigável com bloqueio de acesso e botão de registro de interesse comunitário ("Tenho Interesse"), permitindo que discentes votem e apoiem novas ideias conceituais.
+5. **Governança & Imutabilidade Técnica (Admin)**:
+   - Ferramentas consolidadas do sistema possuem `slug` e rota interna imutáveis no painel administrativo para resguardar a estabilidade da aplicação.
+   - Ferramentas de ideação são cadastradas de forma puramente conceitual (sem rotas) para validar a demanda e interesse antes do desenvolvimento de código.
 
 ---
 
@@ -46,6 +49,40 @@ O **Scholarship Finder** é a ferramenta inteligente de descoberta e curadoria d
   2. 🌐 **Explorar Todos:** Barra lateral com acordeom de filtros combinados (Curso, Estado, Instituição, Tipo, Valor, Modalidade, Nível Acadêmico, Prazo), campo de busca rápida e ordenação ("Melhor Match", "Mais Recentes", "Prazo mais próximo", "Maior Valor", "Ordem Alfabética").
   3. 📋 **Minhas Inscrições:** Quadro Kanban com 3 colunas interativas ("Preparando Documentação", "Em Análise", "Aprovado"), sincronizado em tempo real com o botão "Me inscrevi / Inscrito" dos cards.
 - **Resumo Inteligente com IA (`AiSummaryModal`):** Permite analisar os editais em segundos com síntese executiva, benefícios, critérios de elegibilidade e recomendações para aumentar a nota na avaliação.
+
+---
+
+## 🔍 Ferramenta Event Discovery (`/toolkit/event-discovery`)
+
+O **Event Discovery** é o radar inteligente do Academic Companion focado em **eventos científicos, simpósios, conferências, competições acadêmicas e hackathons**:
+
+### 1. Componentes da Interface (`pages/toolkit/event-discovery/`)
+- **`EventHeader`:** Título oficial, botão para recomputar recomendações com IA e link direto de retorno ao catálogo do Toolkit.
+- **`EventStats`:** 4 métricas em tempo real:
+  - *Eventos encontrados:* Total de eventos mapeados e vigentes.
+  - *Altamente relevantes:* Eventos com taxa de compatibilidade $\ge 80\%$.
+  - *Salvos no calendário:* Total de eventos salvos na agenda do estudante.
+  - *Networking previsto:* Estimativa de conexões qualificadas no mês.
+- **`EventFilters`:** Campo de busca textual por títulos, temas e instituições, com multi-select de categorias:
+  - 🏆 **Competições** (`competition`)
+  - 🔬 **Eventos Científicos** (`scientific`)
+  - 💻 **Hackathons & Maratonas** (`hackathon`)
+  - 🎨 **Esportivos & Culturais** (`cultural`)
+- **`EventFeed` & `EventCard`:**
+  - Badge de categoria com ícone temático e código de cores padronizado.
+  - Score de afinidade algorítmica (`matchScore`) com badges tonais (Verde, Âmbar, Neutro).
+  - Descrição, instituição, modalidade (Presencial/Remoto) e tags de temas.
+  - Box de **Insight da IA** destacando aderência e oportunidades de publicação.
+  - Botão de alternância **Salvar no Calendário / Salvo na Agenda** sincronizado em tempo real.
+  - Botão para acessar edital ou detalhes oficiais da inscrição.
+- **`EventCalendarWidget`:** Mini-calendário do mês atual com indicadores circulares coloridos por categoria nas datas dos eventos e lista de compromissos imediatos.
+- **`AIInsightCard`:** Card de recomendação personalizada gerado com base no perfil do estudante com resumo de afinidade e destaque principal.
+
+### 2. Endpoints e Contratos Backend (`apps/backend`)
+- **`GET /api/opportunities/events`:** Retorna a listagem completa de eventos (`AcademicEventDTO[]`), estatísticas agregadas (`EventStatItemDTO[]`), agenda do mês (`CalendarMarkDTO[]`) e insight executivo da IA (`AIInsightDTO`). Suporta busca textual (`query`) e filtro de categorias (`categories`).
+- **`PATCH /api/opportunities/events/:id/toggle-save`:** Alterna o salvamento do evento no calendário pessoal do estudante autenticado (persistido em `StudentOpportunity.isFavorite`).
+
+---
 
 ## 🎯 Central de Oportunidades & Bolsas (`/opportunities`)
 
@@ -237,5 +274,62 @@ O Painel Geral (`/`) conta com um motor completo de personalização declarativa
     - Sincronização em tempo real ao alternar entre cartões e fechamento automático ao concluir a edição.
 - **Estilização Exclusiva:** Construído 100% em CSS Modules e tokens OKLCH, sem qualquer dependência de Tailwind CSS.
 
+---
 
+## 🏠 Landing Page Reestruturada (`/welcome`) & Radar Universitário Aberto
+
+A Landing Page da plataforma foi completamente reestruturada para oferecer uma experiência imersiva e de alto valor imediato para novos visitantes e estudantes:
+
+### 1. Cena Interativa Planetária em SVG (`PlanetScene`)
+- Implementada puramente com **SVG vetorial e animações CSS nativas** (`@keyframes`), garantindo altíssima performance, zero dependências pesadas de WebGL e peso inferior a 15KB.
+- Simula o **Academic World**: uma esfera central com atmosfera brilhante e 3 órbitas elípticas contendo eixos da trajetória acadêmica (Graduação, Pesquisa & IC, Projetos & Inovação, Estágios & Carreira, Competências e Diário de Memória).
+- Interação por hover revela badges explicativos em tempo real.
+
+### 2. Hub de Ferramentas Públicas & Seletor de Modo (`PublicScholarshipPreview`)
+- Integrado em um **chassi estilizado de laptop**, simulando a interface real da plataforma.
+- **Seletor de Ferramentas Públicas:** Permite alternar instantaneamente entre duas ferramentas sem necessidade de login ou cadastro:
+  - 🎓 **Scholarship Finder (Bolsas & IC):** Radar de editais, bolsas de pesquisa (PIBIC, FAPERGS), monitorias remuneradas e estágios com cálculo de afinidade (Match Score).
+  - 📅 **Event Discovery (Congressos & Hackathons):** Radar de conferências científicas, chamadas de trabalhos (Call for Papers), simpósios acadêmicos e maratonas de tecnologia, com tags informativas ("Call for Papers", "Hackathon & Maratona", "Premiação em dinheiro", "Certificado de 40h").
+- **Zero Dados Falsos:** Conectado diretamente ao backend via endpoint público `GET /api/opportunities/public` com o hook `usePublicOpportunities(type: 'scholarships' | 'events')`.
+- Filtros em tempo real por Tipo de Evento / Curso, Instituição, Localidade, Formato (Presencial, Híbrido, Remoto) e Ordenação (Match, Prazos de Submissão, Alfabética).
+- **Auth Gate Dinâmico:** Ações que demandam persistência de dados (como "Me inscrevi", "Salvar no Calendário", "Resumo IA" ou visualizações repetidas de editais) acionam um modal explicativo que convida o usuário a criar sua conta gratuita sem barreiras.
+
+### 3. Rodapé Interativo com Modais de Prévia (`LandingFooter`)
+- Links para páginas internas ou rotas protegidas abrem **cards modais de prévia rica**:
+  - **LinkedIn Impact Builder:** Prévia da ferramenta de geração contextual de posts técnicos e hashtags automáticas com IA Gemini.
+  - **Lattes Assistant:** Prévia da conversão inteligente de certificados e declarações no padrão CNPq.
+  - **Diretório de Fontes Acadêmicas:** Exibição das mais de 15 fontes de fomento monitoradas (UFSM, CNPq, FAPERGS, CAPES, Governo RS, etc.).
+  - **Central de Ajuda & Suporte:** Guia rápido de dúvidas frequentes, canais de suporte e links para a Wiki.
+- Navegação fluida com **scroll suave** para as âncoras `#bolsas`, `#recursos` e `#como-funciona`.
+
+### 4. Acessibilidade Visual e Alto Contraste no Tema Claro
+- Aplicação de caixas de vidro fosco com fundo translúcido elevado (`background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(20px); border: 1px solid rgba(226, 232, 240, 0.95)`) em todos os cabeçalhos de seção (`sectionHeadingBox`, `headerCard`, `stepCard`), garantindo 100% de legibilidade dos textos sobre as ilustrações de fundo.
+
+### 5. Endpoints Públicos de Apoio
+- **`GET /api/opportunities/public`:** Listagem paginada e filtrada de oportunidades abertas com suporte aos parâmetros `type` (`scholarships` | `events`), `category`, `course`, `institution`, `city`, `modality` e `sort`.
+- **`GET /api/opportunities/public-radar`:** Listagem direta para simulação rápida por curso e semestre.
+
+---
+
+## ⚡ Aprimoramentos Recentes de Produtividade e Experiência Discente
+
+### 1. Quadro Kanban Drag & Drop em "Minhas Inscrições" (`ScholarshipFinder`)
+- Visualização de candidaturas em três etapas de funil: **"Preparando Documentação"**, **"Em Análise"** e **"Aprovado"**.
+- Movimentação bidirecional de cartões através de **HTML5 Drag & Drop nativo**, permitindo que o estudante arraste candidaturas entre as colunas sem bibliotecas externas pesadas.
+- Persistência instantânea via `useUpdateApplicationStatus()` com sincronização otimista de estado.
+
+### 2. Pomodoro Timer Flutuante & Arrastável (`SpeedDial`)
+- Widget flutuante projetado com contêiner arrastável (`draggable` por mouse com cursor `grab` e `grabbing`), permitindo reposicionamento livre pela viewport.
+- Modo colapsável em botão estético com formato de tomate e folhas estilizadas, exibindo cronômetro tabular e status em tempo real.
+- Emissão de alerta sonoro suave gerado via **Web Audio API** (`OscillatorNode` e `GainNode`) ao término dos 25 minutos de ciclo de foco, sem dependência de arquivos de áudio externos.
+
+### 3. Matriz Anual de Atividade (`ContributionGrid`)
+- Algoritmo de mapeamento cronológico de **53 semanas contínuas (371 dias)** cobrindo o ciclo anual da trajetória do discente.
+- Agregação ponderada em tempo real de memórias do diário (`useMemories()`) e vivências práticas (`useExperiences()`), computando níveis de intensidade de 0 a 4 com cores graduais do tema e tooltips informativos por data.
+
+### 4. Captura Inteligente com Ações Múltiplas (`SmartCapture`)
+- Entrada textual multifuncional integrada no grid de widgets personalizáveis do Dashboard.
+- Rotação dinâmica de sugestões de escrita e dois botões de ação contextuais:
+  - **"Salvar em Memória":** Registra instantaneamente uma nova memória na Linha do Tempo e Diário Acadêmico via `useCreateMemory()`.
+  - **"Perguntar ao Copiloto":** Redireciona a reflexão ou dúvida diretamente para a sessão ativa do Copiloto IA via `navigate('/assistant?prompt=...')`.
 

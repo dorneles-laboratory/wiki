@@ -1,13 +1,13 @@
 ---
-title: Autenticação & Integrações OAuth 2.0 (Google & LinkedIn)
-description: Arquitetura completa de segurança, autenticação segura via Cookies HttpOnly, integração com Google OAuth 2.0 e publicação direta no LinkedIn.
+title: Autenticação & Integrações OAuth 2.0 (Google, LinkedIn & GitHub)
+description: Arquitetura completa de segurança, autenticação segura via Cookies HttpOnly, integração com Google, LinkedIn e GitHub OAuth 2.0, credenciais dinâmicas no banco de dados e trilhas de acesso no Admin.
 sidebar:
   order: 14
 ---
 
-# 🔐 Autenticação & Integrações OAuth 2.0
+# 🔐 Autenticação, OAuth Dinâmico & Trilhas de Auditoria
 
-O **Academic Companion (`acad`)** adota uma arquitetura de autenticação moderna e segura, projetada para garantir zero vazamento de credenciais via JavaScript (XSS) através de cookies **HttpOnly**, suporte nativo a login federado institucional e pessoal via **Google OAuth 2.0**, e conexão direta com a **LinkedIn Developer Platform** para publicação automática de conquistas acadêmicas.
+O **Academic Companion (`acad`)** adota uma arquitetura de autenticação moderna e segura, projetada para garantir zero vazamento de credenciais via JavaScript (XSS) através de cookies **HttpOnly**, suporte nativo a login federado institucional e de desenvolvedor via **Google OAuth 2.0**, **LinkedIn OpenID** e **GitHub OAuth**, além de gerenciamento dinâmico de credenciais criptografadas no PostgreSQL e auditoria completa de acessos.
 
 ---
 
@@ -21,73 +21,64 @@ Para evitar vulnerabilidades de roubo de sessão através de ataques Cross-Site 
 
 ---
 
-## 🌐 2. Google OAuth 2.0 & One-Tap
+## ⚙️ 2. Credenciais OAuth Dinâmicas no Banco de Dados
 
-A autenticação com o Google permite que estudantes acessem a plataforma instantaneamente, com suporte prioritário a e-mails institucionais (como `@ecomp.ufsm.br` e `@ufsm.br`).
-
-### Fluxo de Redirecionamento (Authorization Code Flow)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Aluno as Estudante
-    participant Front as Frontend (/auth)
-    participant Back as Backend API (/auth/google)
-    participant Google as Google Identity Provider
-    participant DB as PostgreSQL
-
-    Aluno->>Front: Clica em "Continuar com o Google"
-    Front->>Back: GET /auth/google/url
-    Back-->>Front: Retorna { url, state }
-    Front->>Google: Redireciona para tela de consentimento
-    Aluno->>Google: Autoriza acesso ao perfil básico
-    Google->>Front: Redireciona para /auth/google/callback?code=...
-    Front->>Back: POST /auth/google/callback { code }
-    Back->>Google: Troca code por access_token & id_token
-    Google-->>Back: Retorna perfil (sub, email, name, picture)
-    Back->>DB: Cria/localiza User + StudentProfile + Wallet (+50 tokens)
-    Back-->>Front: Seta Cookies HttpOnly (access_token, refresh_token)
-    Front->>Aluno: Redireciona para /dashboard
-```
-
-### Endpoints Oficiais do Google OAuth
-
-| Método | Rota | Descrição |
-|---|---|---|
-| `GET` | `/api/auth/google/url` | Retorna a URL segura de consentimento com state assinado anti-CSRF |
-| `POST` | `/api/auth/google/callback` | Recebe o código temporário, valida no Google e inicia a sessão |
-| `POST` | `/api/auth/google/one-tap` | Recebe o ID Token emitido pelo componente Google One-Tap e autentica |
+Diferente de abordagens estáticas que exigem alteração manual de arquivos `.env` e reinicialização de containers em produção, o sistema suporta **configuração dinâmica de OAuth**:
+- As chaves de cliente (`clientId`), segredos (`clientSecret`), URIs de callback (`redirectUri`) e flags de ativação (`enabled`) são armazenadas com categoria `AUTH_OAUTH` na tabela `SystemSetting`.
+- O endpoint administrativo `GET /api/admin/auth-config` e `PUT /api/admin/auth-config` permite que superusuários configurem Google, LinkedIn e GitHub diretamente pela interface web (`/acessos`), com máscara de segurança (`******`).
+- O endpoint público `GET /api/auth/providers` informa ao frontend quais botões de login social devem ser renderizados.
 
 ---
 
-## 💼 3. Integração LinkedIn Developer Platform
+## 🌐 3. Provedores Federados (Google, LinkedIn & GitHub)
 
-O **Academic Companion** integra-se à API oficial do LinkedIn para transformar vivências e certificações em publicações de alto impacto profissional.
+### Google OAuth 2.0
+Suporta autenticação com contas institucionais (como `@ufsm.br`) e contas pessoais Google.
 
-### Permissões & Produtos Ativos
+### LinkedIn OpenID Connect
+Permite identificação através do perfil profissional do LinkedIn e habilita a publicação automática de conquistas acadêmicas.
 
-1. **Share on LinkedIn (`w_member_social`):** Permite a publicação direta de posts no feed oficial do usuário através da API UGC (`/v2/ugcPosts`).
-2. **Sign In with LinkedIn using OpenID Connect (`openid`, `profile`, `email`):** Permite sincronização da foto, identificador profissional e vanity URL.
+### GitHub OAuth 2.0
+Projetado para estudantes de cursos de tecnologia, computação e engenharia. Resolve automaticamente e-mails primários verificados mesmo quando configurados como privados no GitHub (`https://api.github.com/user/emails`).
 
-### Endpoints da Integração LinkedIn
+### PGI-PROA & Dorneles Identity Provider (SSO Central)
+O PGI-PROA (sistema de gestão de projetos e equipes) opera integrado ao **Dorneles IdP (Ory Hydra v2.2.0)** com escopos `pgi:read` e `pgi:admin`. O Academic Companion consome os projetos em **modo estritamente Leitor (Dashboard)**:
+- **Disparo de Sincronização:** Acionado sob demanda (on-load ao carregar a página com cache inteligente de 5 minutos, ou clique explícito no botão *"Sincronizar"*). Sem jobs de background (cron) para evitar consumo desnecessário.
+- **Ação Rápida:** Botão *"Abrir no PGI"* disponível diretamente ao lado de sincronizar, direcionando o estudante para a respectiva visualização no PGI-PROA (`:5175`).
+- **Isolamento de Domínios:** Os `TimeLog`s do PGI-PROA **não geram memórias acadêmicas (`AcademicMemory`)**, sendo totalizados estritamente no campo analítico `metadata.pgiProaTotalMinutes`.
 
-| Método | Rota | Descrição |
-|---|---|---|
-| `GET` | `/api/integrations/linkedin/status` | Informa se a conta está conectada e os metadados do perfil |
-| `GET` | `/api/integrations/linkedin/auth-url` | Gera URL de consentimento OAuth do LinkedIn |
-| `POST` | `/api/integrations/linkedin/callback` | Conclui o fluxo de autorização e armazena o access token |
-| `POST` | `/api/integrations/linkedin/manual` | Permite conexão rápida fornecendo a URL pública do perfil |
-| `DELETE` | `/api/integrations/linkedin` | Desconecta a conta e revoga credenciais salvas |
-| `POST` | `/api/integrations/linkedin/share` | Publica o texto gerado diretamente no feed do LinkedIn |
-| `POST` | `/api/integrations/linkedin/generate-post` | Gera posts em 3 variações de tom utilizando IA Gemini |
-| `POST` | `/api/integrations/linkedin/optimize-profile` | Gera Headline, resumo e sugestões de competências |
+### Endpoints Oficiais de Autenticação & Integrações
+
+| Provedor | Método | Rota | Descrição |
+|---|---|---|---|
+| **Público** | `GET` | `/api/auth/providers` | Retorna mapa booleano de provedores habilitados |
+| **Google** | `GET` | `/api/auth/google/url` | URL de consentimento com state anti-CSRF |
+| **Google** | `POST` | `/api/auth/google/callback` | Validação do código de autorização Google |
+| **LinkedIn** | `GET` | `/api/auth/linkedin/url` | URL de consentimento do LinkedIn |
+| **LinkedIn** | `POST` | `/api/auth/linkedin/callback` | Validação do código de autorização LinkedIn |
+| **GitHub** | `GET` | `/api/auth/github/url` | URL de consentimento do GitHub |
+| **GitHub** | `POST` | `/api/auth/github/callback` | Validação do código e criação/vínculo de conta |
+| **PGI-PROA** | `GET` | `/api/integrations/pgi-proa/status` | Status de conexão e última sincronização |
+| **PGI-PROA** | `GET` | `/api/integrations/pgi-proa/auth-url` | URL de autenticação via Dorneles IdP |
+| **PGI-PROA** | `POST` | `/api/integrations/pgi-proa/sync` | Sincronização de projetos (suporta `?force=true`) |
+| **PGI-PROA** | `DELETE` | `/api/integrations/pgi-proa` | Desconexão do workspace PGI-PROA |
 
 ---
 
-## 🎁 4. Onboarding Automático & Carteira de Tokens
+## 📊 4. Monitoramento de Acessos & Auditoria (Admin)
 
-Ao entrar via Google pela primeira vez:
+No painel administrativo (`apps/admin`, rota `/acessos`), administradores acompanham em tempo real:
+- **KPIs do Dia:** Total de logins hoje, acessos divididos por provedor (Google, LinkedIn, GitHub, E-mail tradicional) e taxa de falhas.
+- **Trilha Detalhada:** Cada tentativa de autenticação registra autor/usuário, endereço IP, dispositivo/navegador (User-Agent), status (Sucesso/Falha) e timestamp.
+- **Filtros Avançados:** Busca textual por e-mail ou IP, filtragem por método de login e status de concessão.
+
+---
+
+## 🎁 5. Onboarding Automático & Carteira de Tokens
+
+Ao entrar via OAuth pela primeira vez (Google, LinkedIn ou GitHub):
 1. Um registro de usuário (`User`) é criado com papel `STUDENT`.
-2. O perfil acadêmico (`StudentProfile`) é auto-configurado com base no domínio institucional (ex.: UFSM).
+2. O perfil acadêmico (`StudentProfile`) é provisionado automaticamente.
 3. A carteira (`UserWallet`) é provisionada com **50 tokens gratuitos** de boas-vindas com transação do tipo `WELCOME_BONUS`.
 4. Uma notificação interna de boas-vindas é enviada à central de notificações do estudante.
+

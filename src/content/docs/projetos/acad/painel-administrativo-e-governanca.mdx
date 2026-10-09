@@ -78,12 +78,24 @@ O **Painel Administrativo do Academic Companion** é uma aplicação web dedicad
 - **Acesso Direto ao Edital Oficial:** Botão de abertura e checagem do link externo original.
 - **Exclusão Definitiva de Oportunidades:** Exclusão segura no banco com cancelamento em cascata de candidaturas vinculadas, validada via `AdminPasswordModal`.
 
-### 7. Gestão do Academic Toolkit & Catálogo Inteligente
-- **Catálogo 100% no Banco de Dados (`toolkit_tools`):** Zero mocks ou constantes em código. Todas as soluções inteligentes disponíveis ou em desenvolvimento são lidas e persistidas diretamente no PostgreSQL.
-- **Papéis Claros de Uso:**
-  - A fixação no acesso rápido (`pinned`) é de livre escolha de cada discente em seu portal para personalização pessoal.
-  - O administrador gerencia status de disponibilidade (`AVAILABLE` vs `COMING_SOON`), marcação de novidade (`isNew`), ativação (`isActive`), nome, categoria, rota (`href`) e descrição.
-- **Estilo Visual e Ações Diretas:** Botões aprimorados e estilizados para alternância entre "Liberar Disponível" (verde-esmeralda) e "Mudar para Em Breve" (âmbar).
+### 7. Gestão do Academic Toolkit & Catálogo Inteligente (`/toolkit`)
+
+O catálogo do Toolkit divide-se estritamente em duas categorias operacionais para evitar alterações acidentais em rotas críticas da plataforma:
+
+- **Seção A: Ferramentas Consolidadas (Sistema / Hardcoded):**
+  - Soluções implementadas diretamente no código da aplicação (`apps/frontend`).
+  - **Identificadores Técnicos Imutáveis (Read-Only):** O identificador URL (`slug`) e a rota interna de navegação (`href`) são estritamente fixos e protegidos contra edição no painel, garantindo a integridade dos contratos e rotas discentes.
+  - **Metadados Editáveis:** Administradores podem atualizar metadados visuais e operacionais: Nome, Descrição, Categoria temática, Tagline, Ícone e Status Operacional (Toggle entre `Disponível para Todos` e `Indisponível / Em Breve`).
+  - **Proteção contra Exclusão:** Ferramentas consolidadas do sistema não podem ser excluídas pelo painel administrativo.
+  - **Ação de Teste de Rota:** Botão para abrir e validar imediatamente a rota de navegação no portal do discente (`http://localhost:5180`).
+
+- **Seção B: Ferramentas de Ideação (Validação de Interesse):**
+  - Propostas conceituais criadas diretamente no painel para mensurar a demanda da comunidade acadêmica antes do início do desenvolvimento técnico.
+  - **Formulário Conceitual Simplificado:** O cadastro de novas ideias contém apenas **Nome da Ideia**, **Categoria Temática** e **Descrição da Proposta de Valor**, sem campos de rota ou links.
+  - **Votação e Apoio Comunitário:** Cada proposta é listada como "Em Breve" no portal discente, permitindo que os estudantes cliquem em "Tenho Interesse" para registrar seu voto. O total de manifestações de interesse (`interested`) é acompanhado em tempo real no painel do administrador.
+  - **Ações de Gestão:** Administradores podem atualizar os dados conceituais ou excluir ideias descartadas (ação protegida pela senha mestra de administrador via `AdminPasswordModal`).
+
+- **Separação Visual na Interface:** O painel administrativo separa os dois contextos de forma límpida através de abas dedicadas (`Ferramentas do Sistema` vs `Ideias / Validação de Interesse`), com contadores isolados, filtros operacionais e badges informativos (`[🛡️ Sistema]` vs `[💡 Ideação]`).
 ### 8. Diretório de Fontes & Governança de Robôs Mineradores
 - **Catálogo Institucional Centralizado (`academic_sources`):** Cadastro e monitoramento de portais universitários, agências de fomento (CNPq, CAPES, FAPERGS) e fundações parceiras.
 - **Painel em Abas Operacionais:**
@@ -159,6 +171,44 @@ A tela de insígnias descentraliza o reconhecimento acadêmico através de gamif
 - **Notificação e Destaque:** O discente agraciado recebe notificação comemorativa in-app e pode fixar suas insígnias favoritas em seu perfil público.
 - **Auditoria & Revogação:** Histórico completo de concessões com identificação do administrador responsável, justificativa e botão de revogação imediata.
 
+### 11. Auditoria de Locais & Governança de Campus (`/locais-campus`)
+- **Catálogo Geoespacial Centralizado (`campus_places`):**
+  - Mapeamento e auditoria de prédios, centros acadêmicos, bibliotecas, restaurantes universitários e áreas de convivência.
+  - Modelo idêntico à governança de fontes mineradoras, permitindo que a administração audite locais colaborativos inseridos pela comunidade antes de serem publicados na base oficial.
+- **KPIs em Tempo Real:**
+  - Total de locais mapeados no banco compartilhado.
+  - Pendentes para auditoria (com destaque e contadores em amarelo).
+  - Locais aprovados e publicados em produção (verde esmeralda).
+  - Locais rejeitados com parecer arquivado (vermelho destrutivo).
+- **Abas Operacionais & Filtragem Avançada:**
+  - Segmentação em abas: *Todos os Locais*, *Pendentes de Moderação*, *Aprovados / Oficiais* e *Rejeitados*.
+  - Busca em tempo real por nome, prédio ou descrição.
+  - Seletores de universidade (UFSM, UFRGS, USP, UNICAMP, etc.) e tipo de espaço.
+- **Fluxo de Moderação & Parecer Técnico:**
+  - Modal de análise de submissão discente exibindo autor da sugestão, coordenadas e horários.
+  - **Aprovação Imediata:** Muda o status para `APPROVED`, tornando o local visível instantaneamente no mapa discente e landing page.
+  - **Rejeição com Feedback:** Muda o status para `REJECTED` e registra a justificativa técnica para arquivo.
+- **Edição e Exclusão Segura:**
+  - Edição de metadados, categoria e coordenadas geográficas decimais.
+  - Exclusão definitiva de pontos protegida por autenticação de senha de administrador (`AdminPasswordModal`).
+
+### 10. Moderação de Feed & Governança de Conteúdo (`/moderacao`)
+- **Filtro Preliminar Síncrono (Zero Tolerância a Violações Óbvias):**
+  - Análise em tempo real de profanidade pt-BR (via dicionário customizado e lematização) e quarentena de links maliciosos ou encurtadores suspeitos.
+  - Rejeição síncrona com código HTTP `422 Unprocessable Content` e mensagem descritiva antes de qualquer gravação no banco.
+- **Esteira de Auditoria em Lote com IA (Cortex Human-in-the-Loop):**
+  - Publicações comunitárias válidas entram inicialmente com status `PENDING` para o público geral, enquanto o autor visualiza sua publicação com status informativo animado de *"Em análise pela moderação"*.
+  - A esteira agrupa submissões em lote (batch de até 10 itens ou varredura programada diária às 00:00) para otimização de requisições ao Cortex.
+  - A IA avalia linguagem construtiva, ausência de ofensas veladas e confiabilidade, gerando um **Dossiê da IA (`AiDossier`)** com score de 0 a 100, checklist de conformidade e flags de alerta.
+- **Feature Flag Dinâmica de Auto-Aprovação (`COMMUNITY_AUTO_APPROVE`):**
+  - Gerenciável em tempo real em **Sistema → Feature Flags**.
+  - Quando **ativada**, publicações com pontuação de confiança da IA ≥ 85 são aprovadas automaticamente pelo worker e publicadas no feed oficial.
+  - Quando **desativada** (padrão de segurança nas primeiras semanas), todas as publicações aguardam o clique final de homologação humana pelo moderador.
+- **Canal de Denúncias Reativas da Comunidade:**
+  - Aba dedicada no painel para triagem de publicações sinalizadas por estudantes por motivos como `SPAM`, `HATE_SPEECH`, `HARASSMENT`, `FALSE_INFORMATION`, `OFFENSIVE_MEDIA` ou `OTHER`.
+  - Histórico de denúncias, nomes dos relatores e justificativas apresentadas ao lado do post original.
+  - Decisões de moderação com parecer técnico opcional enviado como feedback ao autor.
+
 ---
 
 ## 🧭 Navegação Hierárquica do Painel (Sidebar)
@@ -168,7 +218,10 @@ A barra lateral do painel administrativo organiza os fluxos operacionais em bloc
 1. **Visão Geral:** `/` (Painel Geral)
 2. **Diretórios & Oportunidades:**
    - `/editais` (Editais & Vagas)
-   - `/fontes` (Diretório de Fontes)
+   - `/fila-processamento` (Fila do Pipeline)
+   - `/fontes` (Diretório de Fontes & Dossiê IA)
+   - `/locais-campus` (Locais de Campus, Geo-Fence & Bounding Box)
+   - `/sincronizacoes` (Sincronizações)
    - `/toolkit` (Academic Toolkit)
 3. **Finanças & Economia:**
    - `/financas` (DRE & Finanças)
@@ -176,11 +229,13 @@ A barra lateral do painel administrativo organiza os fluxos operacionais em bloc
    - `/simulador` (Simulador de Escala)
    - `/planos` (Planos de Assinatura)
 4. **Comunidade & Atendimento:**
+   - `/moderacao` (Moderação de Feed & Denúncias)
    - `/usuarios` (Gestão de Usuários)
    - `/insignias` (Insígnias & Mérito Acadêmico)
    - `/suporte` (Suporte & Chamados)
    - `/notificacoes` (Notificações & Avisos)
 5. **Infraestrutura & Sistema:**
+   - `/acessos` (Acessos & OAuth)
    - `/sistema` (Saúde & Auditoria — com links dinâmicos para Swagger OpenAPI e MinIO Console)
    - `/configuracoes` (Configurações Globais & Janelas de Manutenção)
    - Atalho para o Portal do Discente (`acad.dorneles.dev`)

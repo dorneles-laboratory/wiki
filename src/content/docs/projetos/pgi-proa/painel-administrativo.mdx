@@ -1,0 +1,53 @@
+---
+title: Painel Administrativo
+description: Documentação arquitetural do painel admin dedicado do PGI-PROA (apps/admin).
+sidebar:
+  order: 3
+---
+
+# 🛡️ Painel Administrativo (`apps/admin`)
+
+O **Painel Administrativo do PGI-PROA** é uma aplicação Single Page Application (SPA) dedicada, construída com **React 19**, **Vite 7**, **CSS Modules** e **TypeScript em modo estrito**. Ele roda de forma desacoplada do portal de colaboradores, na porta `:5185` (desenvolvimento) e `admin-pgi.dorneles.dev` (produção).
+
+---
+
+## 🎨 Princípios de Design & Regras de Ouro
+
+- **CSS Modules Exclusivo:** Ausência total de Tailwind CSS, classes utilitárias globais ou funções como `cn()`. Toda a estilização reside em arquivos `.module.css`.
+- **Tokens Semânticos Universais:** As variáveis de cores, raios e elevações (`--primary`, `--secondary`, `--muted`, `--card`, `--radius-lg`) são compartilhadas e idênticas às do ecossistema Acad.
+- **Identidade PGI-PROA:** Header, sidebar colapsável, logo SVG, cards ambientais e formulário de login possuem identidade visual coerente com a marca.
+
+---
+
+## 📋 Módulos e Rotas do Painel
+
+| Rota | Componente | Descrição Funcional |
+|---|---|---|
+| `/` | `Dashboard.tsx` | KPIs operacionais em tempo real: total de usuários, squads & projetos, tarefas concluídas e horas computadas. Feed de atividades e cadastros recentes. |
+| `/projetos` | `Projects.tsx` | Gestão de squads, ciclo de vida (`ACTIVE`, `DRAFT`, `ON_HOLD`, `COMPLETED`, `CANCELLED`), tags temáticas e estimativas de horas. |
+| `/tasks` | `Tasks.tsx` | Quadro de supervisão global de demandas, identificadores sequenciais (`#42`), níveis de urgência (`URGENT`, `HIGH`, `MEDIUM`, `LOW`) e prazos de entrega. |
+| `/time-logs` | `TimeLogs.tsx` | Auditoria detalhada de registros de horas por colaborador, natureza (`DEV`, `MEETING`, `TESTING`, `DOCUMENTATION`, `CODE_REVIEW`, `OTHER`) e duração. |
+| `/documentos` | `Documents.tsx` | Gestão e inventário de especificações técnicas e anexos vinculados a projetos. |
+| `/usuarios` | `Users.tsx` | Controle de membros da plataforma, status de ativação/inativação e RBAC. |
+| `/acessos` | `AccessLogs.tsx` | Monitoramento e auditoria de autenticações (Dorneles IdP, Google, GitHub, credenciais) e bloqueios de segurança. |
+| `/sistema` | `System.tsx` | Telemetria de saúde de serviços, versões, conectividade com banco e Jaeger. |
+| `/configuracoes` | `Settings.tsx` | Configurações globais de governança e integrações externas. |
+| `/login` | `Login.tsx` | Tela de autenticação com suporte nativo a **SSO Dorneles IdP** e credenciais de contingência. |
+
+---
+
+## 🔐 Autenticação & SSO
+
+O Painel Administrativo conta com fluxo duplo de acesso:
+1. **SSO Dorneles IdP (Recomendado):** Botão direto de autenticação corporativa via Hydra OIDC, redirecionando com autorização segura.
+2. **Credenciais Locais:** Formulário com rate limiting estrito para administradores do sistema.
+3. **Guarda de Rotas (`AdminProtectedRoute`):** Assegura que apenas usuários autenticados e com permissão administrativa tenham acesso às rotas do painel.
+
+---
+
+## 🧪 Qualidade de Código & Testes
+
+A aplicação do admin é validada continuamente pelo pipeline de CI/CD:
+- **Lint:** ESLint v9 flat config com Prettier integrado (`npm run lint-check`).
+- **Build:** `tsc -b && vite build` com validação de tipagem estrita de contratos.
+- **Testes Unitários e de Integração:** Vitest + React Testing Library (`npm test`).

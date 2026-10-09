@@ -1,0 +1,49 @@
+---
+title: PGI-PROA
+description: Plataforma de Gestão Integrada de Projetos, Demandas e Apontamento de Horas no Ecossistema Dorneles.
+sidebar:
+  order: 1
+---
+
+# 🚀 PGI-PROA — Plataforma de Gestão Integrada
+
+O **PGI-PROA** é o sistema corporativo e institucional de gestão integrada de projetos, squads, fluxos de trabalho e apontamento de horas (*time-tracking*) do **Dorneles Laboratory**. 
+
+Projetado para operar em estreita sinergia com o **Academic Companion (`acad`)** e integrado à camada central de identidade **Dorneles IdP (Ory Hydra OIDC / Kratos)**, o PGI-PROA centraliza a governança operacional de iniciativas técnicas, demandas de desenvolvimento e dedicação temporal de colaboradores.
+
+---
+
+## 🎯 Pilares e Proposta de Valor
+
+1. **Gestão Operacional de Squads & Projetos:** Planejamento ágil, backlog, controle de ciclo de vida (`ACTIVE`, `DRAFT`, `ON_HOLD`, `COMPLETED`, `CANCELLED`) e metas de entrega.
+2. **Quadro de Tarefas Centralizado:** Rastreamento kanban por status, prazos (*due dates*), identificadores sequenciais (`#1`, `#42`) e priorização de demandas (`URGENT`, `HIGH`, `MEDIUM`, `LOW`).
+3. **Apontamento de Horas & Time Logs:** Auditoria de horas computadas em desenvolvimento, reuniões, testes, documentação e code reviews, garantindo transparência de esforço.
+4. **Identidade Federada (SSO Dorneles IdP):** Autenticação unificada baseada em OpenID Connect (OIDC) com cookies HTTP-Only seguros e renovação automática de sessão.
+5. **Integração de Leitura com Acad:** O Academic Companion consome dados de projetos e tarefas do PGI-PROA sob demanda para enriquecer a trajetória dos discentes sem misturar os domínios.
+
+---
+
+## 🏗️ Topologia da Aplicação
+
+```
+pgi-proa/
+├── apps/
+│   ├── backend/        ← API RESTful Express 5 + Prisma 7 + PostgreSQL (:5002)
+│   ├── frontend/       ← SPA React 19 / Vite 7 - Portal do Colaborador (:5175)
+│   └── admin/          ← SPA React 19 / Vite 7 - Painel do Administrador (:5185)
+├── packages/
+│   └── shared/         ← Contratos Zod, DTOs e Schemas OpenAPI Compartilhados
+├── infra/
+│   └── caddy/          ← Proxy Reverso de Borda com SSL Automático Let's Encrypt
+├── Makefile            ← Orquestração completa de CI/CD, builds e deployment
+└── PLANO_PARIDADE.md   ← Rastreamento da evolução e paridade de features
+```
+
+---
+
+## 🧭 Seções da Documentação
+
+| Documento | Descrição |
+|---|---|
+| [Infraestrutura, Docker & Caddy](/projetos/pgi-proa/infraestrutura-e-caddy) | Portas, redes Docker (`identity_network`), Caddyfile e domínios de produção |
+| [Painel Administrativo](/projetos/pgi-proa/painel-administrativo) | Arquitetura do `apps/admin/`, telas operacionais, RBAC e testes Vitest |

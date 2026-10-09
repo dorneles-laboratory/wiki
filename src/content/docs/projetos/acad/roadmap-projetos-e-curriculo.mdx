@@ -1,0 +1,102 @@
+---
+title: Roadmap Planner, Hub de Projetos & Resume Builder
+description: Documentação técnica e arquitetural da esteira de planejamento curricular, gestão ágil de projetos e suíte de currículos com LaTeX IDE.
+sidebar:
+  order: 14
+---
+
+# 🚀 Roadmap Planner, Hub de Projetos & Resume Builder
+
+Este documento registra a implementação de ponta a ponta dos módulos da **Sprint 4**:
+1. **Roadmap & Planejador Semestral** (`/toolkit/roadmap-planner`)
+2. **Hub de Projetos & Gestão de Sprints** (`/hub-projetos`)
+3. **Resume Vault & LaTeX Builder** (`/resume-builder` e `/toolkit/resume-builder`)
+
+---
+
+## 🗺️ 1. Roadmap & Planejador Semestral (`/toolkit/roadmap-planner`)
+
+O **Roadmap Planner** oferece uma visão holística e interativa da matriz curricular do estudante ao longo dos semestres acadêmicos.
+
+### 📐 Contratos e Tipagem (`packages/shared`)
+- **Módulo:** `src/modules/roadmap/`
+  - `roadmapCourseTypeSchema`: `OBRIGATORIA`, `OPTATIVA`, `EXTENSAO`, `ELETIVA`, `required`, `elective`, `dcg`.
+  - `roadmapCourseStatusSchema`: `CONCLUIDA`, `CURSANDO`, `PLANEJADA`, `TRANCADA`.
+  - `courseRoadmapSchema`: Estrutura do roadmap do estudante com agregação de disciplinas.
+  - `addRoadmapCourseSchema` e `updateRoadmapCourseSchema`: Mutação segura de disciplinas.
+  - `roadmapAIInsightsSchema`: Diagnósticos analíticos de formação, IRA médio e horas cumpridas.
+
+### 🗄️ Modelo de Dados (Prisma)
+- **`CourseRoadmap`**: Vínculo com `User` (`studentId`), nome do curso e quantidade de semestres.
+- **`RoadmapCourse`**: Código, nome, carga horária, semestre, tipo, status, pré-requisitos, correquisitos, desbloqueios e notas.
+
+### 🔌 Endpoints da API
+- `GET /api/roadmap`: Retorna o roadmap do estudante ou faz seed inicial com o currículo de referência.
+- `POST /api/roadmap/courses`: Adiciona nova disciplina personalizada ao plano.
+- `PATCH /api/roadmap/courses/:id`: Atualiza status da disciplina (Cursando, Concluída, Planejada) e nota.
+- `DELETE /api/roadmap/courses/:id`: Remove disciplina do roadmap.
+- `GET /api/roadmap/ai-insights`: Gera análise preditiva de formatura e recomendações personalizadas.
+
+---
+
+## 💼 2. Hub de Projetos (`/hub-projetos`)
+
+O **Hub de Projetos** centraliza a gestão ágil de tarefas, iniciativas de pesquisa, extensão e entregas práticas da vivência universitária.
+
+### 📐 Contratos e Tipagem (`packages/shared`)
+- **Módulo:** `src/modules/task/`
+  - `TaskPriority`: `ALTA`, `MEDIA`, `BAIXA`, `URGENTE`.
+  - `TaskStatus`: `A_FAZER`, `EM_ANDAMENTO`, `EM_REVISAO`, `CONCLUIDO`.
+  - `createTaskSchema` e `updateTaskSchema`: Validação de títulos, projetos, horas estimadas e prazos.
+  - `projectStatsResponseSchema`: Agregação de KPIs (total, horas, atrasadas, produtividade) e progresso por projeto.
+
+### 🗄️ Modelo de Dados (Prisma)
+- **`Task`**: Modelo persistente conectado a `User` (`studentId`) e opcionalmente à entidade mãe `Experience` (`experienceId`).
+
+### 🔌 Endpoints da API
+- `GET /api/tasks`: Lista tarefas com filtros por projeto, status e prioridade.
+- `GET /api/tasks/stats`: Retorna KPIs globais e cálculo de progresso por projeto.
+- `POST /api/tasks`: Cria nova tarefa associada a um projeto acadêmico.
+- `PATCH /api/tasks/:id`: Altera status, título, prioridade, horas ou data de conclusão.
+- `DELETE /api/tasks/:id`: Remove tarefa.
+
+### 🎨 Componentes & UI (CSS Modules)
+- **Circular Progress SVG:** Indicador circular nativo sem bibliotecas externas.
+- **Filtros Ágeis:** Abas por status e seleção de projeto na lateral.
+- **Modal de Criação:** Formulário com validação e feedback reativo.
+
+---
+
+## 📄 3. Resume Vault & LaTeX Builder (`/resume-builder` e `/toolkit/resume-builder`)
+
+Conforme deliberação do `DECISIONS.md` (Decisão Q5), a suíte de currículos foi implementada com arquitetura dupla:
+1. **Resume Vault (`/resume-builder`):** Catálogo de versões, fixação de currículos favoritos, download direto de `.tex` e gerador assistido por IA a partir de vagas.
+2. **Resume Studio LaTeX (`/toolkit/resume-builder`):** IDE completa em navegador com editor de código LaTeX, numeração de linhas, busca textual, console de compilação sintática e preview em escala A4.
+
+### 📐 Contratos e Tipagem (`packages/shared`)
+- **Módulo:** `src/modules/resume/`
+  - `ResumeStatus`: `DRAFT`, `SENT`, `READY`, `ARCHIVED`.
+  - `ResumeTone`: `CORPORATIVO`, `TECH`, `ACADEMICO`, `EXECUTIVE`.
+  - `resumeDocumentSchema`: Estrutura do documento com código LaTeX completo e metadados.
+  - `generateResumeSchema`: Parâmetros para composição com IA a partir da vaga de interesse.
+  - `resumeCompileResponseSchema`: Validação sintática e verificação de integridade estrutural.
+
+### 🗄️ Modelo de Dados (Prisma)
+- **`ResumeDocument`**: Persistência do código LaTeX (`@db.Text`), versão, empresa alvo, tom e status de fixação.
+
+### 🔌 Endpoints da API
+- `GET /api/resume`: Lista versões salvas no vault do estudante.
+- `GET /api/resume/:id`: Retorna código LaTeX e detalhes de um currículo específico.
+- `POST /api/resume`: Cria nova versão vazia ou customizada.
+- `POST /api/resume/generate`: Analisa vivências (`Experience`) e memórias do estudante para compor template LaTeX sob medida.
+- `PATCH /api/resume/:id`: Atualiza o código LaTeX (incrementando a versão) ou metadados.
+- `DELETE /api/resume/:id`: Exclui versão do vault.
+- `POST /api/resume/compile`: Simula e valida compilação LaTeX detectando erros sintáticos em tempo real.
+
+---
+
+## 🧪 Testes Automatizados (Vitest)
+A suíte de testes de componentes cobre todos os fluxos com 100% de sucesso:
+- `apps/frontend/tests/pages/RoadmapPlanner.spec.tsx` (3 testes)
+- `apps/frontend/tests/pages/HubProjects.spec.tsx` (3 testes)
+- `apps/frontend/tests/pages/ResumeBuilder.spec.tsx` (3 testes)

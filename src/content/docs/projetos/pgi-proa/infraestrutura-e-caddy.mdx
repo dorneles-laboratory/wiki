@@ -1,0 +1,131 @@
+---
+title: Infraestrutura, Docker & Caddy
+description: Especificação de redes Docker, proxy reverso Caddy, portas e ambientes do PGI-PROA.
+sidebar:
+  order: 2
+---
+
+# 🌐 Infraestrutura, Docker & Borda Caddy
+
+O ecossistema **PGI-PROA** é orquestrado via Docker Compose, seguindo o mesmo padrão de excelência arquitetural do **Academic Companion**. A infraestrutura divide-se entre ambiente de desenvolvimento local e produção servida via Caddy de borda com terminação SSL automática.
+
+---
+
+## 🔌 Topologia de Portas de Desenvolvimento
+
+| Serviço | Porta Local | Protocolo / Descrição |
+|---|---|---|
+| **Backend API** | `http://localhost:5002` | REST API Express 5 + Prisma |
+| **Frontend Portal** | `http://localhost:5175` | React 19 / Vite 7 Discente & Colaborador |
+| **Admin Panel** | `http://localhost:5185` | React 19 / Vite 7 Painel Administrativo |
+| **PostgreSQL** | `localhost:5436` | Banco de dados relacional dedicado (`pgi-proa_db_dev`) |
+| **Jaeger UI** | `http://localhost:5690` | Tracing e observabilidade OpenTelemetry |
+| **OTLP gRPC / HTTP**| `4315` / `4316` | Exportação de métricas e traces |
+
+---
+
+## 🔒 Redes Docker e Comunicação Segura
+
+O PGI-PROA opera com duas redes primárias:
+
+1. **`pgi_proa_network` (Rede Interna do Projeto):** Conecta o Backend, Frontend, Admin, Banco de Dados PostgreSQL e Jaeger.
+2. **`identity_network` (Rede Compartilhada de Identidade):** Permite a comunicação direta do backend do PGI-PROA com o container **Ory Hydra** (`identity_hydra:4444`) para validação interna de tokens OIDC sem sair para a rede pública.
+
+### Configuração no `docker-compose.dev.yml` do Backend
+```yaml
+services:
+  backend:
+    networks:
+      project_network:
+        aliases:
+          - backend
+      identity_network: {}
+
+networks:
+  project_network:
+    name: '${PROJECT_NAME}_network'
+    external: true
+  identity_network:
+    name: 'identity_network'
+    external: true
+```
+
+---
+
+## 🛡️ Proxy Reverso de Borda (Caddy)
+
+Em produção, o tráfego HTTP/HTTPS é roteado pelo Caddy v2, que gerencia certificados TLS de forma 100% automatizada via Let's Encrypt.
+
+### Domínios Oficiais de Produção
+
+| Serviço | URL Pública | Container de Destino |
+|---|---|---|
+| **Portal PGI-PROA** | `https://pgi.dorneles.dev` | `pgi-proa_frontend_prod:80` |
+| **Painel Administrativo** | `https://admin-pgi.dorneles.dev` | `pgi-proa_admin_prod:80` |
+| **API RESTful** | `https://api-pgi.dorneles.dev` | `pgi-proa_backend_prod:5002` |
+
+### Especificação do `Caddyfile` (`infra/caddy/Caddyfile`)
+```caddyfile
+{
+    admin off
+    email fernando.dorneles@ecomp.ufsm.br
+}
+
+# 1. Portal do Usuário PGI-PROA
+pgi.dorneles.dev {
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+    reverse_proxy pgi-proa_frontend_prod:80
+}
+
+# 2. Painel do Administrador PGI-PROA
+admin-pgi.dorneles.dev {
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+    reverse_proxy pgi-proa_admin_prod:80
+}
+
+# 3. API RESTful Backend PGI-PROA
+api-pgi.dorneles.dev {
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+    reverse_proxy pgi-proa_backend_prod:5002
+}
+```
+
+---
+
+## 📦 Builds Multi-Stage com `lib-shared.tgz`
+
+Para garantir que builds de produção (Docker e CI) sejam imunes a indisponibilidades do Git ou vazamento de chaves SSH, o pacote `@lib/shared` é empacotado localmente em um tarball (`lib-shared.tgz`) antes de cada build:
+
+```bash
+make prod-prep
+```
+
+Este comando:
+1. Compila `packages/shared/dist/`.
+2. Gera o pacote via `npm pack`.
+3. Distribui `lib-shared.tgz` para `apps/backend/`, `apps/frontend/` e `apps/admin/`.
+4. Os Dockerfiles executam `npm install ./lib-shared.tgz && npm install` garantindo cache e reprodutibilidade idênticos aos do Acad.

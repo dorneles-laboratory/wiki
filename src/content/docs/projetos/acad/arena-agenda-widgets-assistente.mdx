@@ -1,0 +1,120 @@
+---
+title: Arena Acadêmica, Agenda, Widgets & Assistente IA
+description: Documentação técnica e funcional dos sistemas de gamificação, calendário de rotina, widgets customizáveis do dashboard e melhorias de UX do copiloto de IA.
+sidebar:
+  order: 15
+---
+
+# 🏆 Arena Acadêmica, Agenda, Widgets & Assistente IA
+
+Este documento registra a especificação, arquitetura e integração dos módulos desenvolvidos para engajamento, organização da rotina e experiência do discente.
+
+---
+
+## ⏱️ 1. Speed Dial + Pomodoro Timer (FAB Global)
+
+O **Speed Dial** é um menu flutuante (*Floating Action Button - FAB*) localizado no canto inferior direito da interface em todas as telas autenticadas da aplicação (`AppLayout`).
+
+### Componentes e Capacidades
+- **Ações Rápidas:**
+  - Registrar Memória (`/memories`)
+  - Nova Tarefa (`/hub-projetos`)
+  - Consultar Copiloto (`/assistant`)
+  - Abrir Agenda (`/timeline/calendario`)
+  - Timer Pomodoro (modal integrado)
+- **Pomodoro Timer:**
+  - Ciclo clássico de 25 minutos de foco profundo com alerta visual e sonoro.
+  - Modos de pausa curta (5 min) e pausa longa (15 min).
+  - Controles de Iniciar, Pausar e Resetar com exibição circular animada.
+  - Respeita o estado recolhido/expandido da barra lateral de navegação.
+
+---
+
+## 📅 2. Agenda Acadêmica (`/timeline/calendario` e `/agenda`)
+
+A **Agenda Acadêmica** oferece um ambiente centralizado para planejamento temporal de aulas, provas, reuniões e eventos.
+
+### 📐 Contratos e Tipagem (`packages/shared`)
+- **Módulo:** `src/modules/calendar/`
+  - `CalendarEventCategory`: `AULA`, `PROVA`, `REUNIAO`, `EVENTO`, `PESSOAL`.
+  - `calendarEventSchema`: Modelagem de eventos com data (`date`), horário de início e término (`startTime`, `endTime`), localização e categoria.
+  - `createCalendarEventSchema`: Criação validada de compromissos.
+
+### 🗄️ Modelo de Dados (Prisma)
+- **`CalendarEvent`**: Entidade relacional indexada por `studentId` e `date`.
+
+### 🔌 Endpoints da API
+- `GET /api/calendar/events`: Consulta de compromissos com filtros por mês e ano (`?month=&year=`).
+- `POST /api/calendar/events`: Cadastro de novos compromissos acadêmicos.
+- `DELETE /api/calendar/events/:id`: Exclusão de evento da agenda.
+
+---
+
+## 🏆 3. Arena Acadêmica (`/toolkit/arena-academica` e `/arena`)
+
+A **Arena Acadêmica** integra mecânicas de gamificação para incentivar a regularidade de estudos, participação em pesquisas e registro contínuo da trajetória.
+
+### 📐 Contratos e Tipagem (`packages/shared`)
+- **Módulo:** `src/modules/gamification/`
+  - `AchievementCategory`: `PESQUISA`, `EXTENSAO`, `DISCIPLINAS`, `FOCO`, `COMUNIDADE`.
+  - `achievementSchema`: Conquistas desbloqueáveis com critério, pontuação e progresso incremental.
+  - `weeklyChallengeSchema`: Desafios sazonais de 7 dias com contagem regressiva e recompensas em pontos.
+
+### 🗄️ Modelo de Dados (Prisma)
+- **`Achievement`** & **`StudentAchievement`**: Catálogo de insígnias e relação de desbloqueio por estudante.
+- **`WeeklyChallenge`** & **`ChallengeParticipation`**: Desafios rotativos e controle de participação discente.
+
+### 🔌 Endpoints da API
+- `GET /api/gamification/achievements`: Lista de conquistas do discente com cálculo de nível e pontos.
+- `GET /api/gamification/challenges`: Desafio semanal ativo e metadados de adesão.
+- `POST /api/gamification/challenges/:id/join`: Inscrição ativa no desafio da semana.
+
+---
+
+## 📊 4. Dashboard — Widgets Customizáveis (`/`)
+
+O painel central adota uma arquitetura modular baseada em widgets reativos, permitindo personalização conforme a fase da formação acadêmica:
+
+- **`GreetingBanner`**: Saudação dinâmica com insights preditivos de IA, resumo de IRA e atalhos rápidos.
+- **`SmartCapture`**: Caixa de captura rápida de pensamentos e aprendizados com salvamento imediato nas memórias do discente.
+- **`UpcomingCommitments`**: Card conectado ao serviço de calendário, exibindo as próximas provas e prazos de entrega.
+- **`CurrentGoals`**: Metas semestrais em andamento com barra de progresso visual.
+- **`DevelopingCompetencies`**: Radar das competências com maior evolução recente.
+- **`WellbeingWidget`**: Termômetro de carga de estudos e equilíbrio de rotina semanal.
+- **`AgendaCalendarWidget`**: Mini-calendário interativo mensal com dias destacados por compromissos.
+
+---
+
+## 🤖 5. Copiloto Acadêmico — UX e Contexto Melhorados (`/assistant`)
+
+O assistente conversacional foi ampliado com recursos de context seeding, controle de tom e navegação ágil no histórico:
+
+### Novas Capacidades
+1. **Context Seeding via URL (`?context=`):** Ao navegar a partir de cards do dashboard ou ferramentas externas (ex: `/assistant?context=Explicar+meu+projeto`), o assistente consome o parâmetro automaticamente e inicia o diálogo.
+2. **6 Prompts Sugeridos na Tela Inicial:**
+   - *"O que eu realizei neste semestre?"* (Trajetória)
+   - *"Quais competências estou desenvolvendo?"* (Competências)
+   - *"Em quais áreas estou mais ativo?"* (Atividade)
+   - *"O que eu deveria priorizar agora?"* (Foco)
+   - *"Estou pronto para iniciação científica?"* (Pesquisa)
+   - *"Resuma minha evolução acadêmica até aqui"* (Trajetória)
+3. **Seletor de Modo:**
+   - 🪄 *Explorar trajetória:* Análise retrospectiva de vivências, certificações e histórico.
+   - 🎓 *Planejar próximo passo:* Foco propositivo em editais, disciplinas futuras e TCC.
+4. **Seletor de Nível / Persona:**
+   - *Orientador:* Postura estratégica, contextual e de longo prazo.
+   - *Analista:* Foco rigoroso em métricas, evidências e dados quantitativos.
+   - *Mentor:* Respostas práticas, diretas e acionáveis.
+5. **Sidebar Deslizante com Busca Textual:** Histórico de conversas com filtro instantâneo por título e botão de alternância de visualização (*collapsible*).
+6. **Chips Rotativos de Perguntas:** Quando a conversa já possui mensagens, uma barra horizontal superior ao campo de entrada sugere novos desdobramentos com 1 clique.
+
+---
+
+## 🧪 Testes Automatizados (Vitest)
+Todos os módulos contam com cobertura de testes unitários e de componentes:
+- `apps/frontend/tests/components/SpeedDial.spec.tsx` (4 testes)
+- `apps/frontend/tests/components/DashboardWidgets.spec.tsx` (6 testes)
+- `apps/frontend/tests/pages/Arena.spec.tsx` (3 testes)
+- `apps/frontend/tests/pages/Assistant.spec.tsx` (7 testes)
+- `apps/backend/tests/unit/calendar/calendar.service.spec.ts`
+- `apps/backend/tests/unit/gamification/gamification.service.spec.ts`

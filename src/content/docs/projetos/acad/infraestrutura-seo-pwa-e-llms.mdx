@@ -1,0 +1,82 @@
+---
+title: Infraestrutura de SEO, PWA & LLMs.txt
+description: Arquitetura de metadados estáticos, geração de sitemap, Progressive Web App e proteção de segurança cibernética no Academic Companion.
+sidebar:
+  order: 25
+---
+
+# 🌐 Infraestrutura de SEO, PWA & LLMs.txt
+
+Para posicionar o **Academic Companion (`acad`)** nos motores de busca, viabilizar consumo contextual por modelos de linguagem (LLMs) e transformar a aplicação SPA em um **Progressive Web App (PWA)** instalável e offline-ready, a plataforma implementa uma camada integrada de metadados estáticos e dinâmicos, respeitando rigorosos princípios de **segurança cibernética**.
+
+---
+
+## 🔒 Princípio de Segurança Cibernética: Isolamento Total do Painel Administrativo
+
+> [!CAUTION]
+> **Páginas, rotas e módulos administrativos NUNCA devem ser incluídos em arquivos públicos.**
+>
+> 1. **Zero Enumeração em `robots.txt` e `sitemap.xml`:** Incluir caminhos de administração em regras de exclusão de `robots.txt` divulga a existência e o namespace dos endpoints para scanners e potenciais atacantes. Nenhuma menção a interfaces administrativas é exposta.
+> 2. **Isolamento de Domínio/Aplicação:** O painel de administração (`apps/admin`) opera como uma aplicação dedicada e independente, sem qualquer vazamento de rotas no bundle ou nos arquivos de metadados públicos da aplicação discente (`apps/frontend`).
+> 3. **Propriedade Intelectual e Licenciamento:** O Academic Companion é um **projeto pessoal proprietário** (todos os direitos reservados), não sendo distribuído sob licenças abertas ou GNU.
+
+---
+
+## 📁 Arquivos Estáticos na Raiz (`apps/frontend/public/`)
+
+O Vite copia os arquivos de `apps/frontend/public/` diretamente para a raiz da pasta de build (`dist/`), permitindo que robôs de busca e agentes de IA acessem URLs canônicas na raiz do domínio (`https://acad.dorneles.dev/`):
+
+| Arquivo | Propósito & Padrão | Descrição |
+|---|---|---|
+| `robots.txt` | Robots Exclusion Protocol | Permite rastreamento estritamente de rotas públicas (`/`, `/welcome`, `/u/`, `/p/`), bloqueia indexação da API (`/api/`) e declara o sitemap oficial. Não expõe rotas privadas ou administrativas. |
+| `llms.txt` | Padrão llmstxt.org | Resumo conciso da plataforma em Markdown estruturado para consumo rápido por agentes e LLMs, cobrindo apenas recursos acadêmicos públicos. |
+| `llms-full.txt` | Padrão llmstxt.org (Full) | Documentação aprofundada com arquitetura do sistema, entidades de formação (Experience, Evidence, Goals, Toolkit) e políticas de acesso do discente. |
+| `humans.txt` | humanstxt.org | Atribuição ao desenvolvedor Fernando Dorneles da Silva (Dorneles Laboratory), stack tecnológica e nota de direitos autorais proprietários. |
+| `.well-known/security.txt` | RFC 9116 | Diretrizes para divulgação responsável de vulnerabilidades e contato de segurança cibernética. |
+| `favicon.svg` & `favicon.ico` | Favicons Modernos & Legados | Favicon vetorial SVG com gradiente institucional e ícone multi-resolução para compatibilidade com navegadores legados. |
+
+---
+
+## 🗺️ Geração Dinâmica de Sitemap (`vite-plugin-sitemap`)
+
+Como o frontend é uma Single Page Application (SPA) em React 19, utilizamos o plugin `vite-plugin-sitemap` configurado no `vite.config.ts`:
+
+- **Hostname:** `https://acad.dorneles.dev`
+- **Rotas Públicas Indexadas:**
+  - `/` (Home / Dashboard)
+  - `/welcome` (Apresentação da plataforma)
+  - `/toolkit` e ferramentas públicas do ecossistema acadêmico
+  - `/minha-universidade`, `/construa-comigo`, `/diretorio-fontes`
+- **Segurança:** Rotas de autenticação, erro e qualquer área interna não são incluídas no sitemap.
+- **Configuração de Sobrescrita:** `generateRobotsTxt: false` para manter o `robots.txt` customizado de `public/`.
+
+---
+
+## 📱 Progressive Web App (`vite-plugin-pwa`)
+
+A aplicação é configurada com `vite-plugin-pwa` para instalação nativa no desktop e mobile:
+
+- **Modo:** `registerType: 'autoUpdate'` com atualização silenciosa em background.
+- **Manifest Web (`manifest.webmanifest`):**
+  - **Nome:** Academic Companion (`acad`)
+  - **Cores do Sistema:** `theme_color: #2563eb`, `background_color: #0b0f17`
+  - **Display:** `standalone` (experiência idêntica a aplicativo nativo sem barra de navegador)
+  - **Orientation:** `portrait`
+  - **Ícones PWA:** Resoluções `192x192` e `512x512` com finalidades `any` e `maskable`.
+- **Workbox Cache:** Limite de tamanho de arquivo pré-cache ampliado para suportar chunks analíticos e bundles ricos em componentes.
+
+---
+
+## 🛡️ Proteção de Indexação na API Backend (`apps/backend`)
+
+Para evitar que motores de busca indexem respostas JSON brutas ou rotas internas da API RESTful, o backend Express implementa uma rota dedicada:
+
+```typescript
+// apps/backend/src/app.ts
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain');
+  res.send('User-agent: *\nDisallow: /\n');
+});
+```
+
+Essa rota retorna HTTP `200 OK` com cabeçalho `Content-Type: text/plain` e instrução expressa para que nenhum robô indexe qualquer caminho servido pela API.
