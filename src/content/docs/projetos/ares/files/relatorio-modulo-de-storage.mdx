@@ -1,178 +1,87 @@
 ---
 title: Relatório Técnico — Módulo de Storage (Armazenamento Local Tolerante a Falhas)
-description: 'Em revisão. Ultimo acesso: 23/09'
+description: 'Em revisão. Ultimo acesso: 09/10'
 ---
-# Relatório Técnico — Módulo de Storage (Armazenamento Local Tolerante a Falhas)
+# MÓDULO DE STORAGE DO ARES
 
-**Escopo:** especificar como implementar, na prática, o componente de armazenamento embarcado nos nós ESP32 do ARES — o que ele faz, quais tecnologias usar, e como se conecta ao restante da arquitetura (rádio, gateway, fila de prioridade).
+## OBJETIVO
 
----
+O módulo de storage é o componente responsável por manter em custódia as mensagens que circulam pela rede do ARES. Como a rede opera segundo o modelo store-carry-forward, um nó nunca pode presumir que existe, no instante em que recebe uma mensagem, um caminho contínuo até o destino. Cabe ao storage guardar essa mensagem de forma durável, controlar a situação em que ela se encontra e entregá-la ao despachante de rádio quando surgir uma janela de contato com o próximo salto. Este documento descreve como esse módulo é construído e como cada uma de suas partes funciona dentro do firmware do nó.
 
-## 1. Qual problema o storage resolve
+## PLATAFORMA E MEIO DE ARMAZENAMENTO
 
-O modelo de rede do ARES é **store-carry-forward**: um nó recebe uma mensagem, guarda, carrega fisicamente (ou por múltiplos saltos de rádio) até encontrar um caminho de saída, e só então entrega. Isso só funciona se existir um componente confiável responsável por três coisas:
+Todos os nós utilizam o microcontrolador ESP32-S3, o mesmo já empregado na prova de conceito First Breath. Esse chip reúne processador, memória, rádio Wi-Fi e os periféricos necessários para conversar com outros componentes, o que permite que o hardware seja praticamente idêntico em todos os papéis da rede e que a diferença entre eles resida no firmware (ESPRESSIF SYSTEMS, 2024a). Todo o código do storage, incluindo a lógica de fila, a gravação e a leitura, é executado dentro do próprio ESP32-S3. Não existe nenhum chip ou servidor de banco de dados separado.
 
-1. **Persistir** a mensagem de forma que ela sobreviva a um desligamento abrupto (bateria acabando, queda, reinício por erro de firmware).
-2. **Organizar por prioridade**, para que mensagens P0 (emergência) nunca sejam descartadas antes de P4 (telemetria comum) quando o espaço acabar.
-3. **Controlar o ciclo de vida** de cada mensagem: pendente → em trânsito → confirmada/expirada, sem duplicar nem perder silenciosamente.
+Os dados são gravados em um cartão microSD ligado ao ESP32-S3 por um módulo leitor. O cartão não executa lógica alguma: funciona como um arquivo passivo, em que o firmware escreve e do qual lê. A escolha do cartão, em vez da memória flash interna do microcontrolador, separa fisicamente os dados do firmware, oferece capacidade da ordem de gigabytes e permite retirar o cartão para auditoria em um computador comum. A capacidade, inclusive, não representa limitação de projeto: com cerca de 260 bytes por mensagem, conforme a especificação de requisitos do sistema (ARES, 2026a), um buffer de 500.000 mensagens ocupa aproximadamente 130 MB.
 
-É importante frisar: o storage não decide *para onde* mandar a mensagem (isso é papel do roteamento/rádio) nem *quando* há uma janela de contato (isso é o rádio avisando). O storage é a peça que garante que, entre um evento e outro, o dado não se perde e não corrompe.
+A ligação entre o ESP32-S3 e o cartão é feita pelo protocolo SPI, que utiliza quatro fios: um relógio gerado pelo microcontrolador, uma linha de dados de ida, uma linha de dados de volta e uma linha de seleção que indica ao cartão quando ele está sendo endereçado. O cartão ocupa um barramento SPI exclusivo, de modo que não disputa o canal com o módulo de rádio LoRa, que também se comunica por SPI. Existe ainda a alternativa do modo SDMMC, mais veloz, mas que exige pinos específicos do chip (ESPRESSIF SYSTEMS, 2024b); o modo SPI foi preferido por ser aceito pelos módulos leitores comuns e pela biblioteca de gravação utilizada.
 
----
+## FORMATO DE GRAVAÇÃO
 
-## 2. Por que isso é mais delicado num microcontrolador do que num computador comum
+Os dados são gravados em arquivos no formato SQLite por meio da biblioteca Sqlite µLogger. Essa biblioteca é uma implementação reduzida, pensada para microcontroladores, que escreve registros em arquivos compatíveis com o SQLite padrão usando apenas uma página de memória (512 bytes ou mais) e um pouco de pilha, e que permite recuperar o arquivo após uma queda de energia durante a gravação (RAMANATHAN, 2019a). Como o resultado é um arquivo SQLite convencional, qualquer computador consegue abri-lo depois com ferramentas comuns, o que atende à exigência de registro auditável do sistema.
 
-Um ESP32 tem características que tornam esse problema não trivial:
+Essa biblioteca possui uma característica que determina todo o desenho do módulo: ela apenas acrescenta registros ao final do arquivo e não executa comandos SQL. Não é possível, portanto, ordenar as mensagens por prioridade com uma consulta nem alterar o estado de uma linha já gravada. Cada banco, além disso, aceita uma única tabela (RAMANATHAN, 2019a). O armazenamento foi organizado para funcionar dentro dessas condições, a partir do princípio do registro antecipado de escrita, em que o histórico de mudanças é acrescentado sequencialmente e o estado corrente é obtido a partir dele (SQLITE, 2024).
 
-* **RAM pequena** (tipicamente 320–520 KB, e boa parte já ocupada pelo Wi-Fi/rádio) — não dá para guardar milhares de mensagens só na memória volátil.
-* **Flash interna limitada e com desgaste** (memória flash tem número finito de ciclos de escrita — escrever demais no mesmo bloco repetidamente degrada o chip).
-* **Desligamento abrupto é a regra, não a exceção** — bateria de drone acaba, energia cai, o nó pode reiniciar no meio de uma escrita. Se a estrutura de dados no meio do processo de gravação ficar "pela metade", o arquivo pode corromper e derrubar todo o histórico salvo, não só a última mensagem.
-* **Sem sistema operacional completo por trás** para proteger a escrita (não tem journaling automático como um Linux teria) — é o programador que precisa garantir isso.
+## ORGANIZAÇÃO DOS DADOS
 
-Por isso, a escolha da tecnologia de storage precisa equilibrar três coisas: **resistência a corrupção**, **uso de memória (RAM e flash)**, e **complexidade de implementação**.
+O storage mantém dois conjuntos de arquivos e uma estrutura em memória. O primeiro conjunto é o registro de mensagens, no qual cada mensagem recebida é gravada uma única vez e nunca mais modificada. A tabela contém o identificador único da mensagem, o identificador do nó de origem, a prioridade de 0 a 4, o carimbo de tempo de emissão, o instante de recepção medido pelo relógio local do nó, o número de saltos restantes, a posição geográfica, o texto da mensagem e a assinatura que comprova sua autenticidade. Os campos seguem a estrutura do payload JSON já definida na especificação do ARES, o que mantém coerência entre o que viaja pela rede e o que é guardado.
 
----
+O segundo conjunto é o registro de eventos, que existe justamente porque o registro de mensagens não pode ser alterado. Toda vez que a situação de uma mensagem muda, um novo registro é acrescentado a esse arquivo contendo o identificador da mensagem, o novo estado, o motivo (quando se trata de um descarte) e o instante em que ocorreu. Os estados persistidos são a custódia aceita, a entrega concluída, a expiração e o descarte. O estado atual de qualquer mensagem é, portanto, o do último evento associado a ela. O estado transitório de mensagem em transmissão não é gravado: se o nó reiniciar no meio de um envio, a mensagem simplesmente volta à fila e é reenviada, o que não causa problema porque a rede foi projetada para tolerar duplicatas.
 
-## 3. Onde gravar fisicamente — meio de armazenamento
+A terceira peça é o índice em memória RAM. Ele guarda, para cada mensagem em custódia, o identificador, o arquivo e a posição em que ela foi gravada, a prioridade, o estado e o instante de expiração. É esse índice que responde, sem tocar no cartão, se uma mensagem já é conhecida e qual é a próxima a ser enviada. Ele é reconstruído sempre que o nó liga, a partir da leitura dos dois registros, de modo que nenhuma informação importante depende de ter sobrevivido apenas na RAM.
 
-Existem duas opções de hardware, e a escolha muda a capacidade e a complexidade:
+## SEPARAÇÃO POR PRIORIDADE
 
-| Meio                                                     | Capacidade típica                                                              | Prós                                                                                       | Contras                                                                                                                                                      |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Flash interna do ESP32** (partição SPIFFS ou LittleFS) | Poucos MB (sobra da flash de 4–16 MB do chip, dividida entre firmware e dados) | Não precisa de hardware extra, mais simples de montar                                      | Menor capacidade; mais desgaste por escrita repetida no mesmo chip que roda o firmware                                                                       |
-| **Cartão microSD** (via SPI ou modo SDMMC)               | GB a dezenas de GB                                                             | Capacidade essencialmente irrelevante como restrição (ver §7); fácil de trocar/inspecionar | Precisa de módulo leitor de SD (custo e espaço físico extra); mais um ponto de falha mecânica em ambiente de inundação (RF-NU-12 já exige IP67 no invólucro) |
+O registro de mensagens é dividido em arquivos distintos para cada nível de prioridade, de P0 a P4, e cada arquivo é encerrado e substituído por outro quando atinge um tamanho limite. Essa divisão resolve o problema do descarte. Como o registro só admite acréscimo, apagar uma mensagem isolada não é viável, mas apagar um arquivo inteiro é uma operação simples. Quando todas as mensagens de um arquivo já estão em estado terminal, isto é, entregues ou expiradas, o arquivo é removido, e a remoção é anotada no registro de eventos.
 
-**Recomendação:** para nós que já preveem alto volume de mensagens em trânsito (relé, gateway, drone no papel de mula de dados), usar **cartão microSD**. Para um nó de usuário simples, a flash interna com LittleFS pode ser suficiente, dado que o volume de dados por nó individual é pequeno (ver cálculo em §7).
+Quando o espaço livre do cartão cai abaixo de um limite de segurança, o descarte começa pelos arquivos de prioridade P4 e avança progressivamente para P3, P2 e P1, sempre do mais antigo ao mais recente. Cada mensagem eliminada dessa forma recebe um evento de descarte com o motivo registrado, de modo que nenhuma mensagem desapareça sem rastro, como exige o requisito RS-04 do sistema. Os arquivos de prioridade P0, que contêm os pedidos de socorro e alertas críticos, nunca são removidos por falta de espaço e só deixam de existir quando suas mensagens são entregues ou expiram. Se, ainda assim, não houver espaço para uma nova mensagem P0, a situação é registrada e sinalizada, mas esse é um caso extremo diante da folga de capacidade descrita acima.
 
----
+## FLUXO DE UMA MENSAGEM
 
-## 4. Formato dos dados — três opções, do mais simples ao mais robusto
+Quando um pacote chega pelo rádio, a função de callback do ESP-NOW é acionada. Essa função é executada no contexto da pilha Wi-Fi do ESP-IDF e não pode realizar operações demoradas, pois isso comprometeria a própria recepção de rádio (ESPRESSIF SYSTEMS, 2024c). Foi exatamente esse o problema encontrado no POC-01, quando uma requisição HTTP feita dentro do callback derrubou o gateway (ARES, 2026b). Por isso o callback faz apenas o mínimo: verifica o tamanho do pacote, copia seu conteúdo para um item de tamanho fixo e o coloca em uma fila do FreeRTOS, sem esperar (BARRY, 2016).
 
-### Opção A — Arquivo de log plano (append-only), formato mais simples
+Uma tarefa dedicada ao storage retira os itens dessa fila e é a única parte do firmware autorizada a escrever no cartão, o que evita acessos simultâneos ao arquivo e ao barramento SPI. Para cada pacote, a tarefa consulta o índice pelo identificador da mensagem. Se a mensagem já é conhecida, um evento de duplicata é registrado e o pacote é descartado, garantindo a deduplicação exigida pelo requisito RS-09. Se for nova, a tarefa a acrescenta ao arquivo correspondente à sua prioridade, acrescenta o evento de custódia aceita ao registro de eventos e atualiza o índice. Ao final de cada lote de escritas, a tarefa finaliza o registro e força a descarga dos dados para o cartão, porque há relatos de que registros finalizados sem esse passo podem não persistir após um reinício (RAMANATHAN, 2023).
 
-Cada mensagem é gravada como uma linha (ou registro de tamanho fixo) no final de um arquivo, nunca sobrescrevendo o que já existe. Ler = percorrer o arquivo. Apagar mensagem entregue = marcar um bit de "processado" em vez de remover fisicamente (remover do meio de um arquivo em flash é caro).
+A fila de entrada tem capacidade finita, e se uma rajada de pacotes chegar enquanto o cartão está ocupando uma escrita lenta, os pacotes excedentes são perdidos. Essas perdas são contadas e registradas, e o tamanho da fila é dimensionado para absorver rajadas realistas, já que perder uma mensagem sem registro contraria o requisito de ausência de descarte silencioso.
 
-* **Vantagem:** simplicíssimo de implementar, resistente a corrupção por natureza (só se escreve no final, nunca se reescreve o que já está gravado), baixíssimo uso de RAM.
-* **Desvantagem:** para localizar uma mensagem específica (por ID, para deduplicar) é preciso varrer o arquivo inteiro — lento se o arquivo crescer muito, mas para os volumes calculados em §7, isso é irrelevante.
+## ENTREGA E EXPIRAÇÃO
 
-### Opção B — SQLite embarcado (o que o texto do grupo já menciona)
+O despachante de saída consulta o índice e seleciona a mensagem pendente de maior prioridade e, dentro dessa prioridade, a mais antiga. Quando o rádio informa que existe um vizinho ao alcance, a mensagem é enviada. Ao receber a confirmação de custódia pelo próximo nó, ou a confirmação de entrega pelo gateway, a tarefa de storage registra o evento correspondente e a mensagem deixa de integrar a fila. A entrega é do tipo ao menos uma vez, o que significa que uma mensagem pode chegar mais de uma vez ao destino, e a idempotência do gateway se encarrega de produzir um único registro final.
 
-Existe uma porta de SQLite para ESP32 rodando sobre SPIFFS ou SD (`esp32_arduino_sqlite3_lib`), que permite usar SQL de verdade — `INSERT`, `SELECT ORDER BY prioridade`, etc \[1]. O modo **WAL (Write-Ahead Logging)** grava as mudanças primeiro num arquivo de log separado antes de aplicá-las no banco principal — isso é o que dá a resistência a corrupção em caso de queda de energia no meio de uma escrita \[2].
+O instante de expiração de cada mensagem é calculado a partir do momento em que ela foi recebida pelo nó, e não a partir do carimbo de tempo do emissor. Nós sem fixação de sinal GNSS possuem relógios com deriva, e usar a hora declarada pelo emissor tornaria a expiração imprevisível. Quando o prazo se esgota, a mensagem recebe o evento de expiração e é retirada da fila de saída, mas continua registrada para fins de auditoria.
 
-* **Vantagem:** consultas ricas (ordenar por prioridade, filtrar por TTL expirado, etc. ficam triviais em SQL), ACID de verdade.
-* **Desvantagem real e importante: overhead considerável para um microcontrolador.** O próprio autor da porta ESP32 do SQLite recomenda, para uso como logger simples de dados sensoriais, **não usar essa biblioteca completa**, e sim uma variante mais enxuta chamada **Sqlite µLogger**, justamente porque a biblioteca completa consome muito mais RAM e stack do que o necessário para esse tipo de tarefa \[3].
+## INICIALIZAÇÃO E RECUPERAÇÃO
 
-### Opção C — Sqlite µLogger (recomendado)
+Como os nós podem ser desligados abruptamente por esgotamento de bateria ou por falha, o módulo parte do princípio de que cada inicialização pode ser uma recuperação. Ao ligar, o firmware executa a rotina de recuperação da biblioteca sobre os arquivos que não foram finalizados corretamente (RAMANATHAN, 2019a), percorre todos os arquivos do registro de mensagens e reaplica o registro de eventos para determinar o estado de cada mensagem. Com isso, o índice é reconstruído e o nó retoma a operação exatamente do ponto em que estava, inclusive retransmitindo as mensagens que não chegaram a ser confirmadas.
 
-É uma biblioteca derivada, feita especificamente para esse cenário: gravação append-only de registros em formato de banco SQLite, mas com footprint mínimo — funciona com **apenas 2 KB de RAM livre** (foi originalmente testada em Arduino Uno) \[4]. Ainda assim gera um arquivo `.db` compatível com o formato SQLite padrão — ou seja, dá para abrir esse arquivo depois num computador normal com qualquer ferramenta SQLite para auditoria (isso conecta diretamente com RF-ND-05 e RF-NG-09 do documento de requisitos, que exigem registro auditável). Suporta recuperação após falha de energia e busca binária por timestamp em tempo logarítmico, o que é mais rápido que varrer um arquivo de texto simples \[4].
+## DIMENSIONAMENTO DA MEMÓRIA
 
----
+O índice em RAM é o único componente cujo tamanho cresce com a quantidade de mensagens. Estimando cerca de 24 bytes por entrada, ele ocupa aproximadamente 48 KB para 2.000 mensagens, meta dos nós de usuário, valor que cabe na RAM interna do ESP32-S3. Para 50.000 mensagens, meta dos drones, o índice chega a cerca de 1,2 MB, o que exige uma variante do chip com memória PSRAM adicional (ESPRESSIF SYSTEMS, 2024d). Para 500.000 mensagens, meta do gateway, a estimativa chega a aproximadamente 12 MB, o que indica que o gateway precisará de hardware de maior capacidade ou de um índice parcial mantido no cartão. Esses números são estimativas feitas a partir da estrutura descrita neste documento e precisam ser confirmados por medição.
 
-## 5. Estrutura da fila de prioridade
+## PONTOS A VALIDAR EM BANCADA
 
-O storage não deve ser tratado como "uma pilha só" — internamente, ele precisa se comportar como **quatro filas separadas, uma por nível de prioridade (P0 a P4)**, ou, na prática de banco de dados, uma única tabela com uma coluna `priority` e consultas que sempre ordenam por ela primeiro:
+Alguns aspectos só poderão ser confirmados com o hardware em mãos. A biblioteca Sqlite µLogger declara testes em placas ESP32 com cartão SD, sem mencionar o ESP32-S3 explicitamente, de modo que sua compilação e funcionamento nesse chip devem ser verificados (RAMANATHAN, 2019a). Também é necessário medir o tempo de escrita no cartão e seu efeito sobre a fila de entrada, tendo em vista a meta de 500 ms para mensagens P0, bem como o tempo de reconstrução do índice na inicialização e o comportamento do arquivo após um corte de energia durante uma gravação.
 
-```
-SELECT * FROM mensagens
-WHERE status = 'pendente'
-ORDER BY priority ASC, timestamp ASC
-LIMIT 1;
+Há ainda uma questão a resolver no formato da mensagem. A estimativa de 260 bytes ultrapassa o limite de 250 bytes por pacote da versão 1.0 do ESP-NOW. A versão 2.0, disponível a partir do ESP-IDF 5.4, aceita até 1470 bytes (ESPRESSIF SYSTEMS, 2024c), de modo que é preciso verificar qual versão do ESP-IDF acompanha o núcleo Arduino-ESP32 em uso, ou então reduzir ou fragmentar a mensagem.
 
-```
+## REFERÊNCIAS
 
-**Regra de descarte sob pressão de espaço** (isto é o requisito RS-05/RF-NU-17 em prática):
+ARES. Especificação de Requisitos do Sistema, versão 0.1, Seção 8.2 (dimensionamento de buffer). Documento interno, 2026a.
 
-1. Antes de aceitar uma mensagem nova, verificar espaço livre.
-2. Se o espaço estiver abaixo de um limite de segurança (ex.: 90% cheio), buscar a mensagem de **menor prioridade** e **mais antiga** já marcada como entregue/expirada para remover primeiro.
-3. Mensagens P0 são **imunes a essa política** — nunca são candidatas a descarte automático, só saem por confirmação de entrega ou expiração de TTL (RF-NG-12).
-4. Todo descarte deve gerar um registro de auditoria (RS-04: "todo descarte deve ser registrado") — nunca simplesmente sumir.
+ARES. Documentação do POC-01 "Operação First Breath" e relatório do incidente ESP-NOW/HTTP de 24 de agosto de 2026. Documento interno, 2026b.
 
----
+BARRY, R. Mastering the FreeRTOS Real Time Kernel. 2016. Disponível em: https\://www\.freertos.org/Documentation/RTOS\_book.html
 
-## 6. Ciclo de vida de uma mensagem no storage
+ESPRESSIF SYSTEMS. ESP32-S3 Series Datasheet. 2024a. Disponível em: https\://www\.espressif.com/sites/default/files/documentation/esp32-s3\_datasheet\_en.pdf
 
-```
-[chegou via rádio] → PENDENTE
-        │
-        ▼ (aceita em custódia, escrita confirmada em flash/SD)
-   CUSTÓDIA_ACEITA
-        │
-        ▼ (encontrou próximo salto / janela de contato)
-   EM_TRANSMISSÃO
-        │
-   ┌────┴─────┐
-   ▼          ▼
-ENTREGUE   EXPIRADA (TTL zerou antes de confirmação)
+ESPRESSIF SYSTEMS. SD/SDIO/MMC Driver. ESP-IDF Programming Guide, ESP32-S3. 2024b. Disponível em: https\://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/storage/sdmmc.html
 
-```
+ESPRESSIF SYSTEMS. ESP-NOW. ESP-IDF Programming Guide, v5.4, ESP32-S3. 2024c. Disponível em: https\://docs.espressif.com/projects/esp-idf/en/release-v5.4/esp32s3/api-reference/network/esp\_now\.html
 
-Cada transição de estado é uma escrita no storage, não apenas uma variável em RAM — porque se o nó reiniciar no meio do processo, ele precisa, ao ligar de novo, ler o storage e saber exatamente em que estado cada mensagem estava.
+ESPRESSIF SYSTEMS. ESP32-S3 Series Datasheet (variantes com PSRAM). 2024d. Disponível em: https\://www\.espressif.com/sites/default/files/documentation/esp32-s3\_datasheet\_en.pdf
 
----
+RAMANATHAN, A. Sqlite µLogger for Arduino. GitHub, 2019a. Disponível em: https\://github.com/siara-cc/sqlite\_micro\_logger\_arduino
 
-## 7. Dimensionamento — o storage não é o gargalo
+RAMANATHAN, A. Issue #10: dados não persistidos após dblog\_finalize sem fechamento do arquivo. Repositório sqlite\_micro\_logger\_arduino, 2023. Disponível em: https\://github.com/siara-cc/sqlite\_micro\_logger\_arduino/issues/10
 
-Isso já havia sido calculado no documento de requisitos original do projeto e vale reafirmar aqui, porque muda a prioridade de engenharia: uma mensagem estruturada do ARES (ID + coordenadas + timestamp + metadados + texto curto + assinatura) ocupa cerca de **260 bytes**. Isso significa:
-
-* 50.000 mensagens em buffer ≈ 13 MB
-* 500.000 mensagens ≈ 130 MB
-
-Ou seja: mesmo um cartão microSD pequeno (poucos GB) comporta ordens de magnitude mais do que qualquer cenário realista de operação. **A decisão de projeto não deve ser guiada por "economizar espaço"**, e sim pela robustez contra corrupção e pela política correta de prioridade/TTL — dimensionar o buffer com folga generosa é a escolha certa.
-
----
-
-## 8. Onde o storage se encaixa no fluxo de código (conectando com o bug já resolvido)
-
-O incidente já documentado no POC-01 (ISR travando ao chamar HTTP diretamente dentro do callback do ESP-NOW) se aplica **da mesma forma** ao storage, e a solução é a mesma lógica de produtor-consumidor:
-
-* **Dentro do callback de rádio (ISR):** apenas copiar os bytes recebidos para um buffer temporário em RAM (`pendingPacket`). **Nunca** chamar funções de escrita em SD/flash diretamente aqui — operações de I/O em cartão SD podem levar milissegundos e travar a pilha de rádio do mesmo jeito que a chamada HTTP travava.
-* **No `loop()` principal:** verificar se há pacote pendente no buffer; se houver, só então chamar a rotina de gravação no storage (SQLite µLogger ou equivalente).
-
-```
-// Pseudocódigo ilustrativo da separação
-volatile bool pacotePendente = false;
-AresMessagePacket bufferPacote;
-
-void onEspNowReceive(const uint8_t *mac, const uint8_t *data, int len) {
-  // ISR: só copia, não grava em disco aqui
-  memcpy(&bufferPacote, data, len);
-  pacotePendente = true;
-}
-
-void loop() {
-  if (pacotePendente) {
-    storage_gravar_mensagem(bufferPacote); // I/O pesado, fora da ISR
-    pacotePendente = false;
-  }
-  storage_processar_fila_saida(); // drena mensagens prontas para próximo salto
-}
-
-```
-
----
-
-## 9. Resumo — pilha de tecnologia recomendada
-
-| Camada               | Escolha recomendada                                                                                                          |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Meio físico          | microSD (nós relé/gateway/drone-mula); flash interna + LittleFS aceitável para nó de usuário simples                         |
-| Formato de dados     | Sqlite µLogger (arquivo `.db` compatível com SQLite padrão, footprint de poucos KB de RAM)                                   |
-| Estrutura lógica     | Tabela única com coluna de prioridade e status, ordenação por prioridade + timestamp                                         |
-| Padrão de acesso     | Produtor-consumidor: ISR só copia para buffer, `loop()` grava e drena                                                        |
-| Política de descarte | Nunca descartar P0 automaticamente; descartar por prioridade crescente + mais antigo primeiro, sempre registrando o descarte |
-
----
-
-## Referências
-
-\[1] Sqlite3 Arduino library for ESP32 (siara-cc/esp32\_arduino\_sqlite3\_lib). GitHub. [https://github.com/siara-cc/esp32\_arduino\_sqlite3\_lib](https://github.com/siara-cc/esp32_arduino_sqlite3_lib)
-
-\[2] SQLite Write-Ahead Logging. Documentação oficial do SQLite. [https://sqlite.org/wal.html](https://sqlite.org/wal.html)
-
-\[3] siara-cc/esp32\_arduino\_sqlite3\_lib — nota do próprio mantenedor recomendando o Sqlite µLogger para logging de dados de sensor por ser mais rápido e eficiente em memória. GitHub. [https://github.com/siara-cc/esp32\_arduino\_sqlite3\_lib](https://github.com/siara-cc/esp32_arduino_sqlite3_lib)
-
-\[4] Sqlite µLogger for Arduino (siara-cc/sqlite\_micro\_logger\_arduino). GitHub. [https://github.com/siara-cc/sqlite\_micro\_logger\_arduino](https://github.com/siara-cc/sqlite_micro_logger_arduino)
-
-**Documentos internos do projeto usados como base:** Especificação de Requisitos ARES (Seção 3 — RF-NU; Seção 8.2 — dimensionamento de buffer); Documentação do POC-01 "Operação First Breath"; Post-mortem do incidente ESP-NOW/HTTP de 24/08/2026.
-
-**Pontos a validar em bancada antes de fechar a escolha:** (1) confirmar que a biblioteca Sqlite µLogger compila sem conflito com as bibliotecas de ESP-NOW e Wi-Fi já usadas no POC-01, já que ambas competem pela mesma RAM/stack; (2) medir o tempo real de escrita no SD em uma chamada dentro do `loop()` para garantir que não introduz atraso incompatível com o requisito de latência P0 (≤ 500 ms).
+SQLITE. Write-Ahead Logging. 2024. Disponível em: https\://sqlite.org/wal.html
