@@ -43,10 +43,9 @@ A **Agenda Acadêmica** oferece um ambiente centralizado para planejamento tempo
 ### 🗄️ Modelo de Dados (Prisma)
 - **`CalendarEvent`**: Entidade relacional indexada por `studentId` e `date`.
 
-### 🔌 Endpoints da API
-- `GET /api/calendar/events`: Consulta de compromissos com filtros por mês e ano (`?month=&year=`).
-- `POST /api/calendar/events`: Cadastro de novos compromissos acadêmicos.
-- `DELETE /api/calendar/events/:id`: Exclusão de evento da agenda.
+### 🔔 Consentimento e Lembretes Nativos (`NotificationPermissionCard`)
+- **Card Explicativo Pré-Permissão:** Em vez de disparar a janela intrusiva do navegador imediatamente na montagem da tela, o sistema exibe um card dedicado detalhando os benefícios dos lembretes (alertas automáticos de aulas, avaliações, prazos e editais, mesmo com o navegador em segundo plano).
+- **Ações:** Botão "Permitir Notificações" (que aciona `Notification.requestPermission()`) e opção "Agora não" que persiste a decisão no armazenamento local (`localStorage`).
 
 ---
 
