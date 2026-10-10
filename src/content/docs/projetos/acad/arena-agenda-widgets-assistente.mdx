@@ -109,6 +109,22 @@ O assistente conversacional foi ampliado com recursos de context seeding, contro
 
 ---
 
+## 🌟 6. Sistema Unificado de Destaques: Spotlight Banners
+
+A área superior do Dashboard unificou os antigos cards empilhados (`OnboardingResumeBanner` e `AiRecommendationCard`) em um sistema integrado e padronizado: o **`DashboardSpotlight`**.
+
+### Componentes e Arquitetura
+- **`SpotlightBanner` (`apps/frontend/src/components/common/spotlight-banner/`):**
+  - Componente base com caixa de ícone estilizada (40x40px), título em destaque acompanhado de badge semântica (`amber`, `primary`, `purple`, `emerald`), descrição concisa e cluster de ações (botão primário e secundário com integração ao Copiloto IA).
+  - Suporte a paginação compacta (`X de Y`) e navegação ágil com setas quando múltiplos destaques estão ativos.
+- **`DashboardSpotlight` (`apps/frontend/src/components/dashboard/dashboard-spotlight/`):**
+  - Orquestra os itens ativos da sessão do discente:
+    1. **Jornada Inicial (Onboarding):** Retomada com recompensa de +15 Tokens de IA (alta prioridade enquanto pendente).
+    2. **Recomendações da IA:** Oportunidades estratégicas (PIBITI/CNPq), auditoria de Lattes, planejamento de disciplinas no Roadmap Planner e divulgação de conquistas no LinkedIn Builder.
+    3. **Novidades & Avisos da Plataforma:** Notícias sobre novas ferramentas no Toolkit e radar de editais.
+
+---
+
 ## 🧪 Testes Automatizados (Vitest)
 Todos os módulos contam com cobertura de testes unitários e de componentes:
 - `apps/frontend/tests/components/SpeedDial.spec.tsx` (4 testes)
@@ -117,3 +133,4 @@ Todos os módulos contam com cobertura de testes unitários e de componentes:
 - `apps/frontend/tests/pages/Assistant.spec.tsx` (7 testes)
 - `apps/backend/tests/unit/calendar/calendar.service.spec.ts`
 - `apps/backend/tests/unit/gamification/gamification.service.spec.ts`
+
