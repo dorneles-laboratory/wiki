@@ -1,0 +1,84 @@
+---
+title: Checkout de Pagamentos Mercado Pago com PIX
+description: Integração completa do gateway Mercado Pago focada em PIX para recarga de tokens acadêmicos e fechamento de comandas.
+---
+
+# Checkout de Pagamentos Mercado Pago com PIX
+
+O **Academic Companion (`acad`)** integra o gateway de pagamento **Mercado Pago** com foco primordial em **PIX**, permitindo uma experiência instantânea, segura e com conciliação automática para estudantes e pesquisadores.
+
+---
+
+## 1. Casos de Uso Suportados
+
+1. **Apoio ao Desenvolvimento & Recarga Livre de Tokens (`/carteira`):**
+   - Recargas a partir de **R$ 2,50** diretamente na Carteira de Tokens.
+   - Cálculo automático de bônus progressivos por faixa de contribuição.
+2. **Fechamento de Comandas Gastronômicas (`/bistro` ou `/planos`):**
+   - Aquisição de pratos do cardápio e gorjetas de apoio com conversão direta em tokens de inteligência artificial.
+
+---
+
+## 2. Fluxo Arquitetural e Conciliação em Tempo Real
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Estudante as Discente (Frontend)
+    participant Backend as API Express 5
+    participant MP as API Mercado Pago
+    participant DB as PostgreSQL (Prisma 7)
+    participant Webhook as Webhook Listener
+
+    Estudante->>Backend: POST /api/wallet/checkout/pix { amountReals, menuItemName }
+    Backend->>MP: POST /v1/payments (payment_method_id: 'pix', metadata)
+    MP-->>Backend: 201 Created (id, qr_code, qr_code_base64, expiration)
+    Backend->>DB: Criar PaymentOrder (status: PENDING)
+    Backend-->>Estudante: 200 OK { orderId, qrCode, qrCodeBase64, expiresAt }
+    Estudante->>Estudante: Exibe PixCheckoutModal (QR Code + Copia e Cola + Timer)
+    
+    par Polling Reativo no Frontend
+        loop A cada 3 segundos
+            Estudante->>Backend: GET /api/wallet/payments/:orderId/status
+            Backend-->>Estudante: { status: 'PENDING' }
+        end
+    and Pagamento no Banco do Usuário
+        Estudante->>MP: Paga o PIX no app bancário
+        MP->>Webhook: POST /api/webhooks/mercadopago (x-signature, payment.updated)
+        Webhook->>MP: GET /v1/payments/:id (Confirmação fidedigna)
+        MP-->>Webhook: { status: 'approved' }
+        Webhook->>DB: $transaction: PaymentOrder -> APPROVED, credita UserWallet, cria TokenTransaction, cria FinancialEntry
+    end
+
+    Estudante->>Backend: GET /api/wallet/payments/:orderId/status
+    Backend-->>Estudante: { status: 'APPROVED', newBalance }
+    Estudante->>Estudante: Sucesso (saldo atualizado, fecha modal)
+```
+
+---
+
+## 3. Endpoints da Plataforma
+
+| Método | Rota | Autenticação | Descrição |
+|---|---|---|---|
+| `POST` | `/api/wallet/checkout/pix` | Sim (`cookieAuth`) | Cria ordem de pagamento PIX e retorna QR Code e Copia-e-Cola |
+| `GET` | `/api/wallet/payments/:orderId/status` | Sim (`cookieAuth`) | Consulta status em tempo real com suporte a polling |
+| `POST` | `/api/plans/checkout-pix` | Sim (`cookieAuth`) | Gera ordem PIX para comanda de planos/pratos |
+| `POST` | `/api/webhooks/mercadopago` | Pública (HMAC SHA-256) | Receptor oficial de notificações de pagamento do Mercado Pago |
+| `POST` | `/api/wallet/payments/:orderId/simulate-approval` | Sim (Ambiente Dev) | Simula aprovação imediata em desenvolvimento |
+
+---
+
+## 4. Variáveis de Ambiente Necessárias
+
+No arquivo `.env.production` do `apps/backend`:
+
+```env
+# Mercado Pago Gateway
+MERCADOPAGO_ACCESS_TOKEN=APP_USR-xxxxxxxxxxxxxxxxxxxx
+MERCADOPAGO_PUBLIC_KEY=APP_USR-xxxxxxxxxxxxxxxxxxxx
+MERCADOPAGO_WEBHOOK_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
+API_BASE_URL=https://acad.dorneles.dev
+```
+
+> **Modo Sandbox / Desenvolvimento:** Caso `MERCADOPAGO_ACCESS_TOKEN` não seja informado, o sistema entra automaticamente em modo simulado, gerando QR Code SVG representativo e disponibilizando o botão *"Simular Pagamento Aprovado"* no modal.
