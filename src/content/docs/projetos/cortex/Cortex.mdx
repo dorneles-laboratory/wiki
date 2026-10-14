@@ -1,0 +1,61 @@
+---
+title: Cortex (AI Gateway & Decision Hub)
+description: Hub Orquestrador Multi-Modelos, AI Gateway central do ecossistema, motor determinístico JEV e banco vetorial pgvector.
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+# Cortex (AI Gateway & Hub Multi-Modelos)
+
+<Badge text="Núcleo de Inteligência Artificial" variant="note" size="large" />
+
+O **Cortex** é a espinha dorsal de IA do ecossistema Dorneles Laboratory. Ele funciona como o único gateway para todas as operações de inferência generativa, busca semântica, vetorização de documentos e tomadas de decisão estruturadas de alta velocidade.
+
+---
+
+## 🏛️ Papel Arquitetural
+
+No ecossistema, nenhuma aplicação cliente (como Acad, Sentinel ou FederalStatus) comunica-se diretamente com provedores externos de LLM. Todas as chamadas trafegam pelo Cortex, garantindo:
+
+1. **Governança de Custos e Tokens:** Monitoramento de uso e limites por projeto consumidor.
+2. **Resiliência e Fallback Semântico:** Se um provedor (ex: OpenAI ou Anthropic) apresentar lentidão ou erro 500, o LiteLLM redireciona automaticamente para um modelo alternativo compatível (ex: Google Gemini ou Llama 3 via Groq).
+3. **Privacidade e Proteção de Chaves:** As chaves de API externas residem exclusivamente no `.env` do Cortex.
+4. **Decisão Ultra-Rápida com JEV:** Separação entre inferência de texto livre (LLM tradicional) e decisões binárias/estruturadas (System One).
+
+---
+
+## 🗺️ Portas e Serviços Locais
+
+| Serviço | Porta Host | Porta Container | Descrição |
+|---|:---:|:---:|---|
+| **litellm** | `4000` | `4000` | Proxy universal compatível com API OpenAI |
+| **backend** | `5011` | `5011` | API RESTful do Cortex (JEV, RAG, Embeddings) |
+| **frontend** | `5185` | `5173` | Painel de controle e Playground de IA |
+| **db (PostgreSQL + pgvector)** | `5454` | `5432` | Banco relacional com extensão vetorial |
+| **jaeger** | `16696` | `16686` | UI de rastreamento de chamadas e latência |
+| **otlp-grpc** | `4333` | `4317` | Coletor OpenTelemetry gRPC |
+| **otlp-http** | `4334` | `4318` | Coletor OpenTelemetry HTTP |
+| **minio-api** | `9013` | `9000` | Armazenamento de datasets e artefatos de IA |
+| **minio-console** | `9014` | `9001` | Console do MinIO |
+
+---
+
+## ⚡ Módulos do Cortex
+
+<CardGrid>
+  <Card title="JEV (Decision Engine)" icon="seti:graphql">
+    Motor determinístico para julgamento de qualidade de editais (`quality-judge`), matchmaking perfil × edital (`matchmaking`) e roteamento semântico (`route-decision`). Respostas em menos de 500ms.
+  </Card>
+
+  <Card title="Embeddings & Vector Store" icon="document">
+    Geração contínua de vetores de documentos e histórico acadêmico persistidos no `pgvector`, viabilizando buscas por similaridade cosseno de alto desempenho.
+  </Card>
+
+  <Card title="Copiloto Acadêmico Conversacional" icon="comment">
+    Engine conversacional com suporte a streaming Server-Sent Events (SSE), montagem dinâmica de prompt e injeção contextual de RAG.
+  </Card>
+
+  <Card title="Playground & Observabilidade de IA" icon="laptop">
+    Painel web para testes interativos de prompts entre modelos, comparação de latência, custo de tokens e inspeção de traces de inferência.
+  </Card>
+</CardGrid>

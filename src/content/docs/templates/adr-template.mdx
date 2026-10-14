@@ -1,0 +1,60 @@
+---
+title: Template de ADR (Architecture Decision Record)
+description: Modelo padrão para registro histórico de decisões arquiteturais técnicas, motivações e trade-offs avaliados.
+---
+
+Este documento serve como modelo para criação de **Architecture Decision Records (ADR)** no ecossistema Dorneles Laboratory.
+
+---
+
+# ADR [Número]: [Título Conciso da Decisão Arquitetural]
+
+- **Status:** [Proposto | Aceito | Substituído | Rejeitado]
+- **Data:** YYYY-MM-DD
+- **Decisores:** [Nomes dos envolvidos na decisão]
+- **Projeto(s) Afetado(s):** [csm / acad / cortex / todos]
+
+---
+
+## 1. Contexto e Declaração do Problema
+*Qual é o cenário técnico que motivou esta avaliação? Quais restrições de tecnologia, desempenho, custos ou segurança enfrentamos?*
+
+---
+
+## 2. Decisão Tomada
+*Declaramos formalmente a escolha técnica que adotaremos no ecossistema.*
+
+Adotaremos **[Tecnologia / Padrão Escolhido]** para solucionar o problema de **[Problema Abordado]**.
+
+---
+
+## 3. Alternativas Consideradas
+
+### Alternativa A: [Nome da Opção 1]
+- **Pontos Positivos:** Vantagens e facilidades.
+- **Pontos Negativos:** Por que foi descartada ou considerada insuficiente.
+
+### Alternativa B: [Nome da Opção 2]
+- **Pontos Positivos:** Vantagens.
+- **Pontos Negativos:** Trade-offs e custos envolvidos.
+
+---
+
+## 4. Consequências e Trade-Offs
+
+### Consequências Positivas (Ganhos)
+- ✅ Padronização consistente entre os microsserviços.
+- ✅ Redução da complexidade de manutenção.
+- ✅ Compatibilidade com o ecossistema existente.
+
+### Consequências Negativas (Custos & Riscos)
+- ⚠️ Necessidade de refatoração nos módulos legados.
+- ⚠️ Curva de aprendizado inicial da equipe na nova biblioteca.
+
+---
+
+## 5. Plano de Implementação e Validação
+1. Prototipar a solução em branch de pesquisa (`spike/nome-da-decisao`).
+2. Atualizar os schemas compartilhados em `packages/shared`.
+3. Validar a migração com suite de testes Vitest.
+4. Publicar guia de migração para o time.

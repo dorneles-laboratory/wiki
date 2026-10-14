@@ -1,0 +1,62 @@
+---
+title: Health Checker (Telemetria de Aplicações)
+description: Motor de telemetria e observabilidade contínua para monitoramento de saúde de todas as aplicações e microsserviços do ecossistema.
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+# Health Checker
+
+<Badge text="Telemetria & Observabilidade" variant="caution" size="large" />
+
+O **Health Checker** é o motor de monitoramento contínuo de integridade e telemetria de todo o ecossistema Dorneles Laboratory. Ele atua como um sentinela ativo que executa sondagens periódicas em cada microsserviço, banco de dados, coletor OpenTelemetry e storage S3, identificando degradações de performance antes que afetem os usuários.
+
+---
+
+## 🔬 Sondas e Filosofia de Monitoramento
+
+O sistema opera sondagens padronizadas baseadas em duas garantias fundamentais:
+
+1. **Liveness Probe (`/health/live`):** Avalia se o processo do servidor web está ativo e respondendo chamadas HTTP no event loop sem bloqueios fatais.
+2. **Readiness Probe (`/health/ready`):** Executa verificações profundas de dependências:
+   - Conexão e latência da query de teste no PostgreSQL (`SELECT 1`).
+   - Disponibilidade do bucket no MinIO / S3.
+   - Comunicação com o coletor OpenTelemetry e o Jaeger.
+   - Status dos endpoints do Ory Kratos/Hydra no Identity e do LiteLLM no Cortex.
+
+---
+
+## 🗺️ Portas e Serviços Locais
+
+| Serviço | Porta Host | Porta Container | Descrição |
+|---|:---:|:---:|---|
+| **backend** | `5004` | `5004` | API do Health Checker e motor de sondas |
+| **frontend** | `5177` | `5173` | Dashboard operacional de saúde do ecossistema |
+| **db (PostgreSQL)** | `5441` | `5432` | Banco com histórico de uptime e incidentes |
+| **jaeger** | `16690` | `16686` | UI de rastreamento OpenTelemetry |
+| **otlp-grpc** | `4325` | `4317` | Coletor OpenTelemetry gRPC |
+| **otlp-http** | `4326` | `4318` | Coletor OpenTelemetry HTTP |
+| **minio-api** | `9007` | `9000` | Armazenamento de relatórios e snapshots |
+| **minio-console** | `9008` | `9001` | Console do MinIO |
+
+---
+
+## 📊 Capacidades do Sistema
+
+<CardGrid>
+  <Card title="Cálculo Automático de SLA" icon="bars">
+    Contabilização contínua de disponibilidade percentual (99.9% uptime), tempo médio entre falhas (MTBF) e tempo médio de recuperação (MTTR).
+  </Card>
+
+  <Card title="Detecção de Degradação Silenciosa" icon="warning">
+    Gatilhos de alerta preventivos quando a latência p95 ou p99 ultrapassa os limites toleráveis, mesmo com status HTTP 200.
+  </Card>
+
+  <Card title="Mapa de Topologia e Dependências" icon="puzzle">
+    Visualização gráfica de todos os serviços conectados e impacto em cascata em caso de queda de um nó crítico.
+  </Card>
+
+  <Card title="Histórico de Incidentes e Post-Mortem" icon="document">
+    Registro estruturado de quedas, causas raízes identificadas e tempo de resolução para auditoria de confiabilidade.
+  </Card>
+</CardGrid>

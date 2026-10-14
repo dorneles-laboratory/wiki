@@ -1,0 +1,51 @@
+---
+title: Template de Planejamento de Sprint
+description: Modelo padrão para registro de Sprint Planning, definição de metas de ciclo, capacidade do time e lista de entregas.
+---
+
+Este documento fornece a estrutura recomendada para registrar ciclos de desenvolvimento ágil nos projetos do laboratório.
+
+---
+
+# Planejamento de Sprint — Sprint [Número] ([Nome do Projeto])
+
+- **Período:** YYYY-MM-DD até YYYY-MM-DD (Duração: [1 ou 2 semanas])
+- **Tech Lead:** [Nome]
+- **Membros Ativos:** [Nome 1], [Nome 2], [Nome 3]
+- **Capacidade Total Estimada:** [Ex: 40 Story Points / 80 Horas Técnicas]
+
+---
+
+## 🎯 Meta Principal da Sprint (Sprint Goal)
+*Qual é o resultado de valor tangível que o time se compromete a entregar ao final deste ciclo?*
+
+> **Exemplo:** "Concluir a integração do módulo JEV no Cortex e habilitar o julgamento automático de editais no Sentinel."
+
+---
+
+## 📋 Itens Selecionados do Backlog (Sprint Backlog)
+
+| ID | Tarefa / Feature | Responsável | Estimativa (SP / Horas) | Status |
+|---|---|---|:---:|---|
+| **#101** | Criar endpoint `POST /api/jev/evaluate` | Dev 1 | 5 SP | A Fazer |
+| **#102** | Configurar rota de DLQ no Sentinel backend | Dev 2 | 3 SP | A Fazer |
+| **#103** | Escrever testes de integração com Vitest | Dev 1 | 3 SP | A Fazer |
+| **#104** | Atualizar documentação e rotas OpenAPI | Dev 3 | 2 SP | A Fazer |
+
+---
+
+## 🚧 Riscos e Bloqueios Antecipados
+- **Risco 1:** Dependência de credencial de API externa.
+  - *Mitigação:* Usar mock local baseado no contrato Zod até aprovação da chave.
+- **Risco 2:** Possível alteração no schema de banco de dados.
+  - *Mitigação:* Alinhar migração Prisma no início da sprint.
+
+---
+
+## 🏁 Critérios de Pronto (Definition of Done da Sprint)
+- [ ] Todo código desenvolvido com tipagem estrita (zero `any`).
+- [ ] Estilização concluída em CSS Modules (sem Tailwind).
+- [ ] Schemas Zod definidos no `packages/shared`.
+- [ ] Testes unitários e de integração passando localmente e no CI.
+- [ ] Code review aprovado por ao menos 1 par e Tech Lead.
+- [ ] Documentação correspondente atualizada na Wiki.

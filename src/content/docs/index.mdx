@@ -1,53 +1,137 @@
 ---
 title: Ecossistema Dorneles
-description: Documentação centralizada de arquitetura, microsserviços e plataformas do ecossistema.
+description: Documentação centralizada de arquitetura, microsserviços, gateway de inteligência artificial e plataformas do ecossistema.
 template: splash
 hero:
-  tagline: A fonte única de verdade para a arquitetura, APIs e padrões de desenvolvimento de todos os sistemas.
+  tagline: A fonte única de verdade para a arquitetura, microsserviços, APIs e padrões de engenharia de software de todos os sistemas.
   image:
     file: ../../assets/totoro.webp
   actions:
-    - text: Acesse a Documentação
-      link: /welcome/guia-de-contribuicao
+    - text: Visão da Arquitetura
+      link: /architecture
       icon: right-arrow
       variant: primary
+    - text: Guia de Onboarding
+      link: /onboarding
+      icon: open-book
+      variant: secondary
     - text: Editar no Keystatic
       link: /keystatic
       icon: external
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## Frentes do Ecossistema
+## 🚀 Comece por Aqui
 
-<CardGrid stagger>
-  <Card title="Gestão e EdTech" icon="setting">
-    Arquitetura, rotas de API e regras de negócio de plataformas como **PGI-PROA** e **Academic Companion**.
-  </Card>
-  
-  <Card title="Cidades Inteligentes e Clima" icon="earth">
-    Modelagem de dados, digital twins e especificações de monitoramento do **Sulflux** e **Nexus SM**.
-  </Card>
-  
-  <Card title="Engenharia Aeroespacial" icon="rocket">
-    Documentação de simulação balística, infraestrutura offline (**SRM Simulator**) e telemetria.
-  </Card>
-  
-  <Card title="Infraestrutura Core" icon="laptop">
-    Padrões globais de desenvolvimento em **TypeScript, Node.js, Spring Boot**, bancos relacionais e **Docker**.
-  </Card>
+Navegue rapidamente pelos guias fundacionais de desenvolvimento e infraestrutura do ecossistema:
+
+<CardGrid>
+  <LinkCard
+    title="Guia de Onboarding"
+    href="/onboarding"
+    description="Configuração do ambiente de desenvolvimento, clonagem de submódulos Git e execução via Docker."
+  />
+  <LinkCard
+    title="Arquitetura do Ecossistema"
+    href="/architecture"
+    description="Topologia dos microsserviços, gateway Cortex com JEV, Provedor Central Identity e padrões corporativos."
+  />
+  <LinkCard
+    title="Deploy e Infraestrutura"
+    href="/deploy"
+    description="Estratégia de entrega contínua (CI/CD), hospedagem Vercel, Docker Compose e Cloudflare Tunnels."
+  />
+  <LinkCard
+    title="Backlog do Ecossistema"
+    href="/planning/backlog"
+    description="Priorização de demandas ativas, itens de alta criticidade e mapa de evolução técnica."
+  />
 </CardGrid>
 
 ---
 
-## Primeiros Passos
+## 🏛️ Projetos e Plataformas
+
+Explore a documentação técnica, portas de desenvolvimento e regras de negócio de cada aplicação:
 
 <CardGrid>
-  <Card title="Onboarding" icon="open-book">
-    Entendendo a estrutura dos repositórios e como configurar o ambiente de desenvolvimento local.
-  </Card>
-  <Card title="Pipelines e Deploy" icon="rocket">
-    Como funcionam as entregas contínuas (CI/CD) e o roteamento via Cloudflare Tunnels e Vercel.
-  </Card>
+  <LinkCard
+    title="CSM — Murais Digitais"
+    href="/projetos/csm/csm"
+    description="Sinalização digital para murais e TVs universitárias. Referência arquitetural do ecossistema."
+  />
+  <LinkCard
+    title="Cortex — AI Gateway & JEV"
+    href="/projetos/cortex/cortex"
+    description="Hub Multi-Modelos, LiteLLM (:4000), Decision Engine JEV e banco vetorial pgvector."
+  />
+  <LinkCard
+    title="Identity — Provedor de Identidade"
+    href="/projetos/identity/identity"
+    description="IdP centralizado com Ory Kratos (SSO, perfis, 2FA) e Ory Hydra (OAuth2, OIDC, tokens M2M)."
+  />
+  <LinkCard
+    title="Academic Companion (Acad)"
+    href="/projetos/acad/acad"
+    description="Plataforma EdTech universitária com Copiloto Acadêmico RAG e radar de oportunidades."
+  />
+  <LinkCard
+    title="Sentinel — Motor de Scraping"
+    href="/projetos/sentinel/sentinel"
+    description="Coleta e normalização de diários oficiais e editais de compras com auditoria via JEV."
+  />
+  <LinkCard
+    title="FederalStatus"
+    href="/projetos/federal-status/federalstatus"
+    description="Portal de observabilidade e transparência de serviços web das universidades federais."
+  />
+  <LinkCard
+    title="PGI-PROA — Gestão Ágil"
+    href="/projetos/pgi-proa/pgi"
+    description="Gestão de sprints, quadro Kanban dinâmico, timesheet de horas técnicas e chamados."
+  />
+  <LinkCard
+    title="Sulflux — Gestão Ambiental"
+    href="/projetos/sulflux/sulflux"
+    description="Telemetria hidrológica, balanço de carbono e monitoramento contínuo de bacias hidrográficas."
+  />
+  <LinkCard
+    title="Health Checker"
+    href="/projetos/health/health"
+    description="Motor de observabilidade contínua com sondas de liveness/readiness e cálculo de SLA."
+  />
+  <LinkCard
+    title="Network Traffic Analyzer"
+    href="/projetos/network/network"
+    description="Inspeção de pacotes, métricas de qualidade de serviço (QoS) e monitoramento de canais RF/LoRa."
+  />
+</CardGrid>
+
+---
+
+## 📋 Governança, Processos e Padrões
+
+<CardGrid>
+  <LinkCard
+    title="Fluxo de Trabalho & CI/CD"
+    href="/processes/fluxo-de-trabalho"
+    description="Do backlog ao deploy: branches, code review, convenção de commits e Definition of Done."
+  />
+  <LinkCard
+    title="Padrão de Reuniões & Atas"
+    href="/processes/padrao-de-reunioes"
+    description="Diretrizes para Dailies, Planning, Reviews, Retrospectivas e registro oficial de decisões."
+  />
+  <LinkCard
+    title="Central de Links e Referências"
+    href="/reference/links-e-arquivos"
+    description="Links de repositórios oficiais, datasheets de componentes de hardware e especificações RFC."
+  />
+  <LinkCard
+    title="Templates Oficiais"
+    href="/templates/ata-de-reuniao-template"
+    description="Modelos padronizados de PRD, ADRs de arquitetura, atas de reunião e relatórios mensais."
+  />
 </CardGrid>

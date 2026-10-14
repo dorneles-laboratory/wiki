@@ -1,0 +1,54 @@
+---
+title: Ata — Definição da Arquitetura do Banco de Dados (PGI-PROA)
+description: Modelagem relacional, escolha do Prisma ORM 7 e isolamento multi-tenant para a plataforma PGI-PROA.
+---
+
+## Informações Gerais
+
+| Campo           | Detalhes                        |
+|-----------------|---------------------------------|
+| **Data**        | 2026-08-15                      |
+| **Horário**     | 10:00 – 11:30                   |
+| **Local/Canal** | Google Meet                     |
+| **Tipo**        | Arquitetura Técnica / Backend   |
+| **Facilitador** | Dorneles                        |
+| **Redator**     | Dorneles                        |
+
+## Participantes
+
+| Nome              | Função                  | Presença |
+|-------------------|-------------------------|----------|
+| Dorneles          | Tech Lead / Backend     | ✅       |
+| Desenvolvedores   | Engenharia de Software  | ✅       |
+
+## Pauta
+
+1. Escolha do banco de dados e ORM para o PGI-PROA.
+2. Estratégia de modelagem de dados para sprints, tarefas e timesheets.
+3. Padronização de identificadores (UUID v4 vs CUID2 vs BigInt).
+
+## Resumo das Discussões
+
+### 1. PostgreSQL + Prisma ORM 7
+Avaliamos a consistência estrita dos dados relacionais do PGI. Optou-se pelo PostgreSQL rodando em container Docker dedicado (porta `5436`) com Prisma ORM 7 no backend Express 5, garantindo tipagem estrita ponta a ponta gerada automaticamente.
+
+### 2. Modelagem de Tarefas e Horas
+As entidades principais definidas foram:
+- `Organization` e `Project`
+- `Sprint` com controle temporal e status (`PLANNED`, `ACTIVE`, `COMPLETED`)
+- `Task` com prioridades, estimativas e tags
+- `TimeEntry` com apontamentos de início, fim, duração e descrição para auditoria
+
+### 3. Identificadores Primários
+Decidiu-se pela utilização de **UUID v4** como chave primária em todas as tabelas para facilitar a geração desacoplada e sincronização futura sem colisões.
+
+## Action Items
+
+| # | Tarefa | Responsável | Prazo | Status |
+|---|--------|-------------|-------|--------|
+| 1 | Escrever o `schema.prisma` inicial com as entidades principais | Dorneles | 2026-08-18 | Concluído |
+| 2 | Configurar os scripts de migração e seed de desenvolvimento | Equipe Dev | 2026-08-22 | Concluído |
+
+---
+
+*Ata gerada em: 2026-08-15 | Redator: Dorneles*

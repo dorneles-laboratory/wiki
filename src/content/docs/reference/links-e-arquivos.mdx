@@ -1,47 +1,51 @@
 ---
-title: Central de Links e Arquivos Oficiais
-description: Repositório centralizado para PDFs, resumos de artigos, datasheets e links externos dos nossos projetos.
+title: Central de Links e Documentação de Referência
+description: Repositório centralizado de referências técnicas, datasheets oficiais, normas de engenharia e repositórios do ecossistema.
 ---
 
-Este documento funciona como o índice oficial para materiais que não são redigidos diretamente na Wiki. Aqui você encontra o histórico de artigos submetidos, manuais técnicos e os links de acesso para as nossas plataformas de gestão e design.
-
----
-
-### 📄 Artigos, Resumos e Relatórios
-
-Arquivos em PDF hospedados localmente ou links para publicações externas e anais de eventos.
-
-*   **Projeto ARES (Artigo Base):** [Submissão - Resumo Expandido (PDF)](/arquivos/ares-resumo.pdf)
-*   **Academic Companion (Pitch):** [Apresentação Eleva Start (PDF)](/arquivos/academic-companion-pitch.pdf)
-*   **Nexus SM (Digital Twin):** [Documento de Requisitos (PDF)](/arquivos/nexus-sm-requisitos.pdf)
-*   **Relatórios Técnicos (LASC):** [Repositório de Relatórios Anteriores](https://link-para-o-drive.com)
+Este documento funciona como o catálogo oficial de especificações técnicas, links de repositórios e documentações de referência externa adotadas nos projetos do **Dorneles Laboratory**.
 
 ---
 
-### 🛠️ Datasheets e Documentação de Hardware
+## 🏛️ Repositórios e Governança
 
-Manuais e especificações de componentes físicos para consulta rápida durante o desenvolvimento de sistemas embarcados e RF.
+Links diretos para as organizações e repositórios oficiais:
 
-*   **Microcontrolador ESP32-S3:** [Datasheet Oficial - Espressif (PDF)](https://link-externo.com/esp32.pdf)
-*   **Transceptor LoRa 915 MHz:** [Especificações de RF e Consumo (PDF)](/arquivos/lora-915-specs.pdf)
-*   **Sensores (BME280 / MPU):** [Guia de Barramentos I2C/SPI (PDF)](/arquivos/sensores-manuais.pdf)
-
----
-
-### 🎨 Assets, Design e Gerenciamento
-
-Links de acesso rápido para as ferramentas de trabalho da equipe.
-
-*   **Figma (UI/UX):** [Workspace de Protótipos (Acessar)](https://figma.com/...)
-*   **Gestão de Tarefas (Kanban):** [GitHub Projects / Notion](https://github.com/...)
-*   **Nuvem de Arquivos Pesados:** [Google Drive Compartilhado](https://drive.google.com/...)
+*   **Organização GitHub Principal:** [github.com/dorneles-laboratory](https://github.com/dorneles-laboratory)
+*   **Wiki Central do Ecossistema:** [github.com/dorneles-laboratory/wiki](https://github.com/dorneles-laboratory/wiki)
+*   **Projeto de Referência Arquitetural (CSM):** [Documentação do CSM](/projetos/csm/csm)
+*   **AI Gateway & JEV (Cortex):** [Documentação do Cortex](/projetos/cortex/cortex)
+*   **IdP Centralizado (Identity):** [Documentação do Identity](/projetos/identity/identity)
 
 ---
 
-### 💡 Como adicionar novos PDFs nesta página
+## 🛠️ Especificações Técnicas e Padrões RFC
 
-Para que os arquivos fiquem hospedados na própria infraestrutura da Wiki (sem depender do Google Drive) e carreguem de forma ultra-rápida:
+Padrões universais implementados em nossas APIs e sistemas:
 
-1. Coloque o seu arquivo `.pdf` na pasta `public/arquivos/` na raiz do nosso repositório.
-2. Adicione o link nesta página usando apenas a barra inicial, ignorando a pasta *public*. 
-   * **Exemplo de código:** `[Ver Resumo do Artigo](/arquivos/meu-resumo.pdf)`
+*   **RFC 7807 (Problem Details for HTTP APIs):** [IETF Datatracker — RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807) — Padrão obrigatório para todas as respostas de erro nos backends Express 5.
+*   **OAuth 2.0 Authorization Framework (RFC 6749):** [IETF Datatracker — RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749) — Implementado via Ory Hydra no Identity.
+*   **Proof Key for Code Exchange by OAuth Public Clients (RFC 7636 - PKCE):** [IETF Datatracker — RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636) — Obrigatório para SPAs React.
+*   **Conventional Commits 1.0.0:** [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/) — Padrão obrigatório de mensagens de commit Git.
+
+---
+
+## 🛰️ Datasheets Oficiais de Hardware e RF (Projeto ARES & Sensores)
+
+Manuais técnicos dos componentes físicos adotados nos sistemas embarcados e estações de solo:
+
+*   **Microcontrolador ESP32-S3:** [Espressif Systems — ESP32-S3 Datasheet Oficial (PDF)](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf)
+*   **Transceptor Semtech LoRa SX1262 (915 MHz):** [Semtech SX1261/SX1262 Long Range Transceiver Datasheet](https://www.semtech.com/products/wireless-rf/lora-connect/sx1262)
+*   **Sensor Barométrico e Ambiental BME280:** [Bosch Sensortec — BME280 Combined humidity and pressure sensor (PDF)](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf)
+*   **Sensor Inercial IMU de 6 Eixos MPU-6050:** [TDK InvenSense — MPU-6050 Product Specification (PDF)](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf)
+
+---
+
+## 📚 Documentação das Ferramentas da Stack
+
+*   **Astro Starlight:** [starlight.astro.build](https://starlight.astro.build/) — Framework da nossa documentação técnica.
+*   **Keystatic CMS:** [keystatic.com/docs](https://keystatic.com/docs) — Painel headless CMS para edição de conteúdo Markdown/MDX.
+*   **LiteLLM:** [docs.litellm.ai](https://docs.litellm.ai/) — Proxy unificado de LLMs utilizado no Cortex.
+*   **Ory Identity Platform (Kratos & Hydra):** [ory.sh/docs](https://www.ory.sh/docs/) — Documentação oficial do nosso provedor central de identidade.
+*   **Prisma ORM 7:** [prisma.io/docs](https://www.prisma.io/docs) — ORM TypeScript adotado em todos os backends relacionais.
+*   **OpenTelemetry:** [opentelemetry.io/docs](https://opentelemetry.io/docs/) — Rastreamento distribuído e telemetria.

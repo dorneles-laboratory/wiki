@@ -1,0 +1,73 @@
+---
+title: Academic Companion (Acad)
+description: Plataforma EdTech de gestão da jornada acadêmica, histórico escolar, cálculo de IRA e Copiloto inteligente integrado com Cortex RAG.
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+# Academic Companion (Acad)
+
+<Badge text="EdTech & Copiloto" variant="tip" size="large" />
+
+O **Academic Companion (Acad)** é a plataforma digital voltada para estudantes do ensino superior, atuando como um copiloto para a trajetória universitária. O sistema reúne gestão de histórico de disciplinas, cálculo e simulação de Índice de Rendimento Acadêmico (IRA), repositório de artigos e produções científicas, além de matchmaking inteligente com editais de bolsas de pesquisa e extensão.
+
+---
+
+## 🏛️ Arquitetura e Módulos
+
+O Acad é dividido em duas aplicações de frontend (Discente e Admin) conectadas a uma API RESTful em Express 5 e Prisma 7:
+
+```
+acad/
+├── apps/
+│   ├── backend/       # Express 5, Prisma 7, PostgreSQL, MinIO, Pino, OpenTelemetry
+│   ├── frontend/      # SPA React 19 / Vite 7 (Portal Discente)
+│   ├── admin/         # SPA React 19 / Vite 7 (Painel Administrativo da Coordenação)
+│   └── wiki/          # Submódulo da Wiki
+└── packages/
+    └── shared/        # Contratos Zod compartilhados
+```
+
+### 🧠 Integração com o Cortex (AI Gateway)
+
+O Acad **não possui integração direta com LLMs de terceiros**. Toda a inteligência artificial da plataforma é delegada ao **Cortex**:
+
+1. **Copiloto Acadêmico:** O endpoint `POST /api/copilot/chat` do Cortex é consumido via Server-Sent Events (SSE). O Cortex injeta o contexto RAG extraído dos 3 pilares do estudante (Perfil, Hub de Projetos e Memória).
+2. **Matchmaking de Oportunidades:** O módulo JEV do Cortex avalia a compatibilidade de editais extraídos pelo Sentinel com o perfil e competências do aluno, gerando uma pontuação de 0 a 100 com justificativa.
+3. **Resumos de Editais:** O Cortex sintetiza prazos críticos, requisitos e valor da bolsa através do LiteLLM.
+
+---
+
+## 🗺️ Portas e Serviços Locais
+
+| Serviço | Porta Host | Porta Container | Descrição |
+|---|:---:|:---:|---|
+| **backend** | `5007` | `5007` | API RESTful do Acad |
+| **frontend (Discente)** | `5180` | `5173` | Portal do estudante |
+| **admin** | `5181` | `5173` | Painel administrativo / coordenação |
+| **db (PostgreSQL)** | `5447` | `5432` | Banco de dados PostgreSQL |
+| **jaeger** | `16693` | `16686` | UI de rastreamento OpenTelemetry |
+| **minio-api** | `9002` | `9000` | Armazenamento de PDFs, certificados e artigos |
+| **minio-console** | `9003` | `9001` | Console administrativo do MinIO |
+
+---
+
+## 🚀 Principais Funcionalidades
+
+<CardGrid>
+  <Card title="Planejador de Matrícula & IRA" icon="pencil">
+    Simulador de notas e impacto de aprovações/reprovações no Índice de Rendimento Acadêmico, auxiliando na escolha de disciplinas para o próximo semestre.
+  </Card>
+
+  <Card title="Hub de Projetos & Portfólio" icon="open-book">
+    Gestão de projetos de pesquisa, monitoria e extensão com upload de relatórios técnicos, atas e submissões para eventos científicos.
+  </Card>
+
+  <Card title="Copiloto Acadêmico RAG" icon="star">
+    Assistente conversacional que compreende normas acadêmicas da universidade, pré-requisitos curriculares e datas do calendário acadêmico.
+  </Card>
+
+  <Card title="Radar de Oportunidades" icon="magnifier">
+    Feed personalizado de bolsas (PIBIC, PIBITI, FAPERGS, monitoria) com classificação de afinidade calculada pelo JEV.
+  </Card>
+</CardGrid>

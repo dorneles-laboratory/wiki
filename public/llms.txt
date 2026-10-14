@@ -1,0 +1,23 @@
+# Wiki Dorneles — Base de Conhecimento e Engenharia
+
+> A Wiki Dorneles é a fonte única de verdade arquitetural, operacional e técnica de todos os microsserviços e plataformas do ecossistema Dorneles Laboratory.
+
+## Autor & Engenharia
+- **Autor Principal:** Fernando Dorneles da Silva
+- **Cargo:** Engenheiro de Computação / Desenvolvedor Full-Stack
+- **Website Oficial:** https://dorneles.dev
+- **LinkedIn:** https://linkedin.com/in/fernandodorneles
+- **GitHub:** https://github.com/dornelesfernando
+- **Currículo Lattes:** http://lattes.cnpq.br/0532418852427960
+- **Instituição de Origem:** Universidade Federal de Santa Maria (UFSM)
+
+## Projetos Documentados
+- **Acad (Academic Companion):** EdTech universitária com Copiloto RAG
+- **Cortex:** AI Gateway, JEV Decision Engine e roteamento LLM
+- **Identity:** Provedor de Identidade centralizado com Ory Kratos & Hydra
+- **CSM:** Sinalização digital e murais universitários
+- **Sentinel:** Motor de monitoramento contínuo e web scraping
+- **FederalStatus:** Transparência e observabilidade das universidades federais
+- **PGI-PROA:** Gestão ágil de demandas e projetos
+- **SulFlux:** Gestão e telemetria para bacias hidrográficas e propriedades rurais
+- **Health Checker & Network:** Observabilidade de infraestrutura e tráfego de rede

@@ -69,7 +69,14 @@ export default config({
     navigation: {
       '📌 Geral': [
         'welcome',
+        'onboarding',
         'visaoGeral',
+        'reunioes',
+      ],
+      '🏛️ Arquitetura e Engenharia': [
+        'architecture',
+        'deploy',
+        'planning',
       ],
       '📖 Guias e Processos': [
         'guides',
@@ -96,10 +103,50 @@ export default config({
       schema: docSchema,
     }),
 
+    onboarding: collection({
+      label: 'Onboarding',
+      slugField: 'title',
+      path: 'src/content/docs/onboarding/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    architecture: collection({
+      label: 'Arquitetura',
+      slugField: 'title',
+      path: 'src/content/docs/architecture/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
     visaoGeral: collection({
       label: 'Visão Geral',
       slugField: 'title',
       path: 'src/content/docs/visao-geral/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    reunioes: collection({
+      label: 'Atas de Reuniões',
+      slugField: 'title',
+      path: 'src/content/docs/reunioes/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    planning: collection({
+      label: 'Planejamento e Backlog',
+      slugField: 'title',
+      path: 'src/content/docs/planning/**',
+      format: { contentField: 'content' },
+      schema: docSchema,
+    }),
+
+    deploy: collection({
+      label: 'Deploy e Infra',
+      slugField: 'title',
+      path: 'src/content/docs/deploy/**',
       format: { contentField: 'content' },
       schema: docSchema,
     }),
@@ -123,7 +170,6 @@ export default config({
     projetos: collection({
       label: 'Projetos',
       slugField: 'title',
-      // Permite criar e navegar nas pastas: ares, ares/fases, federal-status, nematodes, etc.
       path: 'src/content/docs/projetos/**',
       format: { contentField: 'content' },
       schema: docSchema,
@@ -132,7 +178,6 @@ export default config({
     submissoes: collection({
       label: 'Submissões',
       slugField: 'title',
-      // Permite as subpastas como projetos/ares/...
       path: 'src/content/docs/submissoes/**',
       format: { contentField: 'content' },
       schema: docSchema,

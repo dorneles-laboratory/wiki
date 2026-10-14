@@ -1,0 +1,39 @@
+---
+title: Atas de Reuniões
+description: Índice cronológico oficial de atas, alinhamentos estratégicos e decisões de engenharia do ecossistema.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+# Registro Histórico de Atas
+
+Todas as decisões arquiteturais, alinhamentos táticos e retrospectivas de sprint são registradas em atas oficiais para garantir rastreabilidade e contexto histórico.
+
+Para criar um novo registro, utilize o [Template de Ata de Reunião](/templates/ata-de-reuniao-template) e o [Padrão de Reuniões](/processes/padrao-de-reunioes).
+
+---
+
+## 📅 Atas Registradas
+
+<CardGrid>
+  <LinkCard
+    title="2026-09-28 — Alinhamento de Arquitetura do Ecossistema e Unificação de IA"
+    href="/reunioes/2026-09-28-kickoff"
+    description="Centralização do Cortex como único AI Gateway, introdução do JEV para qualidade de editais e Identity como IdP."
+  />
+  <LinkCard
+    title="2026-08-15 — Definição da Arquitetura do Banco de Dados (PGI-PROA)"
+    href="/reunioes/2026-08-15-db-pgi-proa"
+    description="Decisão sobre PostgreSQL isolado, Prisma ORM 7, modelagem de timesheet e chaves UUID v4."
+  />
+  <LinkCard
+    title="2026-08-10 — Escolha do Microcontrolador e Baterias (ARES)"
+    href="/reunioes/2026-08-10-hardware-ares"
+    description="Seleção do ESP32-S3, transceptor Semtech LoRa 915 MHz e células Li-ion 18650 para telemetria de longo alcance."
+  />
+  <LinkCard
+    title="2026-07-28 — Kickoff da Documentação e Definição da Wiki"
+    href="/reunioes/2026-07-28-kickoff-wiki"
+    description="Estruturação da base de conhecimento central com Astro Starlight e integração com CMS Keystatic."
+  />
+</CardGrid>

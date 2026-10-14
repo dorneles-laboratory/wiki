@@ -1,0 +1,50 @@
+---
+title: Ata — Escolha do Microcontrolador e Baterias (ARES)
+description: Decisões de arquitetura de hardware, transceptores RF e dimensionamento elétrico para a sonda ARES.
+---
+
+## Informações Gerais
+
+| Campo           | Detalhes                        |
+|-----------------|---------------------------------|
+| **Data**        | 2026-08-10                      |
+| **Horário**     | 16:00 – 17:30                   |
+| **Local/Canal** | Laboratório de Sistemas Embarcados / Meet |
+| **Tipo**        | Design Review de Hardware       |
+| **Facilitador** | Dorneles                        |
+| **Redator**     | Dorneles                        |
+
+## Participantes
+
+| Nome              | Função                  | Presença |
+|-------------------|-------------------------|----------|
+| Dorneles          | Engenharia de Sistemas  | ✅       |
+| Equipe ARES       | Pesquisadores           | ✅       |
+
+## Pauta
+
+1. Definição do microcontrolador principal do payload (ESP32-S3 vs STM32).
+2. Protocolo e frequência de rádio para telemetria de longa distância.
+3. Topologia do subsistema de potência (EPS) e seleção de células de bateria.
+
+## Resumo das Discussões
+
+### 1. Seleção do Microcontrolador
+Optou-se pelo **ESP32-S3** (dual-core Xtensa LX7 com suporte a instruções vetoriais para DSP leve), devido à maturidade do framework ESP-IDF, disponibilidade de Wi-Fi para testes de bancada e barramentos SPI/I2C suficientes para a integração dos sensores barométricos e inerciais.
+
+### 2. Transceptor de Telemetria
+Para o enlace descendente de telemetria, foi selecionado o transceptor **SX1262 LoRa operando na faixa de 915 MHz**, garantindo alcance quilométrico com baixa potência e excelente imunidade a ruídos em ambientes urbanos e rurais.
+
+### 3. Gerenciamento de Energia
+Definiu-se a utilização de células de íon de lítio 18650 com circuito de proteção e reguladores chaveados de alta eficiência (step-down buck) para fornecimento de 3.3V estável mesmo sob picos de transmissão RF.
+
+## Action Items
+
+| # | Tarefa | Responsável | Prazo | Status |
+|---|--------|-------------|-------|--------|
+| 1 | Desenhar o esquemático preliminar no KiCad | Dorneles | 2026-08-20 | Concluído |
+| 2 | Realizar ensaios de bancada com o transceptor LoRa | Equipe ARES | 2026-08-25 | Concluído |
+
+---
+
+*Ata gerada em: 2026-08-10 | Redator: Dorneles*

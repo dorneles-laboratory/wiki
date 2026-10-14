@@ -1,0 +1,55 @@
+---
+title: Ata — Alinhamento de Arquitetura do Ecossistema e Unificação de IA
+description: Reunião geral de consolidação do ecossistema, posicionamento do Cortex como AI Gateway central, Identity como único IdP e padrões enterprise.
+---
+
+## Informações Gerais
+
+| Campo           | Detalhes                        |
+|-----------------|---------------------------------|
+| **Data**        | 2026-09-28                      |
+| **Horário**     | 10:00 – 12:00                   |
+| **Local/Canal** | Google Meet / Híbrido           |
+| **Tipo**        | Arquitetura Geral & Kickoff Q4  |
+| **Facilitador** | Dorneles                        |
+| **Redator**     | Dorneles                        |
+
+## Participantes
+
+| Nome              | Função                  | Presença |
+|-------------------|-------------------------|----------|
+| Dorneles          | Arquiteto de Software   | ✅       |
+| Equipe Técnica    | Engenharia & Pesquisa   | ✅       |
+
+## Pauta
+
+1. Centralização de inteligência artificial no **Cortex** (eliminação de chamadas diretas de LLM em Acad e Sentinel).
+2. Introdução do **JEV** (Decision Engine determinístico de alta velocidade para qualidade de editais e roteamento).
+3. Posicionamento do **Identity** como IdP exclusivo com Ory Kratos e Ory Hydra.
+4. Auditoria e reestruturação da **Wiki Central** para documentar todos os microsserviços.
+
+## Resumo das Discussões
+
+### 1. Centralização do AI Gateway (Cortex)
+Identificou-se que microsserviços estavam integrando diretamente com APIs de LLMs como Gemini e OpenAI. A decisão unânime foi proibir chamadas diretas: todas as requisições de inferência, resumos e RAG devem passar pelo Cortex via LiteLLM (`:4000`) ou pelos módulos `/api/copilot` e `/api/jev`.
+
+### 2. JEV como Decision Engine
+Apresentou-se o modelo JEV para decisões binárias e categóricas rápidas (70–500ms). No Sentinel, o JEV atuará como auditor de qualidade de editais: se a pontuação for `< 0.65`, o payload vai para a DLQ para conferência humana antes de entrar no pipeline principal.
+
+### 3. Identity como IdP Único
+Reforçou-se a obrigatoriedade de não manter tabelas de usuários locais com senhas nos projetos satélites. O Identity centraliza SSO, 2FA e emissão de tokens M2M via Ory Hydra.
+
+### 4. Atualização da Wiki
+Aprovada a reestruturação da Wiki com inclusão de seções dedicadas a Arquitetura, Onboarding, Deploy, Backlog e páginas individuais de cada projeto do ecossistema.
+
+## Action Items
+
+| # | Tarefa | Responsável | Prazo | Status |
+|---|--------|-------------|-------|--------|
+| 1 | Escrever a documentação completa de Arquitetura na Wiki | Dorneles | 2026-09-29 | Em Andamento |
+| 2 | Documentar todos os 9 projetos satélites na Wiki | Dorneles | 2026-09-29 | Em Andamento |
+| 3 | Configurar as novas coleções e barra lateral no Astro/Keystatic | Dorneles | 2026-09-29 | Em Andamento |
+
+---
+
+*Ata gerada em: 2026-09-28 | Redator: Dorneles*

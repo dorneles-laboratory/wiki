@@ -1,0 +1,108 @@
+---
+title: Guia de Onboarding de Desenvolvedores
+description: Instruções essenciais para configuração do ambiente de desenvolvimento local, clonagem de submódulos e primeiro commit.
+---
+
+import { Steps, Tabs, TabItem, Card, CardGrid } from '@astrojs/starlight/components';
+
+# Bem-vindo ao Laboratório Dorneles
+
+Este guia orienta a configuração do seu ambiente de desenvolvimento para trabalhar em qualquer um dos projetos do ecossistema.
+
+---
+
+## 💻 Pré-requisitos de Sistema
+
+Antes de iniciar, certifique-se de ter instalado em sua máquina (Linux ou macOS recomendado, ou WSL2 no Windows):
+
+- **Git 2.40+** (com suporte a submódulos recursivos)
+- **Docker & Docker Compose v2** (para bancos PostgreSQL, MinIO, Jaeger e LiteLLM)
+- **Node.js 20+ ou 22 LTS** e gerenciador de pacotes **npm 10+**
+- **GNU Make** (para execução dos orquestradores de comandos)
+
+---
+
+## 🚀 Passo a Passo de Instalação
+
+<Steps>
+1. **Clonar o Repositório com Submódulos**
+
+   Todos os projetos utilizam a arquitetura de **Monorepo por Acoplamento via Git Submodules**. Para garantir que os submódulos (`apps/backend`, `apps/frontend`, `packages/shared`, `wiki`) sejam baixados:
+
+   ```bash
+   git clone --recurse-submodules https://github.com/dorneles-laboratory/<nome-do-projeto>.git
+   cd <nome-do-projeto>
+   ```
+
+   Se você já clonou sem a flag `--recurse-submodules`, inicialize-os manualmente:
+   ```bash
+   git submodule update --init --recursive
+   ```
+
+2. **Configurar as Variáveis de Ambiente**
+
+   Cada serviço possui um template `.env.example`. Você pode copiar os templates para `.env.development`:
+
+   ```bash
+   # Na raiz do projeto orquestrador
+   make setup-env # ou copie manualmente os arquivos .env.example
+   ```
+
+3. **Subir a Infraestrutura Docker Local**
+
+   Suba o banco PostgreSQL isolado, MinIO e Jaeger com um único comando:
+
+   ```bash
+   make dev-infra # ou docker compose -f docker-compose.dev.yml up -d
+   ```
+
+4. **Instalar Dependências e Compilar o `packages/shared`**
+
+   O pacote `@lib/shared` é a fonte única de verdade dos schemas Zod e tipos TypeScript:
+
+   ```bash
+   # Compilação obrigatória do shared antes de rodar os apps
+   cd packages/shared && npm install && npm run build
+   ```
+
+5. **Executar Migrações do Prisma**
+
+   ```bash
+   cd apps/backend && npm install && npx prisma migrate dev
+   ```
+
+6. **Iniciar o Ambiente de Desenvolvimento**
+
+   Na raiz do projeto orquestrador, execute:
+
+   ```bash
+   make dev
+   ```
+</Steps>
+
+---
+
+## 🛠️ Regras Inegociáveis de Desenvolvimento
+
+> [!CAUTION]
+> **Proibido Tailwind CSS:** frontends devem utilizar estritamente **CSS Modules (`.module.css`)**. A adição de dependências como Tailwind, UnoCSS ou utilitários `cn()` causará reprovação imediata no code review.
+
+> [!WARNING]
+> **Proibido Dados Mockados:** O frontend deve sempre consumir dados reais da API Express via `@tanstack/react-query`. Mocks estáticos em código de produção são estritamente proibidos.
+
+> [!IMPORTANT]
+> **Fluxo de Commits em Submódulos:** Como cada pasta (`apps/backend`, `apps/frontend`, `packages/shared`) é um repositório Git independente, você deve **commitar e subir primeiro dentro da pasta do submódulo**, e em seguida commitar a referência atualizada na raiz orquestradora.
+
+```bash
+# 1. Commit dentro do submódulo alterado
+cd apps/backend
+git add .
+git commit -m "feat(auth): adicionar middleware de correlation id"
+git push origin develop
+
+# 2. Atualizar a referência do submódulo na raiz
+cd ../..
+git add apps/backend
+git commit -m "chore: atualizar submódulo backend"
+git push origin develop
+```

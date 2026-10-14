@@ -1,0 +1,59 @@
+---
+title: Network Traffic Analyzer (Network)
+description: Análise de tráfego de rede, inspeção de pacotes, telemetria de conectividade e métricas de qualidade de serviço (QoS).
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+# Network Traffic Analyzer (Network)
+
+<Badge text="Redes & Infraestrutura" variant="note" size="large" />
+
+O **Network Traffic Analyzer** é a solução de monitoramento de tráfego de rede, métricas de conectividade e diagnóstico de qualidade de serviço (QoS) do ecossistema Dorneles Laboratory. Ele foi construído para rastrear fluxos de dados tanto em redes corporativas/universitárias locais quanto em links de telemetria sem fio e canais de longa distância (como redes de sensores e radiofrequência).
+
+---
+
+## 🛰️ Abrangência e Protocolos Monitorados
+
+O sistema opera na análise de múltiplos canais de comunicação:
+
+- **Tráfego Web & Microsserviços:** Análise de overhead HTTP/REST, conexões persistentes via WebSockets e chamadas gRPC internas.
+- **Redes Sem Fio e IoT:** Telemetria de enlaces de rádio LoRa (915 MHz), enlaces Wi-Fi e taxas de retransmissão de pacotes.
+- **Qualidade de Serviço (QoS):** Medição contínua de latência (RTT), flutuação de atraso (*jitter*), perda percentual de pacotes e largura de banda efetiva.
+
+---
+
+## 🗺️ Portas e Serviços Locais
+
+| Serviço | Porta Host | Porta Container | Descrição |
+|---|:---:|:---:|---|
+| **backend** | `5008` | `5008` | Motor de captura e agregação estatística de rede |
+| **frontend** | `5182` | `5173` | Dashboard analítico de tráfego em tempo real |
+| **db (PostgreSQL)** | `5449` | `5432` | Banco com partições temporais de fluxos de rede |
+| **jaeger** | `16694` | `16686` | UI de rastreamento OpenTelemetry |
+| **otlp-grpc** | `4337` | `4317` | Coletor OpenTelemetry gRPC |
+| **otlp-http** | `4338` | `4318` | Coletor OpenTelemetry HTTP |
+| **minio-api** | `9009` | `9000` | Armazenamento de arquivos PCAP e capturas de pacotes |
+| **minio-console** | `9010` | `9001` | Console do MinIO |
+
+---
+
+## 📈 Principais Módulos
+
+<CardGrid>
+  <Card title="Gráficos de Vazão em Tempo Real" icon="random">
+    Visualização imediata de taxa de download/upload, taxas de pacotes por segundo (pps) e gargalos de rede.
+  </Card>
+
+  <Card title="Detecção de Anomalias de Tráfego" icon="warning">
+    Identificação automatizada de surtos incomuns de tráfego, escaneamento de portas e tentativas de conexão maliciosas.
+  </Card>
+
+  <Card title="Inspeção e Parsing de Pacotes (PCAP)" icon="document">
+    Upload e análise detalhada de capturas de rede com decodificação de cabeçalhos e distribuição de protocolos.
+  </Card>
+
+  <Card title="Diagnóstico de Resiliência de Enlace" icon="laptop">
+    Ferramentas integradas para testes de ping contínuo, traceroute visual e avaliação de degradação de sinal de rádio.
+  </Card>
+</CardGrid>

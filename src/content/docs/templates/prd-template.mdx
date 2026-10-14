@@ -1,0 +1,81 @@
+---
+title: Template de PRD (Product Requirements Document)
+description: Modelo padrão para especificação de requisitos, escopo de produto e métricas de sucesso de novas iniciativas no ecossistema.
+---
+
+Este documento fornece o modelo padrão para elaboração de um **Product Requirements Document (PRD)** para novos sistemas, módulos ou grandes funcionalidades.
+
+---
+
+# Documento de Requisitos do Produto (PRD) — [Nome do Produto/Feature]
+
+**Projeto:** [Nome do Projeto]  
+**Versão:** 1.0  
+**Data:** YYYY-MM-DD  
+**Autor(es):** [Nome do Autor]  
+**Status:** [Rascunho / Em Revisão / Aprovado]  
+
+---
+
+## 1. Sumário Executivo e Visão Geral
+*Resuma em 1 ou 2 parágrafos o que é o produto/feature, qual público atende e qual valor central entrega.*
+
+---
+
+## 2. Declaração do Problema
+### 2.1 Contexto Atual
+*Qual é o cenário hoje? Como os usuários resolvem ou contornam o problema atualmente?*
+
+### 2.2 Dores Identificadas
+- **Dor 1:** Descrição do gargalo.
+- **Dor 2:** Descrição do gargalo.
+
+---
+
+## 3. Objetivos do Produto e Não-Objetivos
+### 3.1 Objetivos (In-Scope)
+- O que o produto **DEVE** resolver.
+- Critérios de aceitação principais.
+
+### 3.2 Não-Objetivos (Out-of-Scope)
+- O que o produto **NÃO** fará nesta versão (para evitar escopo inflado).
+
+---
+
+## 4. Personas e Casos de Uso
+| Persona | Perfil | Principal Necessidade |
+|---|---|---|
+| **Estudante / Usuário Final** | Graduando que busca bolsas | Visualizar editais compatíveis com seu histórico |
+| **Administrador / TI** | Gestor de infraestrutura | Monitorar uptime e gerenciar permissões de acesso |
+
+---
+
+## 5. Requisitos Funcionais (RF)
+| ID | Requisito | Prioridade | Descrição |
+|---|---|---|---|
+| **RF-01** | Autenticação via Identity | P0 (Crítica) | O usuário deve autenticar-se via SSO Ory Kratos. |
+| **RF-02** | Exportação de Relatórios | P1 (Alta) | Permitir download em formato PDF assinado digitalmente. |
+| **RF-03** | Notificações em Tempo Real | P2 (Média) | Disparar alertas via WebSocket em caso de mudanças de status. |
+
+---
+
+## 6. Requisitos Não-Funcionais (RNF)
+- **Desempenho:** Tempo de resposta da API abaixo de 300ms para o percentil 95 (p95).
+- **Segurança:** Respostas de erro formatadas estritamente sob a RFC 7807 (Problem Details).
+- **Interface:** Frontends construídos em React 19 com CSS Modules (proibido Tailwind).
+- **Arquitetura:** Schemas de entrada e saída validados via Zod no pacote `@lib/shared`.
+
+---
+
+## 7. Métricas de Sucesso (KPIs)
+- Taxa de conversão ou engajamento de usuários ativos (MAU/DAU).
+- Redução percentual de incidentes ou chamados no suporte.
+- Disponibilidade operacional (Uptime >= 99.9%).
+
+---
+
+## 8. Cronograma e Fases de Entrega
+1. **Fase 1 (Design & Protótipo):** Conclusão em [Data].
+2. **Fase 2 (Desenvolvimento do Core & APIs):** Conclusão em [Data].
+3. **Fase 3 (Testes & Homologação Staging):** Conclusão em [Data].
+4. **Fase 4 (Lançamento em Produção):** Conclusão em [Data].

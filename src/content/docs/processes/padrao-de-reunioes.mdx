@@ -1,37 +1,101 @@
 ---
 title: Padrão de Reuniões
+description: Diretrizes, periodicidade, pautas e boas práticas para condução de reuniões ágeis e registros de atas.
 ---
 
-> **Última atualização:** 20-08-2026
+> **Última atualização:** 29-09-2026
 
 ---
 
 ## Objetivo
 
-Definir os padrões, tipos, frequências e boas práticas das reuniões da equipe de desenvolvimento, garantindo encontros produtivos, objetivos e bem documentados.
+Definir os padrões, tipos, frequências e boas práticas das reuniões da equipe de desenvolvimento do ecossistema, garantindo encontros objetivos, eficientes e adequadamente documentados.
 
 ---
 
 ## Tipos de Reuniões
 
-### 1. Reunião Geral da equipe
+### 1. Daily Sync (Sincronização Diária)
 
-| Campo          | Detalhes                                                        |
-|----------------|-----------------------------------------------------------------|
-| **Frequência** | Quinzenal                                                       |
-| **Formato**    | Síncrono, via google meet (link enviado no grupo)               |
-| **Duração**    | 60–90 minutos                                                   |
+| Campo | Detalhes |
+|---|---|
+| **Frequência** | Diária (Segunda a Sexta) |
+| **Formato** | Assíncrono via canal de comunicação ou síncrono rápido (15 min) |
+| **Duração** | 10–15 minutos |
 
-**Objetivo:** Alinhamento geral da equipe, discussão de tópicos estratégicos e comunicados.
+**Objetivo:** Identificar bloqueios imediatos respondendo às três perguntas essenciais:
+1. O que realizei ontem?
+2. O que farei hoje?
+3. Há algum impedimento técnico ou dependência bloqueando meu avanço?
+
+---
+
+### 2. Sprint Planning (Planejamento de Sprint)
+
+| Campo | Detalhes |
+|---|---|
+| **Frequência** | A cada início de ciclo de sprint (quinzenal) |
+| **Formato** | Síncrono via Google Meet |
+| **Duração** | 45–60 minutos |
+
+**Objetivo:** Selecionar e estimar itens do backlog a serem desenvolvidos no próximo ciclo, alinhando a meta da sprint (*Sprint Goal*) e atribuindo responsáveis diretos. Utilizar o [Template de Planejamento de Sprint](/templates/sprint-template).
 
 ---
 
-## Boas Práticas
+### 3. Sprint Review & Demonstração (Demo)
 
-- **Pontualidade:** Iniciar e encerrar no horário combinado.
-- **Preparação:** Ler a pauta antes da reunião.
-- **Objetividade:** Manter o foco nos tópicos da pauta.
-- **Documentação:** Registrar ata em `/meetings/` após cada reunião síncrona.
-- **Câmera ligada:** Sempre que possível, ligar a câmera em reuniões síncronas.
+| Campo | Detalhes |
+|---|---|
+| **Frequência** | No último dia da sprint |
+| **Formato** | Síncrono com compartilhamento de tela |
+| **Duração** | 30–45 minutos |
+
+**Objetivo:** Apresentar as funcionalidades prontas e validadas em ambiente local ou staging para a equipe e stakeholders, coletando feedback imediato antes do merge em produção.
 
 ---
+
+### 4. Sprint Retrospective (Retrospectiva)
+
+| Campo | Detalhes |
+|---|---|
+| **Frequência** | Quinzenal (imediatamente após a Review) |
+| **Formato** | Síncrono com dinâmica colaborativa |
+| **Duração** | 30 minutos |
+
+**Objetivo:** Análise de melhoria contínua de processos do time:
+- O que funcionou muito bem?
+- O que gerou atrasos ou atrito?
+- Quais ações práticas adotaremos na próxima sprint para evoluir?
+
+---
+
+### 5. Design Review Técnica & Arquitetura
+
+| Campo | Detalhes |
+|---|---|
+| **Frequência** | Sob demanda (antes de iniciar novos épicos ou quebras de contrato) |
+| **Formato** | Síncrono |
+| **Duração** | 45–60 minutos |
+
+**Objetivo:** Avaliar decisões de arquitetura de software, impactos em banco de dados (Prisma migrations), novos contratos Zod em `packages/shared` ou integrações de IA com o Cortex. Resultados relevantes devem ser registrados via [Template de ADR](/templates/adr-template).
+
+---
+
+### 6. Reunião Geral de Alinhamento da Equipe
+
+| Campo | Detalhes |
+|---|---|
+| **Frequência** | Quinzenal / Mensal |
+| **Formato** | Síncrono / Híbrido |
+| **Duração** | 60 minutos |
+
+**Objetivo:** Alinhamento estratégico amplo, comunicados do laboratório, novidades institucionais e apresentação de publicações acadêmicas.
+
+---
+
+## Boas Práticas Obrigatórias
+
+- **Pauta Prévia:** Nenhuma reunião síncrona deve acontecer sem pauta compartilhada com pelo menos 24 horas de antecedência.
+- **Pontualidade Estrita:** Iniciar e encerrar rigorosamente no horário agendado.
+- **Foco e Objetividade:** Debates técnicos pontuais que envolvam apenas duas pessoas devem ser movidos para uma conversa paralela pós-reunião (*take it offline*).
+- **Documentação Obrigatória:** Toda reunião de planejamento, decisão ou alinhamento deve gerar uma ata oficial registrada em [Atas de Reunião](/reunioes/) utilizando o [Template de Ata de Reunião](/templates/ata-de-reuniao-template).

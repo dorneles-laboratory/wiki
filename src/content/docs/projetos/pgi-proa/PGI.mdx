@@ -1,0 +1,58 @@
+---
+title: PGI-PROA (Gestão de Equipes e Sprints)
+description: Plataforma de gestão integrada de projetos, sprints ágeis, apontamento de horas (timesheet) e chamados de suporte.
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+# PGI-PROA
+
+<Badge text="Gestão Ágil & Equipes" variant="tip" size="large" />
+
+O **PGI-PROA** é a plataforma de governança operacional e gestão integrada do ecossistema Dorneles Laboratory. Criado para estruturar a rotina de desenvolvimento e extensão, o sistema centraliza o controle de sprints, alocação de membros, apontamento de horas técnicas e chamados de suporte interno.
+
+---
+
+## 🏛️ Propósito e Fluxo Operacional
+
+O PGI-PROA apoia o ciclo de desenvolvimento em todas as suas fases:
+
+- **Sprint Planning e Backlog:** Definição de metas de ciclo, atribuição de responsáveis e estimativa em story points.
+- **Quadro Kanban Dinâmico:** Visualização de fluxo de trabalho (`A Fazer` → `Em Desenvolvimento` → `Revisão/PR` → `Concluído`).
+- **Timesheet e Horas de Projeto:** Registro de tempo gasto por tarefa para auditoria de produtividade e prestação de contas acadêmicas/bolsas.
+- **Helpdesk e Chamados:** Registro de bugs, solicitações de infraestrutura e pendências bloqueantes.
+
+---
+
+## 🗺️ Portas e Serviços Locais
+
+| Serviço | Porta Host | Porta Container | Descrição |
+|---|:---:|:---:|---|
+| **backend** | `5002` | `5002` | API RESTful do PGI-PROA (Express 5 + Prisma 7) |
+| **frontend** | `5175` | `5173` | SPA React 19 / Vite 7 |
+| **db (PostgreSQL)** | `5436` | `5432` | Banco de dados PostgreSQL |
+| **jaeger** | `16686` | `16686` | UI de rastreamento OpenTelemetry |
+| **otlp-grpc** | `4321` | `4317` | Coletor OpenTelemetry gRPC |
+| **otlp-http** | `4322` | `4318` | Coletor OpenTelemetry HTTP |
+
+---
+
+## 🚀 Principais Módulos
+
+<CardGrid>
+  <Card title="Quadro de Tarefas em Tempo Real" icon="laptop">
+    Arrastar e soltar de cards com sincronização ágil, histórico de comentários e anexos de evidências.
+  </Card>
+
+  <Card title="Apontamento de Horas (Timesheet)" icon="time">
+    Lançamento de horas dedicadas por membro com relatórios consolidados por sprint e projeto para prestação de contas.
+  </Card>
+
+  <Card title="Métricas Ágeis e Burndown" icon="bars">
+    Gráficos de velocidade do time, taxa de entrega de itens e acompanhamento de dívida técnica.
+  </Card>
+
+  <Card title="Gestão de Acessos por Papel (RBAC)" icon="seti:lock">
+    Permissões diferenciadas para Tech Leads, Desenvolvedores, Pesquisadores e Observadores.
+  </Card>
+</CardGrid>

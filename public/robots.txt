@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wiki.dorneles.dev/sitemap-index.xml
+Sitemap: https://wiki.dorneles.dev/sitemap.xml

@@ -1,0 +1,57 @@
+---
+title: Sulflux (Gestão Ambiental e Hidrologia)
+description: Plataforma de monitoramento hidrológico, métricas de sustentabilidade, telemetria ambiental e créditos de carbono.
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+# Sulflux
+
+<Badge text="Gestão Ambiental & Clima" variant="success" size="large" />
+
+O **Sulflux** é uma plataforma focada em sustentabilidade e monitoramento hidroclimático contínuo. Desenvolvido para atuar na análise de bacias hidrográficas, microbacias e ecossistemas agrícolas do sul do Brasil, o sistema processa dados de telemetria ambiental, fluxo de gases de efeito estufa e balanço hídrico.
+
+---
+
+## 🌾 Contexto e Importância Científica
+
+Após eventos climáticos severos no Rio Grande do Sul, a necessidade de instrumentação confiável e alertas precoces tornou-se mandatória. O Sulflux unifica:
+
+- **Ingestão de Sensores:** Coleta dados de estações meteorológicas, pluviômetros, sondas de nível freático e estações micrometeorológicas de fluxo turbulento (*Eddy Covariance*).
+- **Cálculo de Fluxo de Carbono:** Estimativas de troca líquida de CO2 no ecossistema (NEE - Net Ecosystem Exchange).
+- **Alertas de Nível e Enxurrada:** Monitoramento em tempo real do nível de rios e reservatórios com disparos de alerta preventivos.
+
+---
+
+## 🗺️ Portas e Serviços Locais
+
+| Serviço | Porta Host | Porta Container | Descrição |
+|---|:---:|:---:|---|
+| **backend** | `5001` | `5001` | API RESTful e motor de processamento ambiental |
+| **frontend** | `5174` | `5173` | Painel geoespacial e dashboard de métricas |
+| **db (PostgreSQL)** | `5434` | `5432` | Banco com suporte a séries temporais e dados geoespaciais |
+| **jaeger** | `16687` | `16686` | UI de rastreamento OpenTelemetry |
+| **otlp-grpc** | `4319` | `4317` | Coletor OpenTelemetry gRPC |
+| **otlp-http** | `4320` | `4318` | Coletor OpenTelemetry HTTP |
+
+---
+
+## 🌍 Recursos da Plataforma
+
+<CardGrid>
+  <Card title="Visualização Geoespacial (SIG)" icon="earth">
+    Mapas interativos com camadas temáticas de bacias, estações de monitoramento e manchas de inundação histórica.
+  </Card>
+
+  <Card title="Séries Temporais Ambientais" icon="random">
+    Gráficos interativos de precipitação acumulada, temperatura, umidade do solo e radiação fotossinteticamente ativa.
+  </Card>
+
+  <Card title="Métricas de Sustentabilidade" icon="star">
+    Cálculo de balanço de carbono e suporte a relatórios para certificações ambientais e de mitigação de impactos.
+  </Card>
+
+  <Card title="Integração de Estações de Campo" icon="seti:bicep">
+    Protocolos de recepção de telemetria via MQTT, HTTP e integração com redes de baixa potência (LoRaWAN).
+  </Card>
+</CardGrid>
