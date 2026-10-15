@@ -71,7 +71,7 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             name: 'keywords',
-            content: 'Wiki Dorneles, arquitetura de software, engenharia de software, microsserviços, Cortex, Identity, Acad, CSM, Fernando Dorneles da Silva'
+            content: 'Wiki Dorneles, arquitetura de software, engenharia de software, microsserviços, Cortex, Identity, Acad, CMS, Fernando Dorneles da Silva'
           }
         },
         {

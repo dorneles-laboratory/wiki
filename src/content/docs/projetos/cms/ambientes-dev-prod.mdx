@@ -24,8 +24,8 @@ Em máquinas de desenvolvimento (ou na VPS durante testes de homologação):
 
 ```bash
 # 1. Clonar e inicializar os submódulos na branch dev
-git clone --recurse-submodules git@github.com:dorneles-laboratory/csm.git
-cd csm
+git clone --recurse-submodules git@github.com:dorneles-laboratory/cms.git
+cd cms
 
 # 2. Sincronizar na branch dev e instalar dependências
 make sync-dev
@@ -50,8 +50,8 @@ Na VPS de produção, o sistema executa a stack compilada de alta performance:
 
 ```bash
 # 1. Clonar o orquestrador com submódulos na VPS
-git clone --recurse-submodules git@github.com:dorneles-laboratory/csm.git
-cd csm
+git clone --recurse-submodules git@github.com:dorneles-laboratory/cms.git
+cd cms
 
 # 2. Sincronizar na branch de produção (main)
 make sync-main
@@ -69,9 +69,9 @@ make cd-prod
 2. **`ci-local`:** Roda toda a bateria de testes automatizados e validações antes de colocar o código no ar.
 3. **`build-shared`:** Compila o `@lib/shared` em TypeScript estrito.
 4. **`prod-up`:** Constrói as imagens de produção com BuildKit e inicia os containers:
-   - `csm_backend_prod`: Executa o código JavaScript compilado via `tsup` no estágio runner.
-   - `csm_frontend_prod`: Servido via **Nginx** de alta performance com compressão Gzip e suporte a SPA.
-   - `csm_minio_prod`: Armazenamento de mídias persistido em volume Docker.
-   - `csm_tunnel_prod`: Cloudflare Tunnel seguro para publicação web com TLS automático sem abrir portas no firewall da VPS.
+   - `cms_backend_prod`: Executa o código JavaScript compilado via `tsup` no estágio runner.
+   - `cms_frontend_prod`: Servido via **Nginx** de alta performance com compressão Gzip e suporte a SPA.
+   - `cms_minio_prod`: Armazenamento de mídias persistido em volume Docker.
+   - `cms_tunnel_prod`: Cloudflare Tunnel seguro para publicação web com TLS automático sem abrir portas no firewall da VPS.
 5. **`migrate`:** Aplica migrações pendentes no banco de dados PostgreSQL com `prisma migrate deploy`.
 6. **`prune`:** Limpa imagens e camadas antigas do Docker, economizando espaço em disco na VPS.

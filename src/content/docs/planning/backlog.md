@@ -16,7 +16,7 @@ description: Itens de backlog, melhorias arquiteturais e novas funcionalidades p
 - [ ] **Sentinel:** Configurar pipeline de quarentena / DLQ para editais com confiança inferior a 0.65.
 - [ ] **Acad:** Migrar chamadas conversacionais do Copiloto para o endpoint unificado `POST /api/copilot/chat` do Cortex.
 - [ ] **Identity:** Ativar fluxos de autorização Authorization Code com PKCE para os frontends React.
-- [ ] **CSM:** Finalizar cache local de mídias no player web para exibição contínua offline em totens.
+- [ ] **CMS:** Finalizar cache local de mídias no player web para exibição contínua offline em totens.
 
 ---
 
