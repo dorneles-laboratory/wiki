@@ -58,10 +58,27 @@ O PGI-PROA (sistema de gestão de projetos e equipes) opera integrado ao **Dorne
 | **LinkedIn** | `POST` | `/api/auth/linkedin/callback` | Validação do código de autorização LinkedIn |
 | **GitHub** | `GET` | `/api/auth/github/url` | URL de consentimento do GitHub |
 | **GitHub** | `POST` | `/api/auth/github/callback` | Validação do código e criação/vínculo de conta |
+| **Dorneles IdP** | `GET` | `/api/auth/dorneles/url` | URL de autorização OIDC com state anti-CSRF |
+| **Dorneles IdP** | `GET` | `/api/auth/dorneles/login` | Endpoint de redirecionamento 302 direto para login SSO |
+| **Dorneles IdP** | `POST` | `/api/auth/dorneles/callback` | Troca de `code` por tokens e emissão de sessão HttpOnly |
 | **PGI-PROA** | `GET` | `/api/integrations/pgi-proa/status` | Status de conexão e última sincronização |
 | **PGI-PROA** | `GET` | `/api/integrations/pgi-proa/auth-url` | URL de autenticação via Dorneles IdP |
 | **PGI-PROA** | `POST` | `/api/integrations/pgi-proa/sync` | Sincronização de projetos (suporta `?force=true`) |
 | **PGI-PROA** | `DELETE` | `/api/integrations/pgi-proa` | Desconexão do workspace PGI-PROA |
+
+---
+
+## 🏛️ 3.1. Dorneles Identity Provider (SSO Central do Ecossistema)
+
+O Academic Companion adota o **Dorneles IdP** (`id.dorneles.dev`) como provedor primário e oficial de identidade unificada:
+- **Ory Hydra (`oauth.dorneles.dev`):** Servidor OAuth2 / OIDC certificado que emite tokens criptografados e gerencia fluxos de consentimento e login challenge.
+- **Ory Kratos (`auth.dorneles.dev`):** Gerenciador de identidade e perfis, autenticação multifator (MFA) e recuperação de senhas.
+- **Topologia de Produção:**
+  - `acad.dorneles.dev` (Frontend) redireciona via `DORNELES_LOGIN_URL` para `api-acad.dorneles.dev/api/auth/dorneles/login`.
+  - O backend constrói a URL de autorização (`oauth.dorneles.dev/oauth2/auth`) com escopos `openid profile email offline_access academic:read academic:write` e redireciona (HTTP 302).
+  - O Ory Hydra redireciona o navegador para a UI oficial em `id.dorneles.dev/login?login_challenge=...`.
+  - Após a autenticação/cadastro, o Hydra redireciona de volta para `acad.dorneles.dev/auth/dorneles/callback?code=...`.
+  - O backend do acad troca o `code` pelo access token via Hydra Token Endpoint (`oauth.dorneles.dev/oauth2/token`), provisiona ou atualiza o perfil do discente e emite os cookies de sessão segura `accessToken` e `refreshToken` HttpOnly.
 
 ---
 
