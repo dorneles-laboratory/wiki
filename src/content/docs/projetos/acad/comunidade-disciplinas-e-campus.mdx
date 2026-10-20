@@ -90,14 +90,29 @@ O **Hub de Disciplinas** organiza a trajetória curricular do discente por perí
 
 ---
 
-## 🗺️ 3. Minha Universidade — Mapa do Campus (`/minha-universidade`)
+## 🗺️ 3. Minha Instituição — Mapa do Campus (`/minha-universidade`)
 
-O módulo **Minha Universidade** oferece navegação espacial e georreferenciada pelo campus universitário, auxiliando na localização de prédios, centros de ensino, salas de aula e restaurantes universitários. Trata-se de uma base de dados compartilhada, pública (aberta sem necessidade de login) e 100% persistida no PostgreSQL, auditada por moderadores e administradores.
+O módulo **Minha Instituição** oferece navegação espacial e georreferenciada pelo campus universitário, auxiliando na localização de prédios, centros de ensino, salas de aula e restaurantes universitários. Trata-se de uma base de dados compartilhada, pública (aberta sem necessidade de login) e 100% persistida no PostgreSQL, auditada por moderadores e administradores.
 
 ### 📐 Arquitetura & Escolha Tecnológica
 - **MapLibre GL (versão 6.7.x):** Renderização vetorial rápida e aberta, com suporte a perspectiva 3D (*pitch* e *bearing*).
 - **Ancoragem Rígida de Marcadores:** Os pinos no mapa possuem coordenadas travadas através de uma casca intermediária isolada (`.markerWrapper`), evitando que transições CSS e animações de hover causem flutuação ou atraso no posicionamento durante o pan/zoom do usuário.
-- **Suporte Multi-Instituição e Multi-Campi:** Seletor dinâmico no cabeçalho permitindo alternar entre universidades catalogadas (UFSM, UFRGS, USP, UNICAMP, etc.) e seus respectivos campi (Camobi, Centro, Butantã, Barão Geraldo, etc.), com limites geográficos restritivos (*maxBounds*) e voo de câmera suave (*flyTo*).
+- **Suporte Multi-Instituição e Multi-Campi:** Seletor dinâmico no cabeçalho permitindo alternar entre instituições catalogadas (UFSM, UFRGS, USP, UNICAMP, etc.) e seus respectivos campi (Camobi, Centro, Butantã, Barão Geraldo, etc.), com limites geográficos restritivos (*maxBounds*) e voo de câmera suave (*flyTo*).
+- **Seletores Simétricos com o Perfil Discente (Combobox):**
+  - Tanto a tela de **Perfil Acadêmico** quanto a tela **Minha Instituição** utilizam o mesmo componente acessível `Combobox` com busca textual instantânea e formatação limpa sem repetição de siglas (ex: `UFSM — Universidade Federal de Santa Maria`).
+  - **Nomenclatura Unificada:** O label foi padronizado de *"Campus Universitário"* para apenas *"Campus"*.
+  - **Permissão de Customização Restrita:** Na tela Minha Instituição, o combobox atua com `allowCustom={false}`, restringindo a navegação ao catálogo oficial homologado, enquanto o cadastro de novas instituições permanece exclusivo ao formulário de perfil.
+  - **Desambiguação e Pré-seleção Inicial:** A tela inicializa automaticamente com a instituição e o campus cadastrados no perfil do discente (desambiguando estritamente siglas como `UFSM` sobre `UFS`).
+  - **Abertura Inteligente do Dropdown (`isActivelyFiltering`):** Ao focar ou clicar na seta de um seletor com valor já preenchido, o dropdown exibe a lista completa de opções disponíveis com a seleção atual marcada, filtrando em tempo real apenas quando o usuário digita ativamente um termo diferente, eliminando seletores vazios ou com apenas 1 item.
+
+### 🏛️ Catálogo Nacional do MEC & Agregação Contínua de Dados Auditados
+A plataforma unifica duas camadas complementares de dados institucionais para garantir cobertura integral e evolução comunitária sem dados fictícios:
+
+1. **Catálogo Oficial do Ministério da Educação (MEC / e-MEC / INEP):**
+   - Mapeado no backend em `campus.mec-catalog.ts`, abrange 100% das **69 Universidades Federais**, **38 Institutos Federais de Educação, Ciência e Tecnologia (IFs)**, **2 CEFETs** (RJ e MG), as principais **Universidades Estaduais** (USP, UNICAMP, UNESP, UERJ, UDESC, etc.) e as principais **Comunitárias/Confessionais** (PUCRS, PUCPR, PUC-SP, PUC-Rio, Unisinos, UCS, Feevale, etc.) com todos os seus respectivos campi municipais oficiais.
+2. **Camada Dinâmica de Instituições e Campi Auditados (`PostgreSQL`):**
+   - Os serviços `campus.service.ts` e `student.service.ts` realizam uma agregação contínua entre o catálogo MEC, a tabela `CampusPlace` (locais já aprovados e com coordenadas auditadas pela moderação administrativa) e a tabela `StudentProfile` (novas instituições e campi cadastrados livremente pelos estudantes).
+   - Se um estudante cadastrar um novo campus ou uma nova instituição no seu perfil, ou se um local for auditado e aprovado no mapa, ele é imediatamente incorporado ao índice de autocompletes e seletores em tempo real, mantendo os dados sempre atualizados e auditados.
 
 ### 📐 Contratos (`packages/shared`)
 - **Módulo:** `src/modules/campus/`
@@ -130,7 +145,7 @@ O módulo **Minha Universidade** oferece navegação espacial e georreferenciada
 
 ### 🎨 Frontend Discente & Landing Page
 - **Portal Discente (`apps/frontend/src/pages/my-university/MyUniversity.tsx`):**
-  - Seletor de universidade e campus sincronizado com o perfil acadêmico do usuário logado.
+  - Seletor de instituição e campus sincronizado com o perfil acadêmico do usuário logado via `Combobox`.
   - Cards de KPIs reais sem fallbacks fictícios.
   - Busca instantânea e filtragem por tipo de espaço.
   - Card de detalhes com rotas ("Como chegar" via Google Maps) e cópia rápida de coordenadas.
@@ -140,7 +155,7 @@ O módulo **Minha Universidade** oferece navegação espacial e georreferenciada
   - Análise semântica assistida pelo Cortex IA sobre nome, categoria e descrição do local para detectar incongruências, spam ou brincadeiras.
   - Geração automática de score de confiança (0-100) e alertas apresentados no **Dossiê da IA (`AiDossier`)** para homologação do administrador no painel.
 - **Showcase Público na Landing Page (`apps/frontend/src/pages/welcome/Welcome.tsx`):**
-  - Componente `PublicScholarshipPreview.tsx` com alternador entre *Bolsas & Editais*, *Eventos Acadêmicos* e *Minha Universidade*.
+  - Componente `PublicScholarshipPreview.tsx` com alternador entre *Bolsas & Editais*, *Eventos Acadêmicos* e *Minha Instituição*.
   - Visualização interativa com mapa MapLibre 3D, seletor de instituições e banner destacando a base aberta colaborativa.
 
 ---
@@ -150,9 +165,10 @@ O módulo **Minha Universidade** oferece navegação espacial e georreferenciada
 Todos os fluxos possuem testes unitários e de integração implementados:
 1. `apps/frontend/tests/pages/ConstruaComigo.spec.tsx` (4 testes: feed, tags, like toggle, composer)
 2. `apps/frontend/tests/pages/HubDisciplinas.spec.tsx` (4 testes: métricas, grade em colunas, modais)
-3. `apps/frontend/tests/pages/MyUniversity.spec.tsx` (3 testes: seletores institucionais, estatísticas do banco, listagem e modal)
-4. `apps/frontend/tests/pages/Assistant.spec.tsx` (8 testes: layout Gemini, sidebar retrátil com pin e hover)
-5. `apps/admin/tests/pages/CampusAudit.spec.tsx` (3 testes: KPIs de moderação, aprovação/rejeição e exclusão segura)
+3. `apps/frontend/tests/components/Combobox.spec.tsx` (3 testes: seleção de item, exibição da lista completa ao abrir com valor prévio, digitação ativa com filtro)
+4. `apps/frontend/tests/pages/MyUniversity.spec.tsx` (9 testes: seletores Combobox, desambiguação institucional, estatísticas do banco, listagem e modal)
+5. `apps/frontend/tests/pages/Assistant.spec.tsx` (8 testes: layout Gemini, sidebar retrátil com pin e hover)
+6. `apps/admin/tests/pages/CampusAudit.spec.tsx` (3 testes: KPIs de moderação, aprovação/rejeição e exclusão segura)
 
 Para rodar as suítes:
 ```bash

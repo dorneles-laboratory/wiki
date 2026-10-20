@@ -69,6 +69,13 @@ Preserva a história viva, os acontecimentos diários e os aprendizados do estud
 | **FAM-018** | Sugestão Automática de Eventos | Detecção e sugestão de inclusão de eventos ocorridos no calendário. |
 | **FAM-019** | Extração de Contexto | Detecção automática de disciplinas, tecnologias e professores citados nas anotações. |
 | **FAM-020** | Resumo Automático de Registros | Geração de sínteses mensais ou semestrais das memórias acumuladas. |
+| **FAM-021** | Registro em Datas Específicas | Seleção de datas personalizadas (passadas ou presentes) no diário e modal de edição para reconstrução cronológica fiel de eventos e marcos da formação. |
+| **FAM-022** | Importador Inteligente de Currículo Lattes | Extração automática de seções do currículo CNPq (formação acadêmica, artigos em periódicos, projetos de pesquisa/extensão, apresentações em congressos e prêmios) gerando acontecimentos datados com tags temáticas. |
+| **FAM-023** | Inserção de Múltiplos Acontecimentos em Lote | Criação transacionada em lote (`POST /api/memories/batch`) a partir de linhas manuais ou lista delimitada (`Data \| Título \| Tipo \| Conteúdo \| Tags`), com grade de revisão interativa antes da persistência. |
+| **FAM-024** | Robô ACAD Companion (Sobreposição de Tela) & Web Scraping Guiado | Inserção de link do Currículo Lattes com abertura de janela assistida e Robô Companion flutuante sobreposto à tela do CNPq (`MutationObserver` em tempo real): aguarda o clique no checkbox do Captcha, minera todos os dados automaticamente e envia ao ACAD via `window.opener.postMessage` sem necessidade de copiar ou colar. |
+| **FAM-025** | Importador de PDF Impresso do Lattes | Upload e drag & drop do PDF gerado pelo botão "Imprimir Currículo" da Plataforma Lattes (`POST /api/memories/lattes/pdf`), extraindo integralmente o texto via `pdf-parse` e gerando memórias cronológicas. |
+| **FAM-026** | Higienização & Validação Cognitiva de Trajetória / Lattes (Cortex / JEV) | Botão "Higienizar e Validar" no modal de lote que aciona o Cortex AI Gateway / JEV (`POST /api/memories/lattes/ai-validate`), separando títulos límpidos de autores ABNT, normalizando datas parciais para ISO UTC, reclassificando tipos acadêmicos e executando deduplicação semântica com feedback visual de confiança. |
+
 
 ---
 

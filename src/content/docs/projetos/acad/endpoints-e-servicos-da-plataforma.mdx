@@ -63,8 +63,11 @@ Este documento descreve a arquitetura de serviços HTTP, contratos OpenAPI decla
 |---|---|---|---|
 | `GET` | `/api/memories` | Histórico cronológico de reflexões e notas de estudo | Autenticada |
 | `GET` | `/api/memories/:id` | Detalhes de anotação ou transcrição de áudio | Autenticada |
-| `POST` | `/api/memories` | Registro de aprendizado, insight, reflexão ou conquista | Autenticada |
-| `PUT` | `/api/memories/:id` | Edição de conteúdo ou tags temáticas | Autenticada |
+| `POST` | `/api/memories` | Registro de aprendizado, insight, reflexão ou conquista com suporte a data específica retroativa | Autenticada |
+| `POST` | `/api/memories/batch` | Inserção transacionada em lote de múltiplos acontecimentos ou importações do Lattes | Autenticada |
+| `POST` | `/api/memories/lattes/scrape` | Web scraping guiado de currículo Lattes por URL e detecção de desafio Captcha | Autenticada |
+| `POST` | `/api/memories/lattes/pdf` | Extração inteligente de acontecimentos e marcos temporais de PDF impresso do Lattes | Autenticada |
+| `PUT` | `/api/memories/:id` | Edição de conteúdo, tags temáticas e retificação de data do acontecimento | Autenticada |
 | `DELETE` | `/api/memories/:id` | Exclusão de registro | Autenticada |
 
 ### 5. Carteira de Tokens & Apoio Solidário (`/api/wallet`)
@@ -117,6 +120,17 @@ Este documento descreve a arquitetura de serviços HTTP, contratos OpenAPI decla
 |---|---|---|---|
 | `POST` | `/api/integrations/linkedin/generate-post` | Gera publicação profissional em 3 tons (Técnico, Storytelling, Executivo) | Autenticada |
 | `POST` | `/api/integrations/linkedin/optimize-profile` | Gera Headline magnética, Pitch "Sobre" e recomendações de palavras-chave | Autenticada |
+
+### 11. Public API & Headless CMS (`/api/public/v1`)
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `POST` | `/api/public/v1/keys` | Gera nova chave de API exclusiva para portfólio externo | Autenticada (Cookie) |
+| `GET` | `/api/public/v1/keys` | Lista as chaves de API cadastradas e telemetria | Autenticada (Cookie) |
+| `DELETE` | `/api/public/v1/keys/:keyId` | Revoga imediatamente uma chave de API | Autenticada (Cookie) |
+| `GET` | `/api/public/v1/me/portfolio` | Obtém portfólio completo com perfil e vivências públicas | API Key (`X-Acad-Api-Key`) |
+| `GET` | `/api/public/v1/me/experiences` | Lista exclusivamente as vivências marcadas como públicas | API Key (`X-Acad-Api-Key`) |
+| `GET` | `/api/public/v1/me/profile` | Retorna o perfil público do estudante | API Key (`X-Acad-Api-Key`) |
 
 ---
 

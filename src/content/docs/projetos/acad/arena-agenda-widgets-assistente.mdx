@@ -70,42 +70,60 @@ A **Arena Acadêmica** integra mecânicas de gamificação para incentivar a reg
 
 ---
 
-## 📊 4. Dashboard — Widgets Customizáveis (`/`)
+### 🏛️ Cabeçalho Fixo do Dashboard
+- **Saudação com Data Integrada:** Posicionada diretamente no topo do cabeçalho da página (sem formato de card, sem caixas e sem poluição visual), contendo a data corrente formatada acima e a saudação temporal com o primeiro nome do estudante (`{getGreeting()}, {firstName}! 👋`) alinhada com as ferramentas de personalização de layout (`DashboardToolbar`). Não exibe informações redundantes como curso, semestre ou universidade.
 
-O painel central adota uma arquitetura modular baseada em widgets reativos, permitindo personalização conforme a fase da formação acadêmica:
+### 🧩 Grade Customizável de Widgets
+Os cartões modulares da grade refletem as diferentes frentes da vida universitária:
+- **`SmartCapture`**: Captura rápida de pensamentos e aprendizados com salvamento imediato nas memórias e direcionamento ao Copiloto (desbloqueado via Memória Acadêmica).
+- **`SemesterSummary`**: Semanas letivas, progresso temporal, disciplinas matriculadas e métricas semestrais (desbloqueado via Perfil Acadêmico).
+- **`MetricsGrid`**: Métricas de editais, candidaturas, vivências e carga horária semanal (desbloqueado via Vivências & Projetos).
+- **`Opportunities`**: Editais e bolsas com % de match para o perfil (desbloqueado via Scholarship Finder / Oportunidades).
+- **`UpcomingCommitments`**: Card conectado ao calendário com próximas provas e entregas (desbloqueado via Agenda).
+- **`CurrentGoals`**: Metas semestrais do perfil acadêmico com barra de progresso (desbloqueado via Roadmap & Metas).
+- **`DevelopingCompetencies`**: Radar de competências técnicas, científicas e comportamentais (desbloqueado via Mapa de Competências).
+- **`WellbeingWidget`**: Termômetro de rotina e bem-estar (desbloqueado via Arena Acadêmica).
+- **`AgendaCalendarWidget`**: Mini-calendário mensal integrado (desbloqueado via Agenda).
+- **`RecentMemories`**: Últimas reflexões e registros do diário (desbloqueado via Memória Acadêmica).
+- **`Experiences`**: Vivências práticas, iniciação científica e extensão ativas (desbloqueado via Vivências & Projetos).
+- **`RecentActivities`**: Feed de conquistas e marcos recentes (desbloqueado via Arena Acadêmica).
 
-- **`GreetingBanner`**: Saudação dinâmica com insights preditivos de IA, resumo de IRA e atalhos rápidos.
-- **`SmartCapture`**: Caixa de captura rápida de pensamentos e aprendizados com salvamento imediato nas memórias do discente.
-- **`UpcomingCommitments`**: Card conectado ao serviço de calendário, exibindo as próximas provas e prazos de entrega.
-- **`CurrentGoals`**: Metas semestrais em andamento com barra de progresso visual.
-- **`DevelopingCompetencies`**: Radar das competências com maior evolução recente.
-- **`WellbeingWidget`**: Termômetro de carga de estudos e equilíbrio de rotina semanal.
-- **`AgendaCalendarWidget`**: Mini-calendário interativo mensal com dias destacados por compromissos.
+### 🔒 Bloqueio Inicial Total e Desbloqueio Progressivo de Widgets
+- **Mapeamento Central (`WIDGET_TOOL_ROUTES`):** Define a ferramenta de origem (`href` e `toolName`) e orientação de ação para cada um dos 12 widgets.
+- **Estado Inicial (Novo Cadastro):** Ao se cadastrar, **todos os widgets da grade iniciam bloqueados**, exibindo o ícone de cadeado e orientação clara da ação necessária com link direto para a respectiva tela.
+- **Mecanismo Duplo de Desbloqueio:**
+  1. **Por Ação/Dados Reais:** Se o estudante preencher o perfil acadêmico, registrar memórias, cadastrar vivências ou candidaturas, os respectivos widgets são desbloqueados automaticamente pelo sistema.
+  2. **Por Exploração/Navegação:** A navegação até a ferramenta de origem aciona `unlockWidget()` persistido no `toolkitStore` (Zustand com LocalStorage), notificando o discente via toast comemorativo.
 
 ---
 
 ## 🤖 5. Copiloto Acadêmico — UX e Contexto Melhorados (`/assistant`)
 
-O assistente conversacional foi ampliado com recursos de context seeding, controle de tom e navegação ágil no histórico:
+O assistente conversacional foi ampliado com recursos de context seeding, controle de tom, modo rail e navegação ágil no histórico:
 
 ### Novas Capacidades
-1. **Context Seeding via URL (`?context=`):** Ao navegar a partir de cards do dashboard ou ferramentas externas (ex: `/assistant?context=Explicar+meu+projeto`), o assistente consome o parâmetro automaticamente e inicia o diálogo.
-2. **6 Prompts Sugeridos na Tela Inicial:**
+1. **Modo Rail / Ícones Colapsado:**
+   - No estado retraído padrão (60px), os itens da barra lateral (botão de nova conversa, lista de chats e indicador de tokens) convertem-se automaticamente em **ícones limpos e centralizados**, eliminando cortes ou textos comprimidos.
+   - Ao passar o mouse (*hover*), a sidebar abre em sobreposição rápida; ao acionar a fixação (*pin*), a sidebar expande permanentemente para 290px e **empurra a área principal do chat (`chatAreaPinned`)**, garantindo que as mensagens e os controles superiores nunca fiquem sobrepostos.
+   - Quando totalmente fechada, um botão de reabertura ágil fica acessível nos controles superiores da conversa.
+2. **Context Seeding via URL (`?context=` e `?prompt=`):** Ao navegar a partir de cards do dashboard ou da Captura Inteligente, o assistente consome o parâmetro automaticamente e envia a consulta sem fricção.
+3. **6 Prompts Sugeridos na Tela Inicial:**
    - *"O que eu realizei neste semestre?"* (Trajetória)
    - *"Quais competências estou desenvolvendo?"* (Competências)
    - *"Em quais áreas estou mais ativo?"* (Atividade)
    - *"O que eu deveria priorizar agora?"* (Foco)
    - *"Estou pronto para iniciação científica?"* (Pesquisa)
    - *"Resuma minha evolução acadêmica até aqui"* (Trajetória)
-3. **Seletor de Modo:**
+4. **Seletor de Modo:**
    - 🪄 *Explorar trajetória:* Análise retrospectiva de vivências, certificações e histórico.
    - 🎓 *Planejar próximo passo:* Foco propositivo em editais, disciplinas futuras e TCC.
-4. **Seletor de Nível / Persona:**
+5. **Seletor de Nível / Persona:**
    - *Orientador:* Postura estratégica, contextual e de longo prazo.
    - *Analista:* Foco rigoroso em métricas, evidências e dados quantitativos.
    - *Mentor:* Respostas práticas, diretas e acionáveis.
-5. **Sidebar Deslizante com Busca Textual:** Histórico de conversas com filtro instantâneo por título e botão de alternância de visualização (*collapsible*).
-6. **Chips Rotativos de Perguntas:** Quando a conversa já possui mensagens, uma barra horizontal superior ao campo de entrada sugere novos desdobramentos com 1 clique.
+6. **Sidebar Deslizante com Busca Textual:** Histórico de conversas com filtro instantâneo por título e alternância ágil de layout.
+7. **Chips Rotativos de Perguntas:** Sugestões dinâmicas de desdobramento posicionadas acima do campo de texto quando o chat está ativo.
+8. **Renderização Rica de Markdown (GFM):** Mensagens do Copiloto são processadas com parser GFM e estilização tipográfica modular (`.geminiText`), convertendo negrito (`**`), itálico, listas numeradas e de marcadores, links com abertura segura em nova aba (`target="_blank" rel="noopener noreferrer"`), blocos de código com destaque e tabelas estruturadas, eliminando a exibição de caracteres puros de formatação.
 
 ---
 
