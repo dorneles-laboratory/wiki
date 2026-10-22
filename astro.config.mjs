@@ -3,7 +3,6 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
-import vercel from '@astrojs/vercel';
 
 const schemaOrgJsonLd = JSON.stringify({
   "@context": "https://schema.org",
@@ -26,10 +25,12 @@ const schemaOrgJsonLd = JSON.stringify({
         "url": "https://www.ufsm.br"
       },
       "sameAs": [
+        "https://www.wikidata.org/wiki/Q141727157",
         "https://linkedin.com/in/fernandodorneles",
         "https://github.com/dornelesfernando",
         "https://instagram.com/dorneles_fernando",
-        "http://lattes.cnpq.br/0532418852427960"
+        "http://lattes.cnpq.br/0532418852427960",
+        "https://orcid.org/0009-0005-4259-9394"
       ]
     },
     {
@@ -149,6 +150,4 @@ export default defineConfig({
       ],
     }),
   ],
-
-  adapter: vercel(),
 });
