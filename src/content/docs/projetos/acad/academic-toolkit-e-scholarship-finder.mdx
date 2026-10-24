@@ -333,3 +333,18 @@ A Landing Page da plataforma foi completamente reestruturada para oferecer uma e
   - **"Salvar em Memória":** Registra instantaneamente uma nova memória na Linha do Tempo e Diário Acadêmico via `useCreateMemory()`.
   - **"Perguntar ao Copiloto":** Redireciona a reflexão ou dúvida diretamente para a sessão ativa do Copiloto IA via `navigate('/assistant?prompt=...')`.
 
+### 5. Desbloqueio Progressivo de Widgets Persistido em Banco de Dados (`user_toolkit_states`)
+- **Persistência Relacional Segura no PostgreSQL:** Substitui por completo qualquer dependência de `localStorage` para controle de widgets desbloqueados e ferramentas fixadas.
+- **Modelo de Dados Prisma (`UserToolkitState`):**
+  - `userId`: Chave estrangeira única vinculada ao `User`.
+  - `unlockedWidgets String[]`: Lista de IDs de widgets desbloqueados no Dashboard (inicia vazia `[]` em novos cadastros).
+  - `pinnedTools String[]`: Lista de ferramentas fixadas pelo discente nos atalhos.
+- **Endpoints RESTful Dedicados:**
+  - `GET /api/toolkit/user-preferences`: Retorna as preferências salvas no banco.
+  - `POST /api/toolkit/unlock-widget`: Desbloqueia o widget no banco com flag `unlocked: true` e `alreadyUnlocked: boolean`.
+  - `POST /api/toolkit/toggle-pin`: Alterna a fixação de ferramenta nos atalhos.
+- **Experiência Discente:**
+  - Contas novas iniciam com os widgets do Dashboard bloqueados exibindo o cartão de convite com o nome da tela e botão direto de visitação.
+  - Ao visitar a tela da ferramenta (`/perfil-academico`, `/memories`, `/experiences`, etc.), a API persiste o desbloqueio no banco e emite feedback imediato via Sonner Toast (`toast.success()`).
+  - O estado é sincronizado entre dispositivos e navegadores com isolamento total por usuário.
+
