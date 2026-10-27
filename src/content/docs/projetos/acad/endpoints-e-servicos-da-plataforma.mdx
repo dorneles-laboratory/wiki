@@ -132,6 +132,15 @@ Este documento descreve a arquitetura de serviços HTTP, contratos OpenAPI decla
 | `GET` | `/api/public/v1/me/experiences` | Lista exclusivamente as vivências marcadas como públicas | API Key (`X-Acad-Api-Key`) |
 | `GET` | `/api/public/v1/me/profile` | Retorna o perfil público do estudante | API Key (`X-Acad-Api-Key`) |
 
+### 12. Avisos & Cards do Sistema (`/api/notices`)
+
+Módulo responsável pela gestão de ciclo de vida de cards de aviso (como "Convide seus Colegas" e solicitações de permissão). Caso o usuário feche um aviso, este permanece dispensado por 3 dias e reaparece automaticamente após esse período, com suporte a um job diário de expurgo (`NoticeCleanupJob`):
+
+| Método | Rota | Descrição | Segurança |
+|---|---|---|---|
+| `GET` | `/api/notices/dismissals` | Lista identificadores de avisos dispensados pelo usuário ativo nos últimos 3 dias | Autenticada (Cookie) |
+| `POST` | `/api/notices/dismiss` | Registra a dispensa de um aviso (`noticeKey`) | Autenticada (Cookie) |
+
 ---
 
 ## 📦 Padrão de Erros RFC 7807
