@@ -43,8 +43,9 @@ Projetado para estudantes de cursos de tecnologia, computação e engenharia. Re
 
 ### PGI-PROA & Dorneles Identity Provider (SSO Central)
 O PGI-PROA (sistema de gestão de projetos e equipes) opera integrado ao **Dorneles IdP (Ory Hydra v2.2.0)** com escopos `pgi:read` e `pgi:admin`. O Academic Companion consome os projetos em **modo estritamente Leitor (Dashboard)**:
-- **Disparo de Sincronização:** Acionado sob demanda (on-load ao carregar a página com cache inteligente de 5 minutos, ou clique explícito no botão *"Sincronizar"*). Sem jobs de background (cron) para evitar consumo desnecessário.
-- **Ação Rápida:** Botão *"Abrir no PGI"* disponível diretamente ao lado de sincronizar, direcionando o estudante para a respectiva visualização no PGI-PROA (`:5175`).
+- **Disparo de Sincronização:** Acionado sob demanda (on-load ao carregar a página com cache inteligente de 5 minutos, ou clique explícito no botão *"Sincronizar"* ou *"Vincular PGI-PROA"* via `POST /api/integrations/pgi-proa/connect`). Sem jobs de background (cron) para evitar consumo desnecessário.
+- **Autenticação Inter-Serviços (M2M):** Os tokens de requisição são emitidos dinamicamente e validados com o secret compartilhado do PGI-PROA (`PGI_PROA_JWT_SECRET`), garantindo passagem do `email` e `sub` institucional via header `X-User-Email` e `Authorization: Bearer`.
+- **Ação Rápida:** Botão *"Abrir no PGI"* disponível diretamente ao lado de sincronizar, direcionando o estudante para a respectiva visualização no PGI-PROA (`https://pgi.dorneles.dev` em produção ou `http://localhost:5175` em desenvolvimento).
 - **Isolamento de Domínios:** Os `TimeLog`s do PGI-PROA **não geram memórias acadêmicas (`AcademicMemory`)**, sendo totalizados estritamente no campo analítico `metadata.pgiProaTotalMinutes`.
 
 ### Endpoints Oficiais de Autenticação & Integrações
@@ -62,6 +63,7 @@ O PGI-PROA (sistema de gestão de projetos e equipes) opera integrado ao **Dorne
 | **Dorneles IdP** | `GET` | `/api/auth/dorneles/login` | Endpoint de redirecionamento 302 direto para login SSO |
 | **Dorneles IdP** | `POST` | `/api/auth/dorneles/callback` | Troca de `code` por tokens e emissão de sessão HttpOnly |
 | **PGI-PROA** | `GET` | `/api/integrations/pgi-proa/status` | Status de conexão e última sincronização |
+| **PGI-PROA** | `POST` | `/api/integrations/pgi-proa/connect` | Conexão do workspace e primeiro sync imediato |
 | **PGI-PROA** | `GET` | `/api/integrations/pgi-proa/auth-url` | URL de autenticação via Dorneles IdP |
 | **PGI-PROA** | `POST` | `/api/integrations/pgi-proa/sync` | Sincronização de projetos (suporta `?force=true`) |
 | **PGI-PROA** | `DELETE` | `/api/integrations/pgi-proa` | Desconexão do workspace PGI-PROA |
