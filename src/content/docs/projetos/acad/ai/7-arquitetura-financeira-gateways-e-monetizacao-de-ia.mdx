@@ -40,5 +40,5 @@ O módulo de pagamentos será construído utilizando o padrão de projeto *Facad
 Para garantir rastreabilidade financeira e auditoria de consumo sem sobrecarregar as consultas, os dados são separados em três entidades distintas no `schema.prisma`:
 
 * **`Wallet` (Carteira):** Relacionada ao usuário (`user_id`). Contém uma coluna `balance` (Inteiro) que armazena a quantidade atual de tokens disponíveis.
-* **`Transaction` (Histórico Financeiro):** Registra exclusivamente as movimentações em Reais (R$). Armazena o `transaction_id` do provedor, valor em centavos, método (Pix), status e o pacote adquirido.
-* **`UsageLog` (Auditoria de IA):** Registra o custo das requisições ao longo do tempo. Armazena os tokens de entrada, tokens de saída, modelo utilizado (ex: Gemini Flash, Azure) e o `timestamp`. Esta tabela permite gerar gráficos de consumo para o painel do usuário e prever custos de infraestrutura.
+* **`TokenTransaction` (Histórico de Tokens):** Registra movimentações de tokens (créditos de recarga ou débitos `AI_USAGE`).
+* **`AiUsageLog` (Auditoria e FinOps de IA):** Registra o custo exato de cada inferência ou tarefa em segundo plano (`feature`, `model`, `promptTokens`, `completionTokens`, `totalTokens`, `spendUsd`, `spendBrl`, `latencyMs`, `tokensDebited`). Alimenta em tempo real os painéis de auditoria financeira no Acad Admin (`/admin/tokens`) e no Cortex Gateway (`/admin/overview`).

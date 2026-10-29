@@ -73,6 +73,13 @@ Processamento cognitivo inteligente acionado no modal de inserção em lote de a
 - **Deduplicação Semântica:** Funde e consolida publicações ou participações duplicadas com grafias ou citações variantes.
 - **Auditoria & Confiança:** Fornece badges visuais com status (`VALIDATED`, `ADJUSTED`, `WARNING`), índice de confiança (0 a 100%) e relatório de ajustes aplicados.
 - **Resiliência Offline:** Na eventual indisponibilidade temporária do Cortex, o serviço aplica sanitização heurística baseada em regras sem interromper o fluxo do usuário.
+- **Custo Escalonado (Opção A):** Cobrança dinâmica calculada via `calculateLattesBatchCost(itemCount)`: 3 tokens base para lotes de até 10 itens + 1 token a cada 5 itens adicionais.
+
+### 5. Auditoria e Reavaliação do Radar Lattes (`/api/toolkit/lattes/radar`)
+Analisa a integridade e completude das vivências acadêmicas cadastradas pelo estudante em relação aos padrões de avaliação do CNPq/Lattes:
+- **Detecção de Gaps Curriculares:** Identifica carência de horas de extensão, certificações pendentes ou ausência de produções bibliográficas.
+- **Recomendações Dinâmicas:** Gera cards de ação com índice de relevância e prioridade para submissão na plataforma Lattes.
+- **Custo:** **5 tokens** por reavaliação manual sob demanda (`forceRefresh=true`).
 
 ---
 
@@ -85,3 +92,20 @@ Toda operação de IA gera um registro imutável em `TokenTransaction` no banco 
 - `createdAt: TIMESTAMP`
 
 O saldo é debitado atomicamente via transação Prisma, garantindo consistência estrita mesmo sob concorrência.
+
+---
+
+## 📊 Observabilidade FinOps & Painéis de Custos em Reais (R$)
+
+A arquitetura conta com rastreabilidade financeira de ponta a ponta através da entidade `AiUsageLog` persistida no PostgreSQL:
+
+1. **Painel do Administrador Acad (`apps/admin` → `/admin/tokens`):**
+   - Aba **"Custos de IA por Funcionalidade (R$)"**.
+   - Converte tokens técnicos de API para Dólares (USD) e Reais (R$) com taxa oficial (`USD_TO_BRL_RATE`).
+   - Apresenta KPIs consolidados, gráfico de distribuição percentual (Donut) e barras comparativas por feature (`lattes:batch_validate`, `assistant:chat`, etc.).
+   - Tabela detalhada com latência média, total de tokens e custo unitário.
+
+2. **Painel Central do Cortex AI Gateway (`cortex` → `/admin/overview`):**
+   - Aba **"Custos em Reais (R$) & Por Sistema"**.
+   - Visão multi-sistema (segregação entre `acad`, `sentinel`, etc.) com totalização financeira em Reais (R$).
+   - Tabela analítica item a ítem de todas as funcionalidades atendidas pelo gateway.

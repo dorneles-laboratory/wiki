@@ -1,0 +1,162 @@
+---
+title: Sistema de Badges e Gamificação por Níveis
+description: Especificação arquitetural do sistema de conquistas, badges quantitativos e qualitativos por tiers no estilo GitHub Achievements para o Academic Companion.
+sidebar:
+  order: 14
+---
+
+# 🏆 Sistema de Badges e Gamificação Acadêmica por Níveis
+
+> **Academic Companion (`acad`) — Especificação de Badges e Conquistas Progressivas**  
+> Inspirado na mecânica de reconhecimento e prestígio do **GitHub Achievements** (*Pull Shark*, *Galaxy Brain*, *Pair Extraordinaire*), este sistema eleva a trajetória universitária e científica a um patamar quantitativo e qualitativo de excelência.
+
+---
+
+## 🎯 1. Filosofia: Equilíbrio Quantitativo e Qualitativo
+
+O sistema de badges do Academic Companion afasta-se de métricas superficiais de "cliques". A gamificação é fundamentada no **desenvolvimento real de competências e produção acadêmica**:
+
+```text
+Ação Acadêmica (Publicação, Lattes, PGI-PROA, Estudo)
+  ├── Crivo Quantitativo (Volume, Horas, Frequência, Entregas)
+  ├── Crivo Qualitativo  (Validação por IA, Certificados, Nível Qualis)
+  └── Evolução em Tiers  (Níveis 1 a 4) ➔ Badge Dinâmico com Moldura e Anéis
+```
+
+1. **Eixo Quantitativo:** Avalia o volume de dedicação temporal, a repetição disciplinada, o número de artigos, horas de extensão e sessões de foco.
+2. **Eixo Qualitativo:** Avalia a validação cognitiva da evidência (confiança da IA JEV/Cortex), o estrato de periódicos (Qualis Capes), a aprovação de relatórios por orientadores e a relevância social.
+
+---
+
+## 🎖️ 2. A Mecânica dos Níveis (Tiers de Evolução)
+
+Cada badge possui **4 Níveis Progressivos de Maestria**. Conforme o discente progride, o visual do badge evolui organicamente com molduras e anéis concêntricos adicionais:
+
+| Nível / Tier | Designação | Identidade Visual | Descrição de Conquista |
+|---|---|---|---|
+| **Tier 1** | **Bronze / Iniciante** | Anel de Bronze escovado, centro translúcido | Primeiro marco superado na jornada universitária. |
+| **Tier 2** | **Prata / Praticante** | Moldura prateada polida com 2 estrelas laterais | Consistência comprovada e domínio das rotinas acadêmicas. |
+| **Tier 3** | **Ouro / Notável** | Moldura dourada com 3 gemas e brilho sutil | Destaque na graduação ou pós, publicações e liderança de squads. |
+| **Tier 4** | **Diamante Cósmico / Lenda** | Halo holográfico azul/dourado com efeito glow pulsante | Excelência máxima: impacto internacional, patentes ou premiações de destaque. |
+
+---
+
+## 📚 3. Catálogo Oficial de Badges
+
+### 🦈 1. Arquiteto de Papers (*Paper Shark*)
+*Reconhecimento para a publicação científica ativa em anais de congressos, simpósios e periódicos indexados.*
+
+- **Categoria:** `PESQUISA`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 1 artigo publicado em evento acadêmico ou revista.
+  - 🥈 **Tier 2 (Prata):** 3 publicações científicas com identificadores (ISSN ou ISBN) comprovados.
+  - 🥇 **Tier 3 (Ouro):** 8 artigos científicos (ao menos 2 em periódicos avaliados por pares com DOI ativo).
+  - 💎 **Tier 4 (Diamante):** 15+ artigos publicados, incluindo periódico Qualis A1/A2 ou menção de melhor trabalho de congresso.
+
+---
+
+### 🧠 2. Mente Científica (*Galaxy Researcher*)
+*Para discentes imersos em laboratórios, Iniciação Científica (PIBIC/PIBITI/FAPESP) e projetos de desenvolvimento tecnológico.*
+
+- **Categoria:** `PESQUISA`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 1 projeto de Iniciação Científica cadastrado e vinculado ao histórico.
+  - 🥈 **Tier 2 (Prata):** 2 projetos de pesquisa com relatórios semestrais de atividades validados pelo orientador.
+  - 🥇 **Tier 3 (Ouro):** 2 anos completos de bolsa de pesquisa e apresentação em simpósio institucional de IC.
+  - 💎 **Tier 4 (Diamante):** Desenvolvimento de software registrado no INPI, patente depositada ou transferência tecnológica comprovada.
+
+---
+
+### 📜 3. Maestro do Lattes (*Lattes Maestro*)
+*Premia a higiene, completude e rigor no registro histórico da produção na Plataforma Lattes do CNPq.*
+
+- **Categoria:** `INTEGRACOES`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** Currículo Lattes sincronizado com o Academic Companion e 15 acontecimentos extraídos.
+  - 🥈 **Tier 2 (Prata):** 50 acontecimentos catalogados com datas precisas e todas as produções higienizadas.
+  - 🥇 **Tier 3 (Ouro):** 120 acontecimentos validados cognitivamente pelo Cortex sem nenhuma pendência de título ABNT.
+  - 💎 **Tier 4 (Diamante):** Currículo 100% integralizado em todas as dimensões (Formação, Artigos, Projetos, Bancas, Eventos e Prêmios), atualizado há menos de 30 dias.
+
+---
+
+### ⚡ 4. Titã de Squad (*Squad Titan*)
+*Integração de alto desempenho com o ecossistema PGI-PROA: governança, squads, tarefas e entregas de projetos.*
+
+- **Categoria:** `INTEGRACOES`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** Workspace do PGI-PROA vinculado e 5 tarefas sincronizadas no painel.
+  - 🥈 **Tier 2 (Prata):** 25 tarefas concluídas em projetos colaborativos com prazo respeitado.
+  - 🥇 **Tier 3 (Ouro):** 75 tarefas finalizadas e 3 entregas de marcos (milestones) aprovadas pela squad.
+  - 💎 **Tier 4 (Diamante):** Liderança de squad com 150+ entregas no PGI-PROA, taxa de pontualidade de 95%+ e sincronização bidirecional ativa.
+
+---
+
+### ⏳ 5. Sensei do Foco (*Pomodoro Sensei*)
+*Para o cultivo da disciplina intelectual através de blocos de estudo ininterruptos via Pomodoro do Companion.*
+
+- **Categoria:** `FOCO`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 10 sessões de foco profundo completadas (250 minutos líquidos de dedicação).
+  - 🥈 **Tier 2 (Prata):** 50 sessões de foco (mais de 20 horas de estudo concentrado sem distrações).
+  - 🥇 **Tier 3 (Ouro):** 150 sessões registradas com associação direta às metas semestrais do Roadmap.
+  - 💎 **Tier 4 (Diamante):** 400 sessões de foco (mais de 160 horas de estudo profundo registradas no histórico).
+
+---
+
+### 🔥 6. Constância Inabalável (*Academic Streak*)
+*Premia a regularidade de estudo, registro no diário acadêmico e acompanhamento da trajetória.*
+
+- **Categoria:** `CONSTANCIA`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 5 dias consecutivos com atividades ou memórias registradas na plataforma.
+  - 🥈 **Tier 2 (Prata):** 21 dias de sequência ininterrupta (formação do hábito acadêmico).
+  - 🥇 **Tier 3 (Ouro):** 60 dias de streak ativo durante o período letivo.
+  - 💎 **Tier 4 (Diamante):** 150 dias de sequência ininterrupta (um semestre letivo completo com consistência diária).
+
+---
+
+### 🌐 7. Arquiteto Polímata (*Polymath Architect*)
+*Avalia a amplitude e profundidade do mapa de competências técnicas, científicas e humanas.*
+
+- **Categoria:** `COMPETENCIAS`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 5 competências mapeadas com ao menos uma evidência documental anexada.
+  - 🥈 **Tier 2 (Prata):** 15 competências distribuídas em 3 pilares diferentes (ex: Programação, Escrita Científica, Liderança).
+  - 🥇 **Tier 3 (Ouro):** 30 competências mapeadas, com ao menos 10 delas em nível de proficiência Avançado/Especialista.
+  - 💎 **Tier 4 (Diamante):** Matriz de competências completa com validação cognitiva por IA de score de confiança superior a 95% em todas as evidências.
+
+---
+
+### 🤝 8. Farol da Comunidade (*Community Beacon*)
+*Para vivências práticas de extensão universitária, projetos sociais e retorno do conhecimento à sociedade.*
+
+- **Categoria:** `EXTENSAO`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 1 projeto de extensão universitária registrado e aprovado pela instituição.
+  - 🥈 **Tier 2 (Prata):** 60 horas comprovadas de atuação direta em projetos de impacto social.
+  - 🥇 **Tier 3 (Ouro):** 150 horas de extensão com apresentação de resultados para a comunidade externa.
+  - 💎 **Tier 4 (Diamante):** 300+ horas de extensão com coordenação de oficinas, criação de cartilhas ou premiação comunitária.
+
+---
+
+### 🎯 9. Caçador de Oportunidades (*Opportunity Scout*)
+*Para o estudante estrategista que monitora editais, bolsas, intercâmbios e maratonas acadêmicas.*
+
+- **Categoria:** `EXTENSAO`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 5 editais de bolsas ou vagas favoritados e analisados no Scholarship Finder.
+  - 🥈 **Tier 2 (Prata):** 1 candidatura completa submetida a edital de fomento ou intercâmbio com documentação validada.
+  - 🥇 **Tier 3 (Ouro):** Aprovação comprovada em edital competitivo (PIBIC com bolsa, intercâmbio ou premiação em hackathon).
+  - 💎 **Tier 4 (Diamante):** 3 aprovações em editais nacionais ou internacionais de excelência acadêmica.
+
+---
+
+### 🤖 10. Simbionte Cognitivo (*Cortex Symbiont*)
+*Utilização madura da Inteligência Artificial do Academic Companion para diagnóstico e aceleração da formação.*
+
+- **Categoria:** `IA_ASSISTANT`
+- **Requisitos por Nível:**
+  - 🥉 **Tier 1 (Bronze):** 10 consultas contextuais realizadas com o Academic Assistant sobre a trajetória.
+  - 🥈 **Tier 2 (Prata):** 30 acontecimentos do diário higienizados e validados cognitivamente pelo motor JEV.
+  - 🥇 **Tier 3 (Ouro):** Construção de plano de estudos semestral e estratégia de carreira refinados pelo copiloto.
+  - 💎 **Tier 4 (Diamante):** Diagnóstico semestral completo de formação emitido com aproveitamento de 100% das recomendações estratégicas.
