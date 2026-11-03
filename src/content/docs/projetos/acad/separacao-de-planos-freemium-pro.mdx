@@ -1,0 +1,75 @@
+---
+title: Separação de Planos, Cobrança Flexível & Economia Circular
+description: Arquitetura completa do Plano Gratuito, Plano Pro e Plano Lab, cobrança flexível PIX/Cartão sem bitributação, testes grátis modulares (7d/30d) e os 4 potes de tokens com rollover para o Fundo Solidário.
+sidebar:
+  order: 15
+---
+
+# 💎 Separação de Planos, Cobrança Flexível & Economia Circular
+
+O **Academic Companion** opera um modelo híbrido e solidário que combina **Planos de Assinatura (`Plano Gratuito`, `Plano Pro`, `Plano Lab`)**, **Testes Grátis Modulares (7 e 30 dias)**, **Recargas Avulsas de Longa Duração (365 dias)** e uma **Economia Circular de Tokens** que direciona as sobras mensais dos assinantes para o **Fundo Solidário Universitário (`DonationPool`)**.
+
+---
+
+## 1. Matriz Direta de Planos
+
+A plataforma utiliza nomenclatura direta em toda a interface (`PlanBadge`, `/planos`, `PaywallModal`, `Wallet` e `Settings`):
+
+| Recurso / Módulo | Plano Gratuito (`STARTER_FREE`) | Plano Pro (`PRO_CHEF`) | Plano Lab (`LAB_GRAND_CRU`) |
+|---|---|---|---|
+| **Mensalidade** | R$ 0 / mês | R$ 29,90 / mês (ou R$ 25,40/mês no Semestral) | R$ 69,90 / mês (ou R$ 59,40/mês no Semestral) |
+| **Franquia Mensal (`planTokenBalance`)** | 100 Tk de cortesia | 1.500 Tk renovados todo ciclo | 5.000 Tk renovados todo ciclo |
+| **Destino das Sobras do Mês** | Reseta para 100 Tk | **Doado ao Fundo Solidário (`DonationPool`)** | **Doado ao Fundo Solidário (`DonationPool`)** |
+| **Diário de Memórias** | Até 5 memórias/mês | Memórias ilimitadas + Transcrição de Áudio IA | Memórias ilimitadas + Transcrição de Áudio IA |
+| **Radar de Oportunidades** | Busca manual aberta | **Alertas Ativos** no Telegram + Score de Afinidade | Alertas Ativos + Simulador de Baremas CAPES/CNPq |
+| **Currículo & Exportações** | Editor e Compilador LaTeX gratuitos | **Geração com IA para vagas + Exportador ABNT/PDF** | Tudo do Pro + Relatórios de Grupo de Pesquisa |
+| **Validação de Certificados** | Upload manual | **Leitura OCR Automática** de horas e instituição | Leitura OCR Automática |
+| **Fila de Processamento IA** | Padrão | Padrão | **Prioridade Máxima Expressa** |
+| **Badge na UI** | `Plano Gratuito` | `Plano Pro` | `Plano Lab` |
+
+---
+
+## 2. Cobrança Flexível: PIX Manual vs. Cartão Automático (Precedência do PIX)
+
+O estudante decide livremente como prefere manter seu plano ativo:
+
+1. **Somente PIX Manual (`preferredPaymentMethod = 'PIX'`, `autoRenewCard = false`):**
+   - Nenhuma cobrança automática é realizada. Faltando 5 dias para o fim do ciclo (`T-5d`), o estudante recebe um lembrete amigável para renovar via PIX com 1 clique.
+2. **Cartão Automático (`preferredPaymentMethod = 'CREDIT_CARD'`, `autoRenewCard = true`):**
+   - Renova automaticamente no vencimento (`T-0`).
+3. **Antecipação via PIX sem Dupla Cobrança:**
+   - Mesmo que o estudante tenha o cartão automático ativado, se ele decidir pagar via PIX antes do vencimento (`POST /api/plans/checkout-subscription-pix`), o webhook de aprovação **soma +30 dias (ou +180 dias)** ao `currentPeriodEnd` vigente (sem perder nenhum dia restante!). Como a data de vencimento já avançou para o ciclo seguinte, o cartão **jamais é cobrado naquele mês**.
+
+---
+
+## 3. Testes Grátis Modulares Sem Cartão (`UserFeatureTrial` & Ativação Automática pós-Guia Inicial)
+
+Em vez de um trial único e rígido, os testes grátis do **Academic Companion** começam **automaticamente assim que o estudante conclui o Guia Inicial (Onboarding)** via `OnboardingService.claimReward()` (ou podem ser ativados com 1 clique em `/planos` ou no `PaywallModal` sem exigir cartão de crédito):
+
+- **`PRODUCTIVITY_30D` (30 dias grátis):** Libera recursos de baixo custo marginal de infraestrutura (`UNLIMITED_MEMORIES`, `EXPORT_ABNT_PDF`, `RADAR_ACTIVE_ALERTS`, `ROADMAP_PREDICTIONS`) por 1 mês inteiro.
+- **`AI_PRO_7D` (7 dias grátis + 150 tokens):** Libera recursos intensivos em LLM (`DEEP_RAG_COPILOT`, `AUDIO_TRANSCRIPTION`, `AUTO_CERTIFICATE_VALIDATION`, `LATTES_XML_SYNC`) por 7 dias e credita **+150 tokens de degustação** em `bonusTokenBalance` (somados aos +15 tokens da jornada inicial = **+165 tokens**).
+
+### Cards Indicativos & Landing Page
+- **Landing Page (`LandingPricing.tsx`)**: Exibe a seção pública `#planos` com os 3 cards indicativos de degustação pós-Guia Inicial e Economia Circular, os 3 planos (`Plano Gratuito`, `Plano Pro` e `Plano Lab`) e a faixa de pacotes avulsos.
+- **Painel Geral (`TrialStatusCards.tsx`)**: Exibe cards indicativos no topo do Dashboard (`/painel`) mostrando o progresso do Guia Inicial para liberar os testes grátis ou a contagem regressiva em dias (`X dias restantes`) de cada pacote ativo.
+- **Modais do Guia Inicial (`WelcomeOverlayModal.tsx` e `OnboardingCelebrationModal.tsx`)**: Destacam os dois pacotes de teste grátis desbloqueados ao concluir o percurso inicial.
+
+O middleware `ensurePlan(requiredPlans, featureKey)` e o `SubscriptionContext` verificam automaticamente se o usuário possui plano ativo **ou** um `UserFeatureTrial` vigente para a funcionalidade requisitada.
+
+---
+
+## 4. Os 4 Potes de Saldo (FIFO) & Economia Circular (`DonationPool`)
+
+A tabela `UserWallet` separa os tokens em **4 saldos independentes por prazo de validade**, mantendo `tokenBalance` sempre sincronizado como a soma exata dos quatro:
+
+1. **`solidaryTokenBalance` (1º a consumir — Validade: 30 dias):**
+   - Recebido por estudantes aprovados no Programa Solidário (`isSolidaryBeneficiary = true`, `solidaryStatus = 'APPROVED'`). Se não for utilizado no mês, retorna ao `DonationPool`.
+2. **`planTokenBalance` (2º a consumir — Validade: ciclo de 30 dias):**
+   - Franquia mensal do plano. Na virada do ciclo dos assinantes **Plano Pro** e **Plano Lab**, qualquer saldo não utilizado é transferido para o `DonationPool` (`COMMUNITY_DONATION_OUT`) e contabilizado em `totalDonatedToPool`.
+3. **`bonusTokenBalance` (3º a consumir — Validade: 90 dias):**
+   - Bônus de boas-vindas (50 Tk), indicação de colegas e degustação de trial. Se expirar após 90 dias sem uso, reverte para o `DonationPool`.
+4. **`purchasedTokenBalance` (4º a consumir — Validade: 365 dias):**
+   - Tokens comprados em pacotes avulsos via PIX ou Cartão. Só são gastos quando os 3 potes anteriores estiverem zerados.
+
+### Distribuição Mensal aos Beneficiários Solidários
+Estudantes vulneráveis aprovados no Programa Solidário **permanecem no Plano Gratuito** (não ganham assinatura Pro/Lab gratuita), mas recebem mensalmente (via job `distributeSolidaryPoolToBeneficiaries()`) cotas de tokens em seu `solidaryTokenBalance` provenientes das sobras acumuladas no `DonationPool` no mês anterior.

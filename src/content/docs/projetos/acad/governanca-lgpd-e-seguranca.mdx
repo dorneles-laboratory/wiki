@@ -1,0 +1,62 @@
+---
+title: Governança Legal, LGPD, Privacidade e Segurança
+description: Arquitetura de conformidade com a LGPD, Marco Civil da Internet, CDC, governança de IA, Ferramenta do Lattes XML e blindagem de segurança do Academic Companion.
+sidebar:
+  order: 28
+---
+
+# ⚖️ Governança Legal, LGPD, Privacidade e Segurança (`acad`)
+
+O **Academic Companion (`acad`)** adota uma arquitetura de **Privacy by Design** e **Security by Default**, assegurando conformidade integral com a **Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD)**, o **Marco Civil da Internet (Lei nº 12.965/2014)** e o **Código de Defesa do Consumidor (Lei nº 8.078/1990)**.
+
+---
+
+## 1. Documentos Normativos e Rotas Públicas
+
+Todas as políticas institucionais estão disponíveis publicamente no Portal do Discente e integradas ao rodapé da Landing Page, ao fluxo de autenticação e à página de Configurações:
+
+| Documento | Rota no Portal | Escopo Principal |
+|---|---|---|
+| **Política de Privacidade e Proteção de Dados** | `/privacidade` (`/politica-de-privacidade`) | Inventário de dados pessoais, bases legais (Art. 7º da LGPD), operadores de IA e pagamentos, retenção e direitos do titular (Art. 18). |
+| **Termos e Condições Gerais de Uso (Política de Uso)** | `/termos` (`/termos-de-uso`) | Regras de integridade acadêmica, responsabilidade sobre declarações no Currículo Lattes (Art. 299 do CP), economia de tokens, licença pessoal e regras comunitárias. |
+| **Política de Reembolso e Cancelamento** | `/reembolso` (`/politica-de-reembolso`) | Direito incondicional de arrependimento em 7 dias (Art. 49 do CDC), regras de estorno PIX e Cartão via Mercado Pago, cancelamento de renovação de planos Pro e franquia de tokens IA. |
+| **Política de Cookies e Armazenamento Local** | `/cookies` | Transparência sobre cookies estritamente necessários (`accessToken`, `refreshToken`, `sidebar_state`) conforme Guia Orientativo da ANPD, sem rastreamento de terceiros. |
+| **Consentimento Etário e Proteção de Menores** | `/idade` (`/consentimento-idade`) | Conformidade estrita com o Art. 14 da LGPD (melhor interesse do adolescente) e ECA (Lei 8.069/1990), elegibilidade, assistência legal para discentes de 16 a 18 anos e canais para responsáveis. |
+| **Central de Direitos LGPD & Governança de IA** | `/lgpd` | Portabilidade de dados em JSON (`GET /api/auth/export-data`), eliminação de conta (`DELETE /api/auth/account`), governança de transcrição de voz e processamento por LLMs. |
+
+---
+
+## 2. Direitos do Titular (Art. 18 da LGPD) e Registro de Consentimento
+
+1. **Portabilidade e Acesso Completo (`GET /api/auth/export-data`):**
+   - Na aba `Configurações → Privacidade & Dados`, o estudante pode exportar instantaneamente um pacote JSON contendo seu perfil, experiências, memórias, disciplinas, currículos e histórico.
+2. **Eliminação de Dados e Exclusão de Conta (`DELETE /api/auth/account`):**
+   - Suporta tanto contas locais (mediante validação de senha) quanto contas autenticadas via Single Sign-On (Dorneles IdP, Google, GitHub, mediante confirmação explícita `"EXCLUIR MINHA CONTA"`).
+   - Preserva apenas os registros obrigatórios por lei (logs de conexão pelo prazo de 6 meses do Art. 15 do Marco Civil da Internet e registros fiscais/financeiros pelo prazo legal).
+3. **Trilha Auditável de Consentimento (`user_consents`):**
+   - O endpoint `POST /api/auth/consent` registra na tabela `user_consents` o aceite de `TERMS_OF_USE`, `PRIVACY_POLICY`, `COOKIE_POLICY` e `AI_GOVERNANCE` com versão do documento, timestamp, IP e User-Agent.
+
+---
+
+## 3. Segurança da API e Controle de Acesso
+
+- **Verificação Criptográfica Estrita de JWT:** O middleware `ensureAuthenticated` valida rigorosamente a assinatura criptográfica do token de acesso (`type: 'access'`) e confirma que o usuário está ativo (`isActive: true` e `deletedAt: null`) no banco de dados.
+- **Isolamento de Privilégios (`ensureAdmin`):** Operações administrativas e mutações globais (como criação/edição de oportunidades globais em `/api/opportunities` e aprovações simuladas de sandbox) exigem verificação explícita de papel `ADMIN`.
+- **Proteção contra SSRF e XSS em Uploads:**
+  - O importador do Currículo Lattes valida estritamente que URLs externas pertençam ao domínio oficial `*.cnpq.br`.
+  - O middleware de upload bloqueia arquivos executáveis e `image/svg+xml`, limitando o buffer em memória a 25 MB.
+- **Validação de Webhooks:**
+  - **Mercado Pago (`/api/webhooks/mercadopago`):** Verifica assinatura HMAC-SHA256 incluindo `x-request-id` e timestamp.
+  - **Telegram (`/api/telegram/webhook/:userId`):** Exige correspondência exata do cabeçalho `x-telegram-bot-api-secret-token` e valida propriedade (`studentId`) em todos os check-ins e callbacks interativos.
+
+---
+
+## 4. Ecossistema Lattes (XML CNPq, PDF e Assistente IA)
+
+A ferramenta do Currículo Lattes no `acad` opera em três frentes integradas:
+1. **Importação Estruturada de XML Oficial do CNPq (`POST /api/memories/lattes/xml`):**
+   - Faz o parsing nativo do arquivo `CURRICULO-VITAE` (`.xml`) exportado da Plataforma Lattes, extraindo Dados Gerais, Formação Acadêmica, Atuação Profissional, Projetos de Pesquisa, Artigos Publicados, Trabalhos em Eventos, Produções Técnicas, Prêmios e Idiomas, sincronizando automaticamente `AcademicMemory`, `Experience` e `ProfileEntry`.
+2. **Assistente de Preenchimento com Cache Inteligente (`/toolkit/lattes-assistant`):**
+   - Transforma vivências e memórias do estudante em descrições no padrão formal do CNPq, armazenando as sugestões geradas em cache no banco (`metadata.lattesSuggestion`) para carregamento instantâneo e controle de status (`pending`, `prepared`, `confirmed`, `ignored`) tanto em experiências quanto em memórias avulsas.
+3. **Exportação XML CNPq (`GET /api/toolkit/lattes/export-xml`):**
+   - Gera documento XML estruturado no layout `<CURRICULO-VITAE>` pronto para backup e interoperabilidade acadêmica.

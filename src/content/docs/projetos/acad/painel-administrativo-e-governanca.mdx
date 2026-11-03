@@ -192,7 +192,7 @@ A tela de insígnias descentraliza o reconhecimento acadêmico através de gamif
   - Edição de metadados, categoria e coordenadas geográficas decimais.
   - Exclusão definitiva de pontos protegida por autenticação de senha de administrador (`AdminPasswordModal`).
 
-### 10. Moderação de Feed & Governança de Conteúdo (`/moderacao`)
+### 12. Moderação de Feed & Governança de Conteúdo (`/moderacao`)
 - **Filtro Preliminar Síncrono (Zero Tolerância a Violações Óbvias):**
   - Análise em tempo real de profanidade pt-BR (via dicionário customizado e lematização) e quarentena de links maliciosos ou encurtadores suspeitos.
   - Rejeição síncrona com código HTTP `422 Unprocessable Content` e mensagem descritiva antes de qualquer gravação no banco.
@@ -208,6 +208,21 @@ A tela de insígnias descentraliza o reconhecimento acadêmico através de gamif
   - Aba dedicada no painel para triagem de publicações sinalizadas por estudantes por motivos como `SPAM`, `HATE_SPEECH`, `HARASSMENT`, `FALSE_INFORMATION`, `OFFENSIVE_MEDIA` ou `OTHER`.
   - Histórico de denúncias, nomes dos relatores e justificativas apresentadas ao lado do post original.
   - Decisões de moderação com parecer técnico opcional enviado como feedback ao autor.
+
+### 13. Fila do Pipeline & Enriquecimento Cognitivo (`/fila-processamento`)
+- **Monitoramento em Tempo Real da Esteira Sentinel → Acad → Cortex:**
+  - Acompanhamento de editais sincronizados aguardando resumo executivo por IA, indicações de fontes e pontos de campus pendentes de dossiê automatizado.
+  - Disparo manual de processamento em lote e inspeção de latência e falhas por modelo LLM.
+
+### 14. Simulador Financeiro e de Escala (`/simulador`)
+- **Projeção de Unit Economics e Capacidade:**
+  - Simulação interativa de crescimento da base discente, conversão Freemium → Pro (`PRO_CHEF` / `LAB_GRAND_CRU`), consumo médio de tokens de IA por estudante, custos de infraestrutura (VPS, S3, Banco) e ponto de equilíbrio (breakeven).
+
+### 15. Auditoria de Acessos & Configuração Dinâmica de OAuth (`/acessos`)
+- **Trilha de Auditoria de Autenticação:**
+  - Monitoramento de logins via Dorneles IdP (OIDC), Google, GitHub, LinkedIn e credenciais locais, com registro de IP, User-Agent e tentativas malsucedidas.
+- **Gestão Dinâmica de Provedores OAuth:**
+  - Habilitação/desabilitação e configuração segura de Client ID, Client Secret mascarado e Redirect URI diretamente pelo painel.
 
 ---
 

@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
+import vercel from '@astrojs/vercel';
 
 const schemaOrgJsonLd = JSON.stringify({
   "@context": "https://schema.org",
@@ -51,6 +52,7 @@ const schemaOrgJsonLd = JSON.stringify({
 
 // https://astro.build/config
 export default defineConfig({
+  adapter: vercel(),
   site: 'https://wiki.dorneles.dev',
   integrations: [
     react(),
