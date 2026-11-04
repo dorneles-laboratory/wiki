@@ -32,8 +32,11 @@ Diferente de abordagens estáticas que exigem alteração manual de arquivos `.e
 
 ## 🌐 3. Provedores Federados (Google, LinkedIn & GitHub)
 
-### Google OAuth 2.0
-Suporta autenticação com contas institucionais (como `@ufsm.br`) e contas pessoais Google.
+### Google OAuth 2.0 & Integração Google Calendar
+Suporta autenticação com contas institucionais (como `@ufsm.br`) e contas pessoais Google:
+- **Consistência de Identidade & Trava de Conta:** Ao clicar em *"Conectar Google Agenda"* no Calendário Acadêmico ou em Configurações, o sistema valida se o usuário já possui uma conta Google associada. Caso possua, o parâmetro `login_hint` é enviado obrigatoriamente para a API do Google junto a `prompt: 'consent'`, direcionando o fluxo diretamente para a conta conectada e suprimindo o seletor de contas do navegador.
+- **Validação Estrita no Callback:** Se por qualquer mecanismo o discente selecionar uma conta Google distinta da conta vinculada ao seu usuário, o backend recusa a operação com erro HTTP 400 explicativo, impedindo a mistura de calendários de identidades divergentes.
+- **Usuários Cadastrados sem Google:** Para usuários que realizaram cadastro via credenciais locais (e-mail/senha) e ainda não possuem vínculo Google, o sistema permite a conexão sob demanda exibindo o seletor de contas, vinculando a conta escolhida ao seu `IntegrationAccount` e garantindo que ela não pertença a outro discente na plataforma.
 
 ### LinkedIn OpenID Connect
 Permite identificação através do perfil profissional do LinkedIn e habilita a publicação automática de conquistas acadêmicas.
