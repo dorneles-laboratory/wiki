@@ -45,9 +45,12 @@ A **Agenda Acadêmica** oferece um ambiente centralizado para planejamento tempo
 
 ### 🔄 Sincronização Avançada com Google Calendar
 - **Escopos Completos:** Suporte a leitura e escrita (`calendar.events` e `calendar`), permitindo que compromissos criados ou excluídos no Academic Companion sejam refletidos automaticamente na agenda do Google do estudante.
-- **Paginação e Janela Ampla:** O sincronizador busca eventos reais em uma janela de -180 dias até +365 dias com loop paginado (`nextPageToken`), puxando todo o histórico relevante da vida acadêmica.
+- **Suporte a Múltiplas Agendas (Multi-Calendar):** A integração consulta `users/me/calendarList` para extrair compromissos não apenas da agenda primária (`primary`), mas também de agendas secundárias criadas pelo discente (aulas, faculdade, eventos e calendários com acesso de leitor/escritor).
+- **Tratamento de Eventos Privados e Dia Inteiro:** Preservação de eventos com visibilidade privada/confidencial e tratamento seguro de fuso horário em eventos de dia inteiro (`start.date`) evitando desvios para o dia anterior devido a UTC offset drift.
+- **Paginação e Janela Ampla:** O sincronizador busca eventos reais em uma janela de -365 dias até +730 dias com loop paginado (`nextPageToken`), puxando todo o histórico relevante e planejamento futuro da vida acadêmica.
 - **Desduplicação Inteligente no Backend:** A persistência é realizada via upsert com detecção de tags `[google_event_id:...]` e correspondência de título, data e horário, evitando qualquer multiplicação de registros ao sincronizar repetidamente.
 - **Idempotência e Resiliência no Callback OAuth 2.0:** O fluxo de retorno do Google (`/auth/google/callback`) implementa proteção por chave única em `sessionStorage` e sanitização imediata da URL (`history.replaceState`), evitando que recarregamentos manuais (F5) ou duplo disparo re-enviem códigos já consumidos. No backend (`AuthService.handleGoogleCallback`), caso o código de autorização falhe por já ter sido trocado, o sistema valida a existência da integração ativa do discente no banco e devolve a sessão com sucesso, prevenindo erros 400 (`invalid_grant`).
+- **Ativação da Google Calendar API no GCP:** Requer que a **Google Calendar API** (`calendar-json.googleapis.com`) esteja habilitada no projeto Google Cloud correspondente às credenciais OAuth. Caso esteja desativada, o backend emite diagnóstico e instrução direta com link para o console.
 
 
 ### 🔍 Modal de Detalhes do Evento (`EventDetailsModal`)
