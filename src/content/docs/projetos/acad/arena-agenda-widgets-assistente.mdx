@@ -43,6 +43,25 @@ A **Agenda Acadêmica** oferece um ambiente centralizado para planejamento tempo
 ### 🗄️ Modelo de Dados (Prisma)
 - **`CalendarEvent`**: Entidade relacional indexada por `studentId` e `date`.
 
+### 🔄 Sincronização Avançada com Google Calendar
+- **Escopos Completos:** Suporte a leitura e escrita (`calendar.events` e `calendar`), permitindo que compromissos criados ou excluídos no Academic Companion sejam refletidos automaticamente na agenda do Google do estudante.
+- **Paginação e Janela Ampla:** O sincronizador busca eventos reais em uma janela de -180 dias até +365 dias com loop paginado (`nextPageToken`), puxando todo o histórico relevante da vida acadêmica.
+- **Desduplicação Inteligente no Backend:** A persistência é realizada via upsert com detecção de tags `[google_event_id:...]` e correspondência de título, data e horário, evitando qualquer multiplicação de registros ao sincronizar repetidamente.
+- **Idempotência e Resiliência no Callback OAuth 2.0:** O fluxo de retorno do Google (`/auth/google/callback`) implementa proteção por chave única em `sessionStorage` e sanitização imediata da URL (`history.replaceState`), evitando que recarregamentos manuais (F5) ou duplo disparo re-enviem códigos já consumidos. No backend (`AuthService.handleGoogleCallback`), caso o código de autorização falhe por já ter sido trocado, o sistema valida a existência da integração ativa do discente no banco e devolve a sessão com sucesso, prevenindo erros 400 (`invalid_grant`).
+
+
+### 🔍 Modal de Detalhes do Evento (`EventDetailsModal`)
+- Ao clicar em qualquer bloco ou compromisso na grade (visão semanal, diária, calendário de mesa mensal ou linha do tempo horizontal), o sistema abre uma janela modal com informações completas: título, badge de categoria, data por extenso, horário e duração estimada, localização com suporte a links externos (Google Meet / Zoom) e descrição detalhada, além da ação para exclusão segura.
+
+### 📄 Importação de Cronograma em PDF em Segundo Plano
+- **Processamento Assíncrono:** O discente pode fazer upload de calendários em PDF e minimizar a janela para continuar estudando ou navegando no sistema.
+- **Indicador Flutuante (`ScheduleProcessFloatingPill`):** Exibe a porcentagem e o status da extração no canto inferior da interface, permitindo reabrir e revisar os eventos a qualquer instante.
+- **Fallback Determinístico Resiliente:** Caso o serviço Cortex AI esteja temporariamente indisponível ou o usuário esteja sem saldo de tokens, um analisador determinístico por expressões regulares extrai datas, horários e títulos diretamente do texto do arquivo, eliminando erros 422.
+
+### ⚙️ Preferência de Início da Semana (Domingo vs Segunda)
+- Por padrão institucional e acadêmico, a semana inicia no **Domingo**.
+- Nas **Configurações &gt; Aparência**, o estudante pode facilmente selecionar se prefere que a semana comece na **Segunda-feira**, ajustando reativamente todos os componentes de calendário e grade de horários.
+
 ### 🔔 Consentimento e Lembretes Nativos (`NotificationPermissionCard`)
 - **Card Explicativo Pré-Permissão:** Em vez de disparar a janela intrusiva do navegador imediatamente na montagem da tela, o sistema exibe um card dedicado detalhando os benefícios dos lembretes (alertas automáticos de aulas, avaliações, prazos e editais, mesmo com o navegador em segundo plano).
 - **Ações:** Botão "Permitir Notificações" (que aciona `Notification.requestPermission()`) e opção "Agora não" que persiste a decisão no armazenamento local (`localStorage`).

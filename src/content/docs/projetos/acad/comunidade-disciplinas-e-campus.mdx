@@ -136,7 +136,8 @@ A plataforma unifica duas camadas complementares de dados institucionais para ga
 | `GET` | `/api/university/universities` | Pública | Retorna catálogo de universidades com campi, centros e limites geográficos |
 | `GET` | `/api/university/places` | Pública | Lista os locais aprovados com filtros por universidade, campus, busca e tipo |
 | `GET` | `/api/university/places/:identifier` | Pública | Detalhes de um local específico por ID ou slug |
-| `GET` | `/api/university/stats` | Pública | Estatísticas reais do campus (prédios, centros, locais e comunidade) |
+| `GET` | `/api/university/stats` | Pública | Estatísticas reais do campus (prédios, centros, locais, comunidade e pioneiro) |
+| `GET` | `/api/university/credits` | Pública | Mural de créditos consolidado (pioneiros de campus, top cartógrafos e co-criadores) |
 | `POST` | `/api/university/places` | Pública / Discente | Submete sugestão de novo local (status inicial `PENDING` para moderação) |
 | `GET` | `/api/university/admin/places` | Obrigatória (`ADMIN`) | Lista todos os locais para auditoria com filtros de status e busca |
 | `PATCH` | `/api/university/admin/places/:id/review` | Obrigatória (`ADMIN`) | Aprova ou rejeita com justificativa técnica e feedback |
@@ -146,6 +147,9 @@ A plataforma unifica duas camadas complementares de dados institucionais para ga
 ### 🎨 Frontend Discente & Landing Page
 - **Portal Discente (`apps/frontend/src/pages/my-university/MyUniversity.tsx`):**
   - Seletor de instituição e campus sincronizado com o perfil acadêmico do usuário logado via `Combobox`.
+  - **Banner do Pioneiro do Campus:** Identifica com destaque o estudante que georreferenciou e inaugurou o campus selecionado no sistema, com foto, nome, `@username` e data de catalogação.
+  - **Crédito de Autoria nos Locais (`submitter`):** Cada local selecionado no mapa exibe seu respectivo autor no card de detalhes, com avatar, username, curso e a insígnia oficial de *Cartógrafo Universitário*.
+  - **Atalho para o Mural de Créditos:** Botão no cabeçalho com ícone de troféu permitindo acesso rápido à página `/creditos`.
   - Cards de KPIs reais sem fallbacks fictícios.
   - Busca instantânea e filtragem por tipo de espaço.
   - Card de detalhes com rotas ("Como chegar" via Google Maps) e cópia rápida de coordenadas.
@@ -160,20 +164,41 @@ A plataforma unifica duas camadas complementares de dados institucionais para ga
 
 ---
 
+## 🏆 4. Mural de Créditos & Colaboradores (`/creditos`)
+
+A rota `/creditos` (também acessível por `/construa-comigo/creditos`) foi estruturada para homenagear publicamente todos os discentes e pesquisadores que enriquecem o ecossistema com dados georreferenciados e sugestões aprovadas, sem dados mockados.
+
+### 🏛️ Diretrizes de Autoria & Governança Moral
+Em estrita conformidade com a **Lei de Direitos Autorais (Lei nº 9.610/1998, Art. 8º, I)** e a **Lei do Software (Lei nº 9.609/1998)**, a plataforma protege o desenvolvedor e titular dos direitos patrimoniais do código-fonte (Fernando Dorneles da Silva / Dorneles Laboratory), garantindo concomitantemente o **reconhecimento moral e público** inalienável de toda colaboração voluntária.
+
+### 📐 Dimensões de Reconhecimento Comunitário
+A tela é servida pelo hook `useCampusCredits` alimentado pelo endpoint `GET /api/university/credits`:
+
+1. **🏛️ Pioneiros de Universidades & Campi:** Exibe os discentes que inauguraram e georreferenciaram cada universidade e campus no mapa, com o primeiro local cadastrado, data e link direto de navegação.
+2. **🗺️ Top Cartógrafos de Campus:** Ranking dos estudantes com maior número de pontos de interesse auditados e aprovados, exibindo posições de pódio com medalhas olímpicas (1º ouro, 2º prata, 3º bronze) e insígnias de maturidade (*Cartógrafo Universitário*, *Mestre Cartógrafo* e *Grão-Mestre Cartógrafo*).
+3. **💡 Co-criadores do Produto:** Mural de honra dos colaboradores do programa *Construa Comigo*, documentando as funcionalidades sugeridas, versões implementadas e instituições de origem.
+
+---
+
 ## 🧪 Cobertura de Testes (Vitest)
 
 Todos os fluxos possuem testes unitários e de integração implementados:
 1. `apps/frontend/tests/pages/ConstruaComigo.spec.tsx` (4 testes: feed, tags, like toggle, composer)
 2. `apps/frontend/tests/pages/HubDisciplinas.spec.tsx` (4 testes: métricas, grade em colunas, modais)
 3. `apps/frontend/tests/components/Combobox.spec.tsx` (3 testes: seleção de item, exibição da lista completa ao abrir com valor prévio, digitação ativa com filtro)
-4. `apps/frontend/tests/pages/MyUniversity.spec.tsx` (9 testes: seletores Combobox, desambiguação institucional, estatísticas do banco, listagem e modal)
-5. `apps/frontend/tests/pages/Assistant.spec.tsx` (8 testes: layout Gemini, sidebar retrátil com pin e hover)
-6. `apps/admin/tests/pages/CampusAudit.spec.tsx` (3 testes: KPIs de moderação, aprovação/rejeição e exclusão segura)
+4. `apps/frontend/tests/pages/MyUniversity.spec.tsx` (11 testes: seletores Combobox, desambiguação institucional, banner de pioneiro, crédito de cartógrafo no local, estatísticas do banco, listagem e modal)
+5. `apps/frontend/tests/pages/CreditsPage.spec.tsx` (4 testes: renderização do hero, diretrizes legais, pioneiros de campus, top cartógrafos e co-criadores)
+6. `apps/backend/tests/unit/campus/campus.service.spec.ts` (3 testes: enriquecimento de submitter em locais, identificação de pioneiro em stats e agregação de créditos)
+7. `apps/frontend/tests/pages/Assistant.spec.tsx` (8 testes: layout Gemini, sidebar retrátil com pin e hover)
+8. `apps/admin/tests/pages/CampusAudit.spec.tsx` (3 testes: KPIs de moderação, aprovação/rejeição e exclusão segura)
 
 Para rodar as suítes:
 ```bash
 # Frontend Discente
-cd apps/frontend && npx vitest run tests/pages/MyUniversity.spec.tsx tests/pages/Assistant.spec.tsx
+cd apps/frontend && npx vitest run tests/pages/MyUniversity.spec.tsx tests/pages/CreditsPage.spec.tsx
+
+# Backend
+cd apps/backend && npx vitest run --config tests/unit/vitest.unit.config.ts tests/unit/campus/campus.service.spec.ts
 
 # Painel Administrador
 cd apps/admin && npx vitest run tests/pages/CampusAudit.spec.tsx
