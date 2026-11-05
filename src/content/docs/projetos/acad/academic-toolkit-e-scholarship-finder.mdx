@@ -338,7 +338,7 @@ A Landing Page da plataforma foi completamente reestruturada para oferecer uma e
 - **Modelo de Dados Prisma (`UserToolkitState`):**
   - `userId`: Chave estrangeira única vinculada ao `User`.
   - `unlockedWidgets String[]`: Lista de IDs de widgets desbloqueados no Dashboard (inicia vazia `[]` em novos cadastros).
-  - `pinnedTools String[]`: Lista de ferramentas fixadas pelo discente nos atalhos.
+  - `pinnedTools String[]`: Lista de ferramentas fixadas pelo discente nos atalhos (inicia estritamente vazia `[]`, sem itens pré-fixados).
 - **Endpoints RESTful Dedicados:**
   - `GET /api/toolkit/user-preferences`: Retorna as preferências salvas no banco.
   - `POST /api/toolkit/unlock-widget`: Desbloqueia o widget no banco com flag `unlocked: true` e `alreadyUnlocked: boolean`.
@@ -347,4 +347,36 @@ A Landing Page da plataforma foi completamente reestruturada para oferecer uma e
   - Contas novas iniciam com os widgets do Dashboard bloqueados exibindo o cartão de convite com o nome da tela e botão direto de visitação.
   - Ao visitar a tela da ferramenta (`/perfil-academico`, `/memories`, `/experiences`, etc.), a API persiste o desbloqueio no banco e emite feedback imediato via Sonner Toast (`toast.success()`).
   - O estado é sincronizado entre dispositivos e navegadores com isolamento total por usuário.
+
+---
+
+## 🏛️ Separação de Telas do Sistema, Ferramentas de Sistema e Governança de Dados
+
+### 1. Desacoplamento entre Telas Nativas e Ferramentas do Toolkit
+Para preservar a clareza arquitetural e evitar sobreposição de responsabilidades, o ecossistema estabelece uma divisão rigorosa:
+
+- **Telas Principais do Sistema (Módulos Estruturantes da Sidebar):**
+  - **Hub de Projetos** (`/hub-projetos`): Gestão de projetos, laboratórios e apontamento integrado ao PGI-PROA.
+  - **Minha Universidade & Campus** (`/minha-universidade`): Guia institucional, mapa do campus e serviços universitários.
+  - **Construa Comigo** (`/construa-comigo`): Feed comunitário, fórum e canal de propostas da comunidade acadêmica.
+  - **Diretório de Fontes** (`/diretorio-fontes`): Catálogo oficial de portais e fontes públicas de editais monitorados.
+  - **Copiloto Acadêmico** (`/assistant`): Assistente conversacional contextualizado em tempo real.
+  *Essas telas residem exclusivamente nas seções de navegação da aplicação (`AppSidebar`) e **NÃO** são cadastradas como ferramentas dentro da tabela `toolkit_tools`.*
+
+- **Ferramentas do Catálogo do Academic Toolkit (`/toolkit`):**
+  - Agrupa utilitários especializados com rotas próprias (`/toolkit/*`) ou externas, divididas entre:
+    - **Ferramentas de Sistema (`isSystem: true`):** Disponíveis no código da aplicação e populadas automaticamente no banco de dados na inicialização (`telegram-copilot`, `experience-center`, `scholarship-finder`, `lattes-assistant`, `roadmap-planner`, `linkedin-impact-builder`, `hub-disciplinas`, `resume-builder`, `event-discovery`, `arena-academica`).
+    - **Ferramentas de Ideação & Validação Comunitária (`isSystem: false` ou `COMING_SOON`):** Propostas conceituais submetidas para votação e mensuração de interesse discente (`idea-lab`, `publication-assistant`, `cover-letter`, `research-finder`).
+
+### 2. Auto-População e Garantia de Ferramentas de Sistema (`ensureDefaultSystemTools`)
+Na inicialização do backend (`bootstrap()` em `src/server.ts`), o método `toolkitService.ensureDefaultSystemTools()`:
+1. Executa uma limpeza seletiva (`deleteMany`) removendo quaisquer slugs de telas nativas do sistema da tabela `toolkit_tools`.
+2. Executa operações idempotentes de `upsert` para todas as 14 ferramentas de sistema com base na matriz canônica `DEFAULT_SYSTEM_TOOLKIT_TOOLS`, garantindo sua presença permanente em dev e produção.
+
+### 3. Eliminação Total de Dados Mockados e Início Limpo
+Em conformidade com a Regra Global nº 1 da arquitetura:
+- **Zero Prédios Pré-Cadastrados:** A tabela de locais de campus (`campus_places`) inicia limpa, sendo alimentada e auditada organicamente pela comunidade.
+- **Coordenadas Iniciais Neutras:** O catálogo oficial de instituições do MEC inicia sem polígonos ou coordenadas forçadas, adotando visualização nacional ampla até que os próprios usuários ou a auditoria georreferenciem os prédios.
+- **Zero Editais Mockados:** O motor de eventos (`OpportunityService`) opera exclusivamente sobre editais e eventos reais minerados pelo pipeline automatizado, gerando métricas, calendário e insights de IA dinamicamente.
+
 
