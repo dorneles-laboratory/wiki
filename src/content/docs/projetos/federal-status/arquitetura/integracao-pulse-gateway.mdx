@@ -1,0 +1,106 @@
+---
+title: Integração com o Pulse Telemetry Gateway
+description: Arquitetura de telemetria híbrida e sincronização de contratos de monitoramento sintético entre FederalStatus e Pulse.
+---
+
+## Visão Geral
+
+O **FederalStatus** integra-se ao **Pulse Telemetry Engine** como gateway inteligente de monitoramento sintético.
+Essa integração permite que o FederalStatus delegue a medição contínua e a verificação de desempate de borda para o Pulse, mantendo um canal de sincronização bidirecional em tempo real:
+
+1. **Sincronização de Contratos (FederalStatus → Pulse):**
+   Todos os serviços monitorados das universidades federais cadastradas no FederalStatus são exportados e mantidos em sincronia no Pulse via endpoint autenticado M2M (`POST /api/contracts/batch-sync`).
+2. **Recebimento de Eventos via Webhook (Pulse → FederalStatus):**
+   O Pulse notifica alterações de status, latência e resultados de desempate (Cloudflare Tiebreaker) através do endpoint `/api/telemetry/pulse-callback`.
+3. **Resiliência e Fallback Transparente:**
+   Caso o Pulse Gateway esteja temporariamente inacessível, o FederalStatus chaveia automaticamente para seu motor interno autônomo, sem perda de continuidade de monitoramento.
+
+---
+
+## Arquitetura de Comunicação M2M
+
+```mermaid
+flowchart TD
+    subgraph FederalStatus["FederalStatus (Porta 5005)"]
+        FS_Cron["BatchSchedulerService / Boot"]
+        FS_Client["PulseClientService"]
+        FS_Webhook["/api/telemetry/pulse-callback"]
+        FS_DB[("PostgreSQL (federal_db)")]
+    end
+
+    subgraph Pulse["Pulse Telemetry Gateway (Porta 5013)"]
+        P_M2M["/api/contracts/batch-sync"]
+        P_Engine["SMART_HYBRID Engine"]
+        P_DB[("PostgreSQL (pulse_db)")]
+        P_Redis[("Redis BullMQ")]
+    end
+
+    subgraph Edge["Cloudflare Edge Workers"]
+        CF["Ping Worker (Juiz de Desempate)"]
+    end
+
+    FS_Cron -->|1. Sincroniza Alvos (X-API-Key)| FS_Client
+    FS_Client -->|2. POST /batch-sync| P_M2M
+    P_M2M --> P_DB
+    P_Engine --> P_Redis
+    P_Engine -.->|Se VPS detectar falha| CF
+    P_Engine -->|3. POST Webhook /pulse-callback| FS_Webhook
+    FS_Webhook -->|4. Ingestão e Cálculo de Uptime| FS_DB
+```
+
+---
+
+## Variáveis de Ambiente (Desenvolvimento)
+
+Em `apps/backend/.env.development`:
+
+```env
+# Integração Pulse Gateway (Ambiente de Desenvolvimento)
+USE_PULSE_GATEWAY=true
+PULSE_GATEWAY_URL="http://localhost:5013/api"
+PULSE_M2M_API_KEY="pulse-m2m-secret-dev-change-in-production"
+PULSE_CALLBACK_URL="http://localhost:5005/api/telemetry/pulse-callback"
+```
+
+> **Atenção:** Em conformidade com as diretrizes de isolamento de infraestrutura, esta integração opera exclusivamente em ambiente de desenvolvimento local, sem qualquer impacto em produção (`.env.production` mantido estritamente inalterado).
+
+---
+
+## Endpoints REST Disponíveis
+
+### `POST /api/sys/telemetry/sync-pulse`
+Força a sincronização imediata de todos os `UniversityService` cadastrados no FederalStatus para o Pulse Gateway.
+- **Autenticação:** Sessão SysAdmin (Plataforma)
+- **Resposta (200):**
+  ```json
+  {
+    "message": "Sincronização com Pulse Gateway finalizada.",
+    "success": true,
+    "totalServices": 69,
+    "created": 68,
+    "updated": 1
+  }
+  ```
+
+### `POST /api/telemetry/pulse-callback`
+Endpoint de ingestão acionado pelo webhook do Pulse Gateway.
+- **Payload:**
+  ```json
+  {
+    "contractId": "cmvs...",
+    "name": "UFSM - Portal do Aluno",
+    "url": "https://portal.ufsm.br",
+    "currentStatus": "ONLINE",
+    "latencyMs": 48,
+    "statusCode": 200,
+    "engineUsed": "LOCAL",
+    "timestamp": "2026-11-04T18:00:00.000Z"
+  }
+  ```
+- **Resposta (200):**
+  ```json
+  {
+    "received": true,
+    "processed": true
+  }
+  ```

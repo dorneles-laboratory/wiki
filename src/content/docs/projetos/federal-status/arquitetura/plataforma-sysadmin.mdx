@@ -1,0 +1,29 @@
+---
+title: Plataforma SysAdmin e Governança
+description: Arquitetura de controle central, telemetria nacional, convites e impersonação de universidades.
+---
+
+# Plataforma SysAdmin e Governança Central
+
+Além dos painéis institucionais dedicados a cada equipe técnica de universidade (NOC), o FederalStatus dispõe de um módulo central de controle restrito a administradores da plataforma (`PlatformUser`).
+
+## 1. Módulos e Capacidades
+
+- **Autenticação SysAdmin (`/sys/auth`):** Sessões isoladas com JWT dedicado e refresh tokens com expiração configurável.
+- **Gestão de Universidades Federais (`/sys/universities`):** Cadastro, edição, status de participação institucional e vinculação geográfica (região e estado via IBGE).
+- **Convites Institucionais (`/sys/invites`):** Geração de links seguros com expiração (padrão de 3 dias) para delegação do primeiro operador técnico (`OWNER_TI`) da universidade.
+- **Impersonação Segura (`/sys/impersonate`):** Permite ao SysAdmin assumir temporariamente a visualização de qualquer universidade cadastrada para depuração e suporte em tempo real, sem necessidade de saber a senha do operador.
+- **Telemetria Central (`/sys/telemetry`):**
+  - Monitoramento de lotes de ping em tempo real.
+  - Gatilho manual para execução de ciclos de teste.
+  - Gatilho manual para consolidação (rollup) de métricas de retenção.
+
+## 2. Matriz de Permissões
+
+| Papel | Escopo | Acesso |
+|---|---|---|
+| `SUPER_ADMIN` | Global (Nacional) | Acesso irrestrito a todas as rotas `/sys/*` e dados institucionais |
+| `AUDITOR` | Global (Leitura) | Visualização analítica sem permissão de mutação ou convites |
+| `OWNER_TI` | Universitário | Gestão total da própria universidade |
+| `OPERATOR_SRE` | Universitário | Gestão de serviços e incidentes da universidade |
+| `VIEWER` | Universitário | Visualização do painel administrativo da universidade |
