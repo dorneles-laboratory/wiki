@@ -209,3 +209,29 @@ A seção de planos e aquisição de tokens do portal discente é gamificada no 
 - No momento do fechamento da comanda, o discente pode optar por incluir uma gorjeta para a manutenção e sustentabilidade da infraestrutura da plataforma.
 - **Bonificação:** Cada R$ 1,00 de gorjeta concedido é retribuído diretamente com **60 tokens de IA adicionais**, creditados imediatamente na carteira.
 - Finalizada a comanda, é emitido um **Recibo Gastronômico Digital** com ID de comprovação e notificação in-app de confirmação.
+
+---
+
+## 🤝 O Fundo Solidário Universitário (`/fundo-solidario`)
+
+O **Fundo Solidário Universitário** é a concretização do princípio de economia circular e responsabilidade social acadêmica:
+
+### 1. Pilares do Fundo Solidário
+- **Recolhimento Comunitário Automático:** No último instante de cada mês, as cotas de tokens que expirariam de planos Pro e Lab não são destruídas nem perdidas: 100% desse saldo remanescente é canalizado para o pool comunitário (`fundo-solidario-geral`).
+- **Doações Voluntárias:** Estudantes, orientadores e pesquisadores com saldo de tokens recarregados podem doar qualquer montante voluntariamente a partir de 1 token, com mensagens de incentivo comunitário.
+- **Partilha Equitativa no 1º Dia do Mês:** O montante acumulado no pool é partilhado igualmente entre discentes aprovados no programa de assistência estudantil.
+- **Consumo Prioritário:** Os tokens recebidos via Bolsa Solidária possuem validade mensal de 30 dias e têm prioridade 1 na ordem de consumo da carteira (`solidaryTokenBalance`), poupando os tokens pessoais do estudante.
+
+### 2. Processo de Solicitação de Bolsa Solidária
+Estudantes elegíveis (vulnerabilidade socioeconômica, CADÚnico, PROUNI, PNAES ou desenvolvimento de TCC/IC) podem submeter sua manifestação de interesse na rota `/fundo-solidario` preenchendo:
+- Justificativa acadêmica de uso dos recursos de IA (mínimo de 15 caracteres).
+- Categoria socioeconômica ou acadêmica preponderante.
+- Termo de concordância com as diretrizes e declaração de veracidade sob o regimento acadêmico.
+
+---
+
+## 🔗 Integração Bidirecional com o Ecossistema PGI-PROA (`/acad`)
+
+Para unificar a governança de projetos institucionais com a inteligência acadêmica do discente:
+- No **Academic Companion (`acad`)**: a página `/hub-projetos` centraliza tarefas sincronizadas, métricas de produtividade e atalho direto para o PGI-PROA.
+- No **PGI-PROA (`pgi`)**: a rota dedicada `/acad` (Academic Companion Hub) exibe o status da conexão, os projetos do workspace sincronizados com a trajetória do discente, cômputo automatizado de horas para relatórios de IC/TCC e deep-links diretos para a Central de Experiências, Radar de Editais e Fundo Solidário em `https://acad.dorneles.dev`.
